@@ -10,6 +10,17 @@ app/vendor/
 app/doc/
 app/report/
 data/
+DS_Store
+.idea/.DS_Store
+app-assets/.DS_Store
+application/.DS_Store
+assets/.DS_Store
+php/.DS_Store
+soap/.DS_Store
+system/.DS_Store
+userfiles/.DS_Store
+vendor/.DS_Store
+
 
 # PHPStorm
 .idea/**/workspace.xml
