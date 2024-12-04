@@ -1,40 +1,10 @@
-# Global
-.*.swp
+# Sistem dosyaları
 .DS_Store
-bootstrap
-/log
-# Application
-app/composer.json
-app/composer.lock
-app/vendor/
-app/doc/
-app/report/
-data/
-DS_Store
-.idea/.DS_Store
-app-assets/.DS_Store
-application/.DS_Store
-assets/.DS_Store
-php/.DS_Store
-soap/.DS_Store
-system/.DS_Store
-userfiles/.DS_Store
-vendor/.DS_Store
-
-
-# PHPStorm
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/dictionaries
 .idea/
 
-# Netbeans
-nbproject/
-/nbproject/
-/nbproject/private/
-/nbproject/private/private.properties
+# Log dosyaları
+*.log
 
-# SSL Certs
-etc/ssl/
-node_modules
-env
+# Cache ve geçici dosyalar
+cache/
+tmp/
