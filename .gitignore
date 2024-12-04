@@ -1,0 +1,29 @@
+# Global
+.*.swp
+.DS_Store
+bootstrap
+/log
+# Application
+app/composer.json
+app/composer.lock
+app/vendor/
+app/doc/
+app/report/
+data/
+
+# PHPStorm
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/dictionaries
+.idea/
+
+# Netbeans
+nbproject/
+/nbproject/
+/nbproject/private/
+/nbproject/private/private.properties
+
+# SSL Certs
+etc/ssl/
+node_modules
+env
