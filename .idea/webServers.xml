@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="e717d9d9-312f-4eac-adbb-d4d8225d0440" name="customer" url="http://customer.makro2000.com.tr">
+        <fileTransfer rootFolder="/customer.makro2000.com.tr" host="customer.makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="a7b32be3-f1b1-4b06-9216-1eb1f7112d65" name="portal" url="http://makro2000.com.tr">
+        <fileTransfer rootFolder="/portal.makro2000.com.tr" host="makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="97088281-a16d-4ea5-bc7e-e9d9bb0a31d1" name="personel" url="http://makro2000.com.tr">
+        <fileTransfer rootFolder="/personel.makro2000.com.tr" host="makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="2d57ff1f-2d76-40ed-8b32-496c49cfd6e3" name="local" url="http://makro2000.com.tr">
+        <fileTransfer rootFolder="/local.makro2000.com.tr" host="makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="071b6a15-3f91-4f5c-ab9a-855ff3805b8b" name="muhasebe" url="http://makro2000.com.tr">
+        <fileTransfer rootFolder="/muhasebe.makro2000.com.tr" host="makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="3a699b21-ac4e-410b-95d0-ed073e822fa1" name="makro" url="http://makro2000.com.tr">
+        <fileTransfer host="makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="ab214e62-d42b-4eaf-9265-121476d5ed15" name="istanbul" url="http://istanbulofismobilya.com.tr">
+        <fileTransfer host="istanbulofismobilya.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="111dbd67-3559-4f67-adac-b2220db2b358" name="eskina" url="http://eskinatasciahmet.com">
+        <fileTransfer host="eskinatasciahmet.com" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="78a703e8-ee7d-4fa9-87cc-0b3497761876" name="vivahome" url="http://vivahome.com.tr">
+        <fileTransfer rootFolder="/public_html" host="vivahome.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="5702ae07-a8dc-4546-ae9b-b2626410e1a5" name="butikciler" url="http://185.106.211.102">
+        <fileTransfer rootFolder="/public_html" host="185.106.211.102" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="f22ee13a-ac70-4b10-ac0c-7fc713f98389" name="istanbulm" url="http://185.87.252.161/">
+        <fileTransfer rootFolder="/domains/istanbulofismobilya.com.tr/public_html" host="istanbulofismobilya.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="6fe27a1b-3ff5-4d6d-bceb-c6109dfde745" name="141.98.207.26" url="http://141.98.207.26">
+        <fileTransfer host="141.98.207.26" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="2e1826aa-72d8-4fb9-8aeb-618c3ce8fb41" name="kurumsal" url="http://kurumsaleticaretsitesi.com">
+        <fileTransfer host="kurumsaleticaretsitesi.com" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="0ad5d1aa-ad0c-4919-9534-b634b1e8a7ab" name="makroholding" url="http://makroholding.com.tr">
+        <fileTransfer host="makroholding.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="b6a028cc-d48a-4f66-85a9-36c1172e2842" name="206.81.26.192" url="http://206.81.26.192">
+        <fileTransfer host="206.81.26.192" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="60ea7fdf-5c9b-45b0-a620-36ba314787ea" name="heuristic-hoover.141-98-207-26.plesk.page" url="http://141.98.207.26">
+        <fileTransfer rootFolder="/httpdocs" host="141.98.207.26" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="e1ad358f-b042-4f77-88ce-207b685d81b0" name="nesnewenergy.com" url="http://nesnewenergy.com">
+        <fileTransfer host="nesnewenergy.com" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="c859b975-fe4b-44e3-a252-3f0b5c769581" name="mobil" url="http://makro2000.com.tr">
+        <fileTransfer host="makro2000.com.tr" port="21">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

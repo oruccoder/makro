@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PHPUnit">
+    <option name="directories">
+      <list>
+        <option value="$PROJECT_DIR$/vendor_/markbaker/matrix/tests" />
+        <option value="$PROJECT_DIR$/vendor_/markbaker/complex/tests" />
+        <option value="$PROJECT_DIR$/vendor_/guzzlehttp/psr7/tests" />
+        <option value="$PROJECT_DIR$/crm/application/third_party/PHPMailer/tests" />
+        <option value="$PROJECT_DIR$/vendor_/league/oauth2-google/tests" />
+        <option value="$PROJECT_DIR$/application/third_party/twilio-php-master/tests" />
+        <option value="$PROJECT_DIR$/vendor_/league/oauth2-client/tests" />
+        <option value="$PROJECT_DIR$/vendor_/guzzlehttp/promises/tests" />
+        <option value="$PROJECT_DIR$/vendor_/guzzlehttp/guzzle/tests" />
+        <option value="$PROJECT_DIR$/vendor_/paragonie/random_compat/tests" />
+        <option value="$PROJECT_DIR$/vendor_/ralouphie/getallheaders/tests" />
+        <option value="$PROJECT_DIR$/vendor_/phpoffice/phpspreadsheet/tests" />
+        <option value="$PROJECT_DIR$/vendor_/hayageek/oauth2-yahoo/tests" />
+        <option value="$PROJECT_DIR$/tests" />
+        <option value="$PROJECT_DIR$/application/third_party/stripe-php/tests" />
+        <option value="$PROJECT_DIR$/vendor_/stevenmaguire/oauth2-microsoft/tests" />
+        <option value="$PROJECT_DIR$/application/third_party/twilio-php-master2/Twilio/Tests" />
+        <option value="$PROJECT_DIR$/application/third_party/php-qrcode/tests" />
+      </list>
+    </option>
+  </component>
+</project>

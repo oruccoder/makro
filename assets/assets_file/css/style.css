@@ -1,0 +1,11 @@
+.custom-visible{
+    overflow: auto !important;
+    position: relative !important;
+}
+
+@media (min-width:1540px) {
+    .custom-visible{
+        overflow: visible !important;
+        position: relative !important;
+    }
+}

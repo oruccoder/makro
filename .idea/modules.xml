@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../../../Proje/Makro2000/.idea/Makro2000.iml" filepath="$PROJECT_DIR$/../../../Proje/Makro2000/.idea/Makro2000.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../cars/.idea/cars.iml" filepath="$PROJECT_DIR$/../cars/.idea/cars.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../cordova-docker/.idea/cordova-docker.iml" filepath="$PROJECT_DIR$/../../cordova-docker/.idea/cordova-docker.iml" />
+      <module fileurl="file:///Volumes/SSD - Data/Users/busrasener/Desktop/Projeler/makro/.idea/makro.iml" filepath="/Volumes/SSD - Data/Users/busrasener/Desktop/Projeler/makro/.idea/makro.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../makrocustomer/.idea/makrocustomer.iml" filepath="$PROJECT_DIR$/../makrocustomer/.idea/makrocustomer.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/makroerp.iml" filepath="$PROJECT_DIR$/.idea/makroerp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../mobil-erv-v2/.idea/mobil-erv-v2.iml" filepath="$PROJECT_DIR$/../../mobil-erv-v2/.idea/mobil-erv-v2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../partner/.idea/partner.iml" filepath="$PROJECT_DIR$/../partner/.idea/partner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../personelerp/.idea/personelerp.iml" filepath="$PROJECT_DIR$/../personelerp/.idea/personelerp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../react/.idea/react.iml" filepath="$PROJECT_DIR$/../../react/.idea/react.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../vivahome/.idea/vivahome.iml" filepath="$PROJECT_DIR$/../vivahome/.idea/vivahome.iml" />
+    </modules>
+  </component>
+</project>

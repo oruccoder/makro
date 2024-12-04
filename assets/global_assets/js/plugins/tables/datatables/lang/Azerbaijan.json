@@ -1,0 +1,23 @@
+{
+	"sEmptyTable":     "Sonuç Yok",
+	"sInfo":           " _TOTAL_ Neticeden _START_ - _END_ Arası Neticeler",
+	"sInfoEmpty":      "Netice Yoxdur",
+	"sInfoFiltered":   "( _MAX_ Netice İçinden Tapılanlar)",
+	"sInfoPostFix":    "",
+	"sInfoThousands":  ",",
+	"sLengthMenu":     "Sehifede _MENU_ Netice Göster",
+	"sLoadingRecords": "Yüklenir...",
+	"sProcessing":     "Gözleyin...",
+	"sSearch":         "",
+	"sZeroRecords":    "Netice Tapılmadı.",
+	"oPaginate": {
+		"sFirst":    "İlk",
+		"sLast":     "Sonuncu",
+		"sNext":     "Sonraki",
+		"sPrevious": "Önceki"
+	},
+	"oAria": {
+		"sSortAscending":  ": sütunu artma sırası üzere aktiv etmek",
+		"sSortDescending": ": sütunu azalma sırası üzere aktiv etmek"
+	}
+}

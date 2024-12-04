@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<definitions xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" xmlns:tns="urn:ProductsService" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="urn:ProductsService">
+<types>
+<xsd:schema targetNamespace="urn:ProductsService"
+>
+ <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+ <xsd:import namespace="http://schemas.xmlsoap.org/wsdl/" />
+ <xsd:complexType name="Notebook">
+  <xsd:all>
+   <xsd:element name="code" type="xsd:string"/>
+   <xsd:element name="brand" type="xsd:string"/>
+  </xsd:all>
+ </xsd:complexType>
+ <xsd:complexType name="NotebookList">
+  <xsd:all>
+   <xsd:element name="Notebook" type="tns:Notebook" minOccurs="0" maxOccurs="unbounded"/>
+  </xsd:all>
+ </xsd:complexType>
+ <xsd:complexType name="Book">
+  <xsd:all>
+   <xsd:element name="ISBN" type="xsd:string"/>
+   <xsd:element name="author" type="xsd:string"/>
+  </xsd:all>
+ </xsd:complexType>
+ <xsd:complexType name="BookList">
+  <xsd:all>
+   <xsd:element name="Book" type="tns:Book" minOccurs="0" maxOccurs="unbounded"/>
+  </xsd:all>
+ </xsd:complexType>
+</xsd:schema>
+</types>
+<message name="getAllNotebooksRequest"></message>
+<message name="getAllNotebooksResponse">
+  <part name="return" type="tns:NotebookList" /></message>
+<message name="checkNotebookStatusRequest">
+  <part name="notebookCode" type="xsd:string" /></message>
+<message name="checkNotebookStatusResponse">
+  <part name="return" type="xsd:string" /></message>
+<message name="getAllBooksRequest"></message>
+<message name="getAllBooksResponse">
+  <part name="return" type="tns:BookList" /></message>
+<message name="checkBookStatusRequest">
+  <part name="ISBN" type="xsd:string" /></message>
+<message name="checkBookStatusResponse">
+  <part name="return" type="xsd:string" /></message>
+<portType name="ProductsServicePortType">
+  <operation name="getAllNotebooks">
+    <documentation>Tum notebooklari dondurur</documentation>
+    <input message="tns:getAllNotebooksRequest"/>
+    <output message="tns:getAllNotebooksResponse"/>
+  </operation>
+  <operation name="checkNotebookStatus">
+    <documentation>Notebook stok kontrolu yapar.</documentation>
+    <input message="tns:checkNotebookStatusRequest"/>
+    <output message="tns:checkNotebookStatusResponse"/>
+  </operation>
+  <operation name="getAllBooks">
+    <documentation>Tum kitaplari dondurur</documentation>
+    <input message="tns:getAllBooksRequest"/>
+    <output message="tns:getAllBooksResponse"/>
+  </operation>
+  <operation name="checkBookStatus">
+    <documentation>Kitap stok kontrolu yapar.</documentation>
+    <input message="tns:checkBookStatusRequest"/>
+    <output message="tns:checkBookStatusResponse"/>
+  </operation>
+</portType>
+<binding name="ProductsServiceBinding" type="tns:ProductsServicePortType">
+  <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+  <operation name="getAllNotebooks">
+    <soap:operation soapAction="urn:ProductsService#getAllNotebooks" style="rpc"/>
+    <input><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+    <output><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+  </operation>
+  <operation name="checkNotebookStatus">
+    <soap:operation soapAction="urn:ProductsService#checkNotebookStatus" style="rpc"/>
+    <input><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+    <output><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+  </operation>
+  <operation name="getAllBooks">
+    <soap:operation soapAction="urn:ProductsService#getAllBooks" style="rpc"/>
+    <input><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+    <output><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+  </operation>
+  <operation name="checkBookStatus">
+    <soap:operation soapAction="urn:ProductsService#checkBookStatus" style="rpc"/>
+    <input><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></input>
+    <output><soap:body use="encoded" namespace="urn:ProductsService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/></output>
+  </operation>
+</binding>
+<service name="ProductsService">
+  <port name="ProductsServicePort" binding="tns:ProductsServiceBinding">
+    <soap:address location="http://ws.mustafakirimli.com/rpc/productsService.php"/>
+  </port>
+</service>
+</definitions>

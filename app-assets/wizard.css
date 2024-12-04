@@ -1,0 +1,35 @@
+
+.nav-tabs .nav-link.active, .nav-tabs .nav-item.show .nav-link{
+    color: #ffffff;
+    background-color: #3b475e !important;
+    border-color: #F5F7FA #F5F7FA #F5F7FA !important;
+    height: 64px;
+    font-size: 20px;
+    margin: auto;
+    text-align: center;
+    padding: 15px;
+    border-radius: 0px;
+}
+.nav-tabs .nav-link{
+    height: 64px;
+    font-size: 20px;
+    margin: auto;
+    text-align: center;
+    padding: 15px;
+    background: #617497 !important;
+    color: white;
+    border-color: #F5F7FA #F5F7FA #F5F7FA;
+    border-radius: 0px;
+}
+.nav.nav-tabs .nav-item:hover{
+    color: #fff;
+    font-weight: 700;
+    background: #7a92bf;
+}
+
+.chevron{
+    border: 24px solid transparent;
+    border-right: 0;
+    border-left: 32px solid #5a6780;
+}
+
