@@ -27,6 +27,13 @@ class Arac Extends CI_Controller
         }
     }
 
+    public function test()
+    {
+        $this->load->view('fixed/header');
+        $this->load->view('arac/test');
+        $this->load->view('fixed/footer');
+    }
+
     public function pass_kontrol()
     {
         $pass="post_pass";

@@ -911,206 +911,12 @@
 </div>
 
 
-
-<div id="pop_model" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                </button>
-                <h4 class="modal-title"><?php echo $this->lang->line('Change Status'); ?></h4>
-            </div>
-
-            <div class="modal-body">
-                <form id="form_model">
-
-
-                    <div class="row">
-                        <div class="col-xs-12 mb-1"><label
-                                    for="status"><?php echo $this->lang->line('Change Status') ?></label>
-                            <select name="stat" class="form-control mb-1">
-                                <option value="Due">Due</option>
-                                <option value="Progress">Progress</option>
-                                <option value="Done">Done</option>
-                            </select>
-
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <input type="hidden" class="form-control"
-                               name="tid" id="taskid" value="">
-                        <button type="button" class="btn btn-default"
-                                data-dismiss="modal"><?php echo $this->lang->line('Close'); ?></button>
-                        <input type="hidden" id="action-url" value="tools/set_task">
-                        <button type="button" class="btn btn-primary"
-                                id="submit_model"><?php echo $this->lang->line('Change Status'); ?></button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<div id="task_model" class="modal fade">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;
-                </button>
-                <h4 class="modal-title" id="task_title"><?php echo $this->lang->line('Details'); ?></h4>
-            </div>
-
-            <div class="modal-body">
-                <form id="form_model">
-
-
-                    <div class="row">
-                        <div class="col-xs-12 mb-1" id="description">
-
-                        </div>
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-xs-12 mb-1"><?php echo $this->lang->line('Priority') ?> <strong><span
-                                        id="priority"></span></strong>
-
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 mb-1"><?php echo $this->lang->line('Assigned to') ?>
-                            <strong><span
-                                        id="employee"></span></strong>
-
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-xs-12 mb-1"><?php echo $this->lang->line('Assigned by') ?>
-                            <strong><span
-                                        id="assign"></span></strong>
-
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <input type="hidden" class="form-control"
-                               name="tid" id="taskid" value="">
-                        <button type="button" class="btn btn-default"
-                                data-dismiss="modal"><?php echo $this->lang->line('Close'); ?></button>
-
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- add task -->
-<!--dynamic delete -->
-<div id="delete_model_1" class="modal fade">
-    <form id="mform_1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-
-                </div>
-
-                <div class="modal-footer">
-                    <input type="hidden" id="project_id" name="project_id" value="<?php echo $project['id']; ?>">
-                    <input type="hidden" id="object-id_1" value="" name="object_id">
-                    <input type="hidden" id="action-url_1" value="projects/delete_file">
-                    <button type="button" data-dismiss="modal" class="btn btn-primary delete-confirm"
-                            id="delete-confirm_1"><?php echo $this->lang->line('Delete') ?></button>
-                    <button type="button" data-dismiss="modal"
-                            class="btn"><?php echo $this->lang->line('Cancel') ?></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-<!--dynamic delete 2-->
-<div id="delete_model_2" class="modal fade">
-    <form id="mform_2">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-
-                </div>
-
-                <div class="modal-footer">
-
-                    <input type="hidden" id="object-id_2" value="" name="object_id">
-                    <input type="hidden" id="action-url_2" value="projects/delete_milestone">
-                    <button type="button" data-dismiss="modal" class="btn btn-primary delete-confirm"
-                            id="delete-confirm_2"><?php echo $this->lang->line('Delete') ?></button>
-                    <button type="button" data-dismiss="modal"
-                            class="btn"><?php echo $this->lang->line('Cancel') ?></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-<!-- 3 -->
-<div id="delete_model_3" class="modal fade">
-    <form id="mform_3">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-
-                </div>
-                <div class="modal-body">
-                    <p><?php echo $this->lang->line('delete this task') ?> </p>
-                </div>
-                <div class="modal-footer">
-                    <input type="hidden" id="object-id_3" value="" name="deleteid">
-                    <input type="hidden" id="action-url_3" value="tools/delete_i">
-                    <button type="button" data-dismiss="modal" class="btn btn-primary delete-confirm"
-                            id="delete-confirm_3"><?php echo $this->lang->line('Delete') ?></button>
-                    <button type="button" data-dismiss="modal"
-                            class="btn"><?php echo $this->lang->line('Cancel') ?></button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
-<!-- 4 -->
-<div id="delete_model_4" class="modal fade">
-    <form id="mform_4">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                aria-hidden="true">&times;</span></button>
-
-                </div>
-                <div class="modal-body">
-                    <div class="modal-body">
-                        <p>Bu bölümü silmek istediğinizden emin misiniz?</p>
-                    </div>
-                    <div class="modal-footer">
-                        <input type="hidden" id="object-id_4"  name="object_id">
-                        <input type="hidden" id="action-url_4" value="projects/delete_bolum">
-
-                        <button type="button" data-dismiss="modal" class="btn btn-primary delete-confirm"
-                                id="delete-confirm_4"><?php echo $this->lang->line('Delete') ?></button>
-
-                        <button type="button" data-dismiss="modal"
-                                class="btn"><?php echo $this->lang->line('Cancel') ?></button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
-
+<?php
+$milestones = array_map(function($row) {
+    $row['bolum_name'] = bolum_getir($row['bolum_id']);
+    return $row;
+}, $milestones);
+?>
 <input type="hidden" id="proje_id_hidden" value="<?php echo $project['id']; ?>">
 <style>
 
@@ -2055,7 +1861,7 @@
             buttons: [
                 {
                     text: '<i class="fa fa-plus"></i> Yeni Bölüm Ekle',
-                    action: function ( e, dt, node, config ) {
+                    action: function (e, dt, node, config) {
                         $.confirm({
                             theme: 'modern',
                             closeIcon: true,
@@ -2065,62 +1871,81 @@
                             animation: 'scale',
                             useBootstrap: true,
                             columnClass: "col-md-6 mx-auto",
-                            containerFluid: !0,
+                            containerFluid: true,
                             smoothContent: true,
                             draggable: false,
-                            content:`<form>
-                                      <div class="form-row">
-                                        <div class="form-group col-md-12">
-                                          <label for="name">Bölüm Kodu</label>
-                                          <input type="text" class="form-control" id="code" placeholder="Bölüm Kodu">
-
-                                        </div>
-                                        <div class="form-group col-md-12">
-                                          <label for="name">Bölüm Adı</label>
-                                          <input type="text" class="form-control" id="name" placeholder="Bina Adı">
-
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                     <div class="form-group col-md-6">
-                                          <label for="butce">Bütçe</label>
-                                            <input type="number" class="form-control" id="butce" placeholder="300.000">
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                          <label for="content">Açıklama</label>
-                                          <input type="text" class="form-control" id="content" placeholder="detay">
-                                        </div>
-                                    </div>
-                                    </form>`,
+                            content: `<form id="add-section-form">
+                      <div class="form-row">
+                          <div class="form-group col-md-12">
+                              <label for="code">Bölüm Kodu</label>
+                              <input type="text" class="form-control" id="code" placeholder="Bölüm Kodu">
+                          </div>
+                          <div class="form-group col-md-12">
+                              <label for="name">Bölüm Adı</label>
+                              <input type="text" class="form-control required" id="name" placeholder="Bölüm Adı">
+                          </div>
+                      </div>
+                      <div class="form-row">
+                          <div class="form-group col-md-6">
+                              <label for="butce">Bütçe</label>
+                              <input type="number" class="form-control required" id="butce" placeholder="300.000">
+                          </div>
+                          <div class="form-group col-md-6">
+                              <label for="content">Açıklama</label>
+                              <input type="text" class="form-control required" id="content" placeholder="Detay">
+                          </div>
+                      </div>
+                  </form>`,
                             buttons: {
                                 formSubmit: {
                                     text: 'Ekle',
                                     btnClass: 'btn-blue',
                                     action: function () {
+                                        // Doğrulama
+                                        let valid = true;
+                                        $('#add-section-form .required').each(function () {
+                                            if (!$(this).val()) {
+                                                $(this).addClass('is-invalid');
+                                                valid = false;
+                                            } else {
+                                                $(this).removeClass('is-invalid');
+                                            }
+                                        });
+
+                                        if (!valid) {
+                                            $.alert({
+                                                theme: 'modern',
+                                                icon: 'fa fa-exclamation',
+                                                type: 'red',
+                                                title: 'Hata',
+                                                content: 'Lütfen tüm alanları doldurun!',
+                                            });
+                                            return false;
+                                        }
+
                                         $('#loading-box').removeClass('d-none');
 
                                         let data = {
                                             crsf_token: crsf_hash,
-                                            name:  $('#name').val(),
-                                            code:  $('#code').val(),
-                                            butce:  $('#butce').val(),
-                                            content:  $('#content').val(),
-                                            project:  "<?php echo $_GET['id'] ?>"
-                                        }
-                                        $.post(baseurl + 'projebolumleri/create',data,(response) => {
+                                            name: $('#name').val(),
+                                            code: $('#code').val(),
+                                            butce: $('#butce').val(),
+                                            content: $('#content').val(),
+                                            project: "<?php echo $_GET['id'] ?>"
+                                        };
+
+                                        $.post(baseurl + 'projebolumleri/create', data, (response) => {
                                             let responses = jQuery.parseJSON(response);
                                             $('#loading-box').addClass('d-none');
-                                            if(responses.status==200){
+                                            if (responses.status === 200) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-check',
                                                     type: 'green',
                                                     animation: 'scale',
-                                                    useBootstrap: true,
-                                                    columnClass: "small",
                                                     title: 'Başarılı',
                                                     content: responses.message,
-                                                    buttons:{
+                                                    buttons: {
                                                         formSubmit: {
                                                             text: 'Tamam',
                                                             btnClass: 'btn-blue',
@@ -2131,64 +1956,28 @@
                                                         }
                                                     }
                                                 });
-
-                                            }
-                                            else if(responses.status==410){
-
+                                            } else if (responses.status === 410) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-exclamation',
                                                     type: 'red',
-                                                    animation: 'scale',
-                                                    useBootstrap: true,
-                                                    columnClass: "col-md-4 mx-auto",
                                                     title: 'Dikkat!',
                                                     content: responses.message,
-                                                    buttons:{
-                                                        prev: {
-                                                            text: 'Tamam',
-                                                            btnClass: "btn btn-link text-dark",
-                                                        }
-                                                    }
                                                 });
                                             }
-                                        })
-
+                                        });
                                     }
-                                },
+                                }
                             },
                             onContentReady: function () {
                                 $('.select-box').select2({
                                     dropdownParent: $(".jconfirm-box-container")
-                                })
+                                });
 
-                                $('#fileupload_').fileupload({
-                                    url: url,
-                                    dataType: 'json',
-                                    formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
-                                    done: function (e, data) {
-                                        var img='default.png';
-                                        $.each(data.result.files, function (index, file) {
-                                            img=file.name;
-                                        });
-
-                                        $('#image_text').val(img);
-                                    },
-                                    progressall: function (e, data) {
-                                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                                        $('#progress .progress-bar').css(
-                                            'width',
-                                            progress + '%'
-                                        );
-                                    }
-                                }).prop('disabled', !$.support.fileInput)
-                                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                                // bind to events
-                                var jc = this;
+                                const jc = this;
                                 this.$content.find('form').on('submit', function (e) {
-                                    // if the user submits the form by pressing enter in the field.
                                     e.preventDefault();
-                                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                                    jc.$$formSubmit.trigger('click');
                                 });
                             }
                         });
@@ -3123,9 +2912,8 @@
 
                 <div class="form-group col-md-3">
                     <label for="name">KDV Durumu</label>
-                    <select disabled name="kdv_status" class="form-control select-box kdv_status" id="kdv_status" name='kdv_status'>
-                        <option value='no'>KDV HARİÇ</option>
-                    </select>
+                    <input value='no' type='hidden' class='kdv_status' name='kdv_status'>
+                    <input type'text' class='form-control' disabled value='KDV HARİÇ'>
                 </div>
                 <div class="form-group col-md-3">
                     <label for="name">KDV Oranı</label>
@@ -3248,12 +3036,67 @@
                     text: 'Güncelle',
                     btnClass: 'btn-blue',
                     action: function () {
+
+
+                        // Genel Tutar Alanlarının Kontrolü
+                        if (
+                            !$('.net_tutar_db').val() ||
+                            !$('.kdv_tutar_db').val() ||
+                            !$('.genel_tutar_db').val()
+                        ) {
+                            error_log_message('Lütfen tüm hesaplamaların doğru yapıldığından emin olun!');
+                            return false; // Fonksiyonu sonlandır
+                        }
+
+                        // Price ve Qty Alanlarının Kontrolü
+                        let inputs = document.querySelectorAll('.price, .qty');
+                        let hasError = false;
+
+                        inputs.forEach((input) => {
+                            let value = parseFloat(input.value);
+
+                            // Değer Kontrolü
+                            if (!value || value <= 0) {
+                                input.style.border = "2px solid red"; // Hatalı alanları vurgula
+                                hasError = true;
+                            } else {
+                                input.style.border = ""; // Hatalı değilse varsayılan stile dön
+                            }
+                        });
+
+                        if (hasError) {
+                            error_log_message('Fiyat  veya Miktar alanları boş, 0 veya geçersiz olamaz!');
+                            return false; // Hatalı durumda işlem durduruluyor
+                        }
+
+                        // Cari ve Ödeme Şekli Kontrolleri
+                        let cari_id = document.getElementById('cari_id').value;
+                        let method_id = document.getElementById('method_id').value;
+
+                        if (cari_id === "0") {
+                            error_log_message('Lütfen bir Cari Seçiniz');
+                            document.getElementById('cari_id').style.border = "2px solid red"; // Hatalı alanı işaretle
+                            return false;
+                        } else {
+                            document.getElementById('cari_id').style.border = ""; // Hata yoksa varsayılan stile dön
+                        }
+
+                        if (method_id === "0") {
+                            error_log_message('Lütfen bir Ödeme Şekli seçiniz!');
+                            document.getElementById('method_id').style.border = "2px solid red"; // Hatalı alanı işaretle
+                            return false;
+                        } else {
+                            document.getElementById('method_id').style.border = ""; // Hata yoksa varsayılan stile dön
+                        }
+
+                        // Yükleme Göstergesini Aktif Et
                         $('#loading-box').removeClass('d-none');
 
                         $.post(baseurl + 'razilastirma/update_razilastirma',$('#data_form_iskalemi').serialize(),(response)=>{
                             let responses = jQuery.parseJSON(response);
-                            $('#loading-box').addClass('d-none');
                             if(responses.status==200){
+                                $('#loading-box').addClass('d-none');
+
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-check',
@@ -3277,7 +3120,7 @@
 
                             }
                             else if(responses.status==410){
-
+                                $('#loading-box').addClass('d-none');
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
@@ -4058,7 +3901,7 @@
             buttons: [
                 {
                     text: '<i class="fa fa-plus"></i> Yeni Aşama Ekle',
-                    action: function ( e, dt, node, config ) {
+                    action: function (e, dt, node, config) {
                         $.confirm({
                             theme: 'modern',
                             closeIcon: true,
@@ -4068,132 +3911,134 @@
                             animation: 'scale',
                             useBootstrap: true,
                             columnClass: "col-md-6 mx-auto",
-                            containerFluid: !0,
+                            containerFluid: true,
                             smoothContent: true,
                             draggable: false,
-                            content:`<form>
-                                      <div class="form-row">
-                                        <div class="form-group col-md-12">
-                                            <label for="name">Proje Bölümleri</label>
-                                            <select class="form-control select-box" id="bolum_id" name="bolum">
-                                                <?php foreach ($bolumler as $blm)
-                                                    {
-                                                        $id=$blm['id'];
-                                                        $name=$blm['name'];
-                                                        echo "<option value='$id'>$name</option>";
-                                                    } ?>
-                                            </select>
-                                        </div>
-                                               <div class="form-group col-md-12">
-                                            <label for="name">Bağlı Olduğu Aşama</label>
-                                            <select class="form-control select-box" id="parent_id" name="parent_id">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                     <div class="form-group col-md-6">
-                                          <label for="name">Aşama Adı</label>
-                                            <input type="text" class="form-control" id="name" placeholder="Elektrik İşleri">
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                          <label for="content">Cari</label>
-                                               <select name="customer" class="form-control" id="customer_statement">
-                                                    <option value="0"><?php echo $this->lang->line('Select Customer') ?></option>
-
-                                                </select>
-
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                         <div class="form-group col-md-6">
-                                          <label for="name">Sorumlu Personel</label>
-                                              <select class="form-control select-box" id="pers_id">
-                                                    <?php foreach (all_personel() as $blm)
-                                                            {
-                                                                $id=$blm->id;
-                                                                $name=$blm->name;
-                                                                echo "<option value='$id'>$name</option>";
-                                                            } ?>
-                                                </select>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                          <label for="content">Ölçü Birimi</label>
-                                              <select name="olcu_birimi" class="form-control select-box" id="olcu_birimi">
-                                                    <?php
-                                                foreach (units() as $row) {
-                                                    $id = $row['id'];
-                                                    $cid = $row['code'];
-                                                    $title = $row['name'];
-                                                    echo "<option value='$id'>$title - $cid</option>";
-                                                }
-                                                ?>
-                                                </select>
-
-                                        </div>
-                                    </div>
-
-                                       <div class="form-row">
-                                         <div class="form-group col-md-4">
-                                          <label for="name">Miktar</label>
-                                           <input type="number" class="form-control" name="quantity" id="quantity" value="1">
-                                        </div>
-                                          <div class="form-group col-md-4">
-                                          <label for="name">Birim Fiyatı</label>
-                                            <input type="text" class="form-control" name="fiyat" id="fiyat" value="1">
-                                        </div>
-                                         <div class="form-group col-md-4">
-                                          <label for="name">Toplam Fiyatı</label>
-                                             <input type="text" class="form-control" name="toplam_fiyat" id="toplam_fiyat">
-                                        </div>
-                                      </div>
-                                      <div class="form-row">
-                                         <div class="form-group col-md-6">
-                                          <label for="name">Bütçe</label>
-                                             <input id="butce" name="butce" type="text" class="form-control">
-                                        </div>
-                                          <div class="form-group col-md-6">
-                                          <label for="name">Açıklama</label>
-                                            <input type="text" class="form-control" name="content" id="content">
-                                        </div>
-
-                                      </div>
-                                    </form>`,
+                            content: function () {
+                                return `<form>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="bolum_id">Proje Bölümleri</label>
+                        <select class="form-control select-box" id="bolum_id" name="bolum">
+                            <option value="">Seçiniz</option>
+                            <?php foreach ($bolumler as $blm): ?>
+                                <option value="<?= $blm['id'] ?>"><?= $blm['name'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label for="parent_id">Bağlı Olduğu Aşama</label>
+                        <select class="form-control select-box" id="parent_id" name="parent_id">
+                            <option value="">Seçiniz</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name">Aşama Adı</label>
+                        <input type="text" class="form-control" id="name" placeholder="Elektrik İşleri" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="customer_statement">Cari</label>
+                        <select class="form-control select-box" id="customer_statement">
+                            <option value="">Seçiniz</option>
+                            <?php foreach (all_customer() as $blm): ?>
+                                <option value="<?= $blm->id ?>"><?= $blm->company ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="pers_id">Sorumlu Personel</label>
+                        <select class="form-control select-box" id="pers_id">
+                            <option value="">Seçiniz</option>
+                            <?php foreach (all_personel() as $blm): ?>
+                                <option value="<?= $blm->id ?>"><?= $blm->name ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="olcu_birimi">Ölçü Birimi</label>
+                        <select name="olcu_birimi" class="form-control select-box" id="olcu_birimi">
+                            <option value="">Seçiniz</option>
+                            <?php foreach (units() as $row): ?>
+                                <option value="<?= $row['id'] ?>"><?= $row['name'] ?> - <?= $row['code'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="quantity">Miktar</label>
+                        <input type="number" class="form-control" name="quantity" id="quantity" value="1" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="fiyat">Birim Fiyatı</label>
+                        <input type="number" class="form-control" name="fiyat" id="fiyat" value="1" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="toplam_fiyat">Toplam Fiyat</label>
+                        <input type="number" class="form-control" name="toplam_fiyat" id="toplam_fiyat" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="butce">Bütçe</label>
+                        <input type="number" id="butce" name="butce" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="content">Açıklama</label>
+                        <input type="text" class="form-control" name="content" id="content" required>
+                    </div>
+                </div>
+            </form>`;
+                            },
                             buttons: {
                                 formSubmit: {
                                     text: 'Ekle',
                                     btnClass: 'btn-blue',
                                     action: function () {
-                                        $('#loading-box').removeClass('d-none');
+
 
                                         let data = {
                                             crsf_token: crsf_hash,
-                                            name:  $('#name').val(),
-                                            customer:  $('#customer_statement').val(),
-                                            content:  $('#content').val(),
-                                            bolum:  $('#bolum_id').val(),
-                                            parent_id:  $('#parent_id').val(),
-                                            pers_id:  $('#pers_id').val(),
-                                            butce:  $('#butce').val(),
-                                            olcu_birimi:  $('#olcu_birimi').val(),
-                                            quantity:  $('#quantity').val(),
-                                            fiyat:  $('#fiyat').val(),
-                                            toplam_fiyat:  $('#toplam_fiyat').val(),
-                                            project:  "<?php echo $_GET['id'] ?>"
+                                            name: $('#name').val(),
+                                            customer: $('#customer_statement').val(),
+                                            content: $('#content').val(),
+                                            bolum: $('#bolum_id').val(),
+                                            parent_id: $('#parent_id').val(),
+                                            pers_id: $('#pers_id').val(),
+                                            butce: $('#butce').val(),
+                                            olcu_birimi: $('#olcu_birimi').val(),
+                                            quantity: $('#quantity').val(),
+                                            fiyat: $('#fiyat').val(),
+                                            toplam_fiyat: $('#toplam_fiyat').val(),
+                                            project: "<?php echo $_GET['id'] ?>"
+                                        };
+
+                                        if (!data.name || !data.bolum || !data.butce || !data.pers_id || !data.olcu_birimi || !data.customer) {
+                                            $.alert({
+                                                theme: 'modern',
+                                                icon: 'fa fa-exclamation',
+                                                type: 'red',
+                                                title: 'Eksik Bilgi!',
+                                                content: 'Lütfen gerekli tüm alanları doldurunuz.',
+                                            });
+                                            return false;
                                         }
-                                        $.post(baseurl + 'projeasamalari/create',data,(response) => {
+                                        $('#loading-box').removeClass('d-none');
+                                        $.post(baseurl + 'projeasamalari/create', data, (response) => {
                                             let responses = jQuery.parseJSON(response);
                                             $('#loading-box').addClass('d-none');
-                                            if(responses.status==200){
+                                            if (responses.status === 200) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-check',
                                                     type: 'green',
-                                                    animation: 'scale',
-                                                    useBootstrap: true,
-                                                    columnClass: "small",
                                                     title: 'Başarılı',
                                                     content: responses.message,
-                                                    buttons:{
+                                                    buttons: {
                                                         formSubmit: {
                                                             text: 'Tamam',
                                                             btnClass: 'btn-blue',
@@ -4204,76 +4049,48 @@
                                                         }
                                                     }
                                                 });
-
-                                            }
-                                            else if(responses.status==410){
-
+                                            } else {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-exclamation',
                                                     type: 'red',
-                                                    animation: 'scale',
-                                                    useBootstrap: true,
-                                                    columnClass: "col-md-4 mx-auto",
-                                                    title: 'Dikkat!',
+                                                    title: 'Hata!',
                                                     content: responses.message,
-                                                    buttons:{
-                                                        prev: {
-                                                            text: 'Tamam',
-                                                            btnClass: "btn btn-link text-dark",
-                                                        }
-                                                    }
                                                 });
                                             }
-                                        })
-
+                                        });
                                     }
-                                },
+                                }
                             },
                             onContentReady: function () {
-
-                                $('#bolum_id').select2().trigger('change');
-
-                                $("#customer_statement").select2({
+                                $('#bolum_id').select2();
+                                $('#customer_statement').select2({
                                     minimumInputLength: 1,
                                     dropdownParent: $(".jconfirm-box-container"),
-                                   tags: false,
                                     ajax: {
                                         url: baseurl + 'search/customer_select',
                                         dataType: 'json',
                                         type: 'POST',
-                                        quietMillis: 50,
-                                        data: function (customer) {
-                                            return {
-                                                customer: customer,
-                                                '<?=$this->security->get_csrf_token_name()?>': crsf_hash
-                                            };
-                                        },
-                                        processResults: function (data) {
-                                            return {
-                                                results: $.map(data, function (item) {
-                                                    return {
-                                                        text: item.company,
-                                                        id: item.id
-                                                    }
-                                                })
-                                            };
-                                        },
+                                        data: (customer) => ({
+                                            customer,
+                                            '<?=$this->security->get_csrf_token_name()?>': crsf_hash,
+                                        }),
+                                        processResults: (data) => ({
+                                            results: $.map(data, (item) => ({
+                                                text: item.company,
+                                                id: item.id
+                                            }))
+                                        }),
                                     }
                                 });
 
                                 $('.select-box').select2({
                                     dropdownParent: $(".jconfirm-box-container")
-                                })
-                                var jc = this;
-                                this.$content.find('form').on('submit', function (e) {
-                                    // if the user submits the form by pressing enter in the field.
-                                    e.preventDefault();
-                                    jc.$$formSubmit.trigger('click'); // reference the button and click it
                                 });
                             }
                         });
                     }
+
                 }
             ]
 
@@ -4322,8 +4139,8 @@
 
                                          <div class="form-group col-md-12">
                                             <label for="name">Proje Bölümleri</label>
-                                              <select name="bolum_id" class="form-control select-box bolum_id" id="bolum_id" name='bolum_id'>
-                                              <option value='0'>Seçiniz</option>
+                                              <select name="bolum_id" class="form-control select-box bolum_id required" id="bolum_id" name='bolum_id'>
+                                              <option value=''>Seçiniz</option>
                                                    <?php foreach(all_bolum_proje($_GET['id']) as $items){
                                 echo "<option value='$items->id'>$items->name</option>";
                             } ?>
@@ -4332,8 +4149,8 @@
 
                                         <div class="form-group col-md-12">
                                             <label for="name">Proje Aşamalar</label>
-                                              <select class="form-control select-box asama_new_id" id="milestone_id" name='group_id[]'>
-                                              <option value='0'>Bölüm Seçiniz</option>
+                                              <select class="form-control select-box asama_new_id required" id="milestone_id" name='group_id[]'>
+                                               <option value=''>Seçiniz</option>
                                                 </select>
                                                  </div>
                                                      <div class="form-group col-md-12 one_group">
@@ -4344,14 +4161,16 @@
                                         </div>
                                                <div class="form-group col-md-12">
                                             <label for="name">İş Kalemi Adı</label>
-                                             <input type="text" class="form-control" id="name_is" name='name_is' placeholder="Elektrik İşlerinin Görülmesi">
+                                             <input type="text" class="form-control required" id="name_is" name='name_is' placeholder="Elektrik İşlerinin Görülmesi">
                                             </select>
                                         </div>
                                     </div>
                                     <div class="form-row">
                                           <div class="form-group col-md-6">
                                           <label for="name">Sorumlu Personel</label>
-                                              <select class="form-control select-box" id="pers_id_is" name='pers_id_is'>
+                                              <select class="form-control select-box required" id="pers_id_is" name='pers_id_is'>
+                                                                                             <option value=''>Seçiniz</option>
+
                                                     <?php foreach (all_personel() as $blm)
                             {
                                 $id=$blm->id;
@@ -4362,8 +4181,9 @@
                                         </div>
                                         <div class="form-group col-md-6">
                                           <label for="content">Cari</label>
-                                               <select name="customer_statement_is" class="form-control" id="customer_statement_is">
-                                                    <option value="0"><?php echo $this->lang->line('Select Customer') ?></option>
+                                               <select name="customer_statement_is" class="form-control required" id="customer_statement_is">
+                                                                                                  <option value=''>Seçiniz</option>
+
 
                                                 </select>
 
@@ -4373,7 +4193,9 @@
 
                                         <div class="form-group col-md-12">
                                           <label for="content">Ölçü Birimi</label>
-                                              <select name="olcu_birimi_is" class="form-control select-box" id="olcu_birimi_is">
+                                              <select name="olcu_birimi_is" class="form-control select-box required" id="olcu_birimi_is">
+                                                                                         <option value=''>Seçiniz</option>
+
                                                     <?php
                             foreach (units() as $row) {
                                 $id = $row['id'];
@@ -4392,7 +4214,7 @@
                                        <div class="form-row">
                                          <div class="form-group col-md-3">
                                           <label for="name">Miktar</label>
-                                           <input type="number" class="form-control" name="quantity_is" id="quantity_is" value="1">
+                                           <input type="number" class="form-control required" name="quantity_is" id="quantity_is" value="0">
                                         </div>
                                           <div class="form-group col-md-3">
                                           <label for="name">Birim Fiyatı</label>
@@ -4421,8 +4243,8 @@
                                         </div>
                                           <div class="form-group col-md-6">
                                           <label for="name">Açıklama</label>
-                                            <input type="text" class="form-control" name="content_is" id="content_is">
-                                            <input type="hidden" class="form-control" name="project" value="<?php echo $_GET['id'] ?>">
+                                            <input type="text" class="form-control required" name="content_is" id="content_is">
+                                            <input type="hidden" class="form-control " name="project" value="<?php echo $_GET['id'] ?>">
                                         </div>
 
                                       </div>
@@ -4433,67 +4255,47 @@
                                     btnClass: 'btn-blue',
                                     action: function () {
 
-                                        let bolum_id =$('#bolum_id').val()
-                                        let asama =$('#milestone_id').val()
-                                        if(!parseInt(bolum_id)){
-                                            $.alert({
-                                                theme: 'material',
-                                                icon: 'fa fa-exclamation',
-                                                type: 'red',
-                                                animation: 'scale',
-                                                useBootstrap: true,
-                                                columnClass: "col-md-4 mx-auto",
-                                                title: 'Dikkat!',
-                                                content: 'Bölüm Zorunludur',
-                                                buttons:{
-                                                    prev: {
-                                                        text: 'Tamam',
-                                                        btnClass: "btn btn-link text-dark",
-                                                    }
-                                                }
-                                            });
-                                            return false;
-                                        }
-                                        if(!parseInt(asama)){
-                                            $.alert({
-                                                theme: 'material',
-                                                icon: 'fa fa-exclamation',
-                                                type: 'red',
-                                                animation: 'scale',
-                                                useBootstrap: true,
-                                                columnClass: "col-md-4 mx-auto",
-                                                title: 'Dikkat!',
-                                                content: 'Aşama Zorunludur',
-                                                buttons:{
-                                                    prev: {
-                                                        text: 'Tamam',
-                                                        btnClass: "btn btn-link text-dark",
-                                                    }
-                                                }
-                                            });
-                                            return false;
-                                        }
 
+                                        let valid = true;
+
+// Gerekli alanları kontrol et
+                                        $('#data_form_iskalemi .required').each(function () {
+                                            let element = $(this);
+
+                                            if (element.is('select')) {
+                                                // Select2 öğesi için özel kontrol
+                                                if (!element.val() || element.val() === "") {
+                                                    element.next('.select2').find('.select2-selection').addClass('is-invalid-select2');
+                                                    valid = false;
+                                                } else {
+                                                    element.next('.select2').find('.select2-selection').removeClass('is-invalid-select2');
+                                                }
+                                            }
+
+                                            else {
+                                                // Diğer inputlar için kontrol
+                                                if (!element.val()) {
+                                                    element.addClass('is-invalid');
+                                                    valid = false;
+                                                } else {
+                                                    element.removeClass('is-invalid');
+                                                }
+                                            }
+                                        });
+
+                                        // Eğer valid değilse uyarı göster ve işlemi durdur
+                                        if (!valid) {
+                                            $.alert({
+                                                theme: 'modern',
+                                                icon: 'fa fa-exclamation',
+                                                type: 'red',
+                                                title: 'Hata',
+                                                content: 'Lütfen tüm alanları doldurun!',
+                                            });
+                                            return false;
+                                        }
 
                                         $('#loading-box').removeClass('d-none');
-
-                                        //let data = {
-                                        //    crsf_token: crsf_hash,
-                                        //    name:  $('#name_is').val(),
-                                        //    customer:  $('#customer_statement_is').val(),
-                                        //    oran:  $('#oran_is').val(),
-                                        //    status:  $('#status_is').val(),
-                                        //    content:  $('#content_is').val(),
-                                        //    pers_id:  $('#pers_id_is').val(),
-                                        //    asama_id:  $('#milestone_is').val(),
-                                        //    quantity:  $('#quantity_is').val(),
-                                        //    fiyat:  $('#fiyat_is').val(),
-                                        //    toplam_fiyat:  $('#toplam_fiyat_is').val(),
-                                        //
-                                        //    olcu_birimi:  $('#olcu_birimi_is').val(),
-                                        //    project:  "<?php //echo $_GET['id'] ?>//"
-                                        //}
-                                   //     $.post(baseurl + 'projeiskalemleri/create',data,(response) => {
                                             $.post(baseurl + 'projeiskalemleri/create',$('#data_form_iskalemi').serialize(),(response)=>{
                                             let responses = jQuery.parseJSON(response);
                                             $('#loading-box').addClass('d-none');
@@ -4664,9 +4466,8 @@
 
                                         <div class="form-group col-md-3">
                                             <label for="name">KDV Durumu</label>
-                                              <select disabled name="kdv_status" class="form-control select-box kdv_status" id="kdv_status" name='kdv_status'>
-                                              <option value='no'>KDV HARİÇ</option>
-                                                </select>
+                                            <input type='hidden' class='kdv_status' name='kdv_status' value='no'>
+                                             <input type='text' disabled class='form-control' value='KDV HARİÇ'>
                                          </div>
                                               <div class="form-group col-md-3">
                                             <label for="name">KDV Oranı</label>
@@ -4707,29 +4508,70 @@
                                         text: 'Ekle',
                                         btnClass: 'btn-blue',
                                         action: function () {
+                                            // Genel Tutar Alanlarının Kontrolü
+                                            if (
+                                                !$('.net_tutar_db').val() ||
+                                                !$('.kdv_tutar_db').val() ||
+                                                !$('.genel_tutar_db').val()
+                                            ) {
+                                                error_log_message('Lütfen tüm hesaplamaların doğru yapıldığından emin olun!');
+                                                return false; // Fonksiyonu sonlandır
+                                            }
+
+                                            // Price ve Qty Alanlarının Kontrolü
+                                            let inputs = document.querySelectorAll('.price, .qty');
+                                            let hasError = false;
+
+                                            inputs.forEach((input) => {
+                                                let value = parseFloat(input.value);
+
+                                                // Değer Kontrolü
+                                                if (!value || value <= 0) {
+                                                    input.style.border = "2px solid red"; // Hatalı alanları vurgula
+                                                    hasError = true;
+                                                } else {
+                                                    input.style.border = ""; // Hatalı değilse varsayılan stile dön
+                                                }
+                                            });
+
+                                            if (hasError) {
+                                                error_log_message('Fiyat  veya Miktar alanları boş, 0 veya geçersiz olamaz!');
+                                                return false; // Hatalı durumda işlem durduruluyor
+                                            }
+
+                                            // Cari ve Ödeme Şekli Kontrolleri
+                                            let cari_id = document.getElementById('cari_id').value;
+                                            let method_id = document.getElementById('method_id').value;
+
+                                            if (cari_id === "0") {
+                                                error_log_message('Lütfen bir Cari Seçiniz');
+                                                document.getElementById('cari_id').style.border = "2px solid red"; // Hatalı alanı işaretle
+                                                return false;
+                                            } else {
+                                                document.getElementById('cari_id').style.border = ""; // Hata yoksa varsayılan stile dön
+                                            }
+
+                                            if (method_id === "0") {
+                                                error_log_message('Lütfen bir Ödeme Şekli seçiniz!');
+                                                document.getElementById('method_id').style.border = "2px solid red"; // Hatalı alanı işaretle
+                                                return false;
+                                            } else {
+                                                document.getElementById('method_id').style.border = ""; // Hata yoksa varsayılan stile dön
+                                            }
+
+                                            // Yükleme Göstergesini Aktif Et
                                             $('#loading-box').removeClass('d-none');
 
-                                            //let data = {
-                                            //    crsf_token: crsf_hash,
-                                            //    name:  $('#name_is').val(),
-                                            //    customer:  $('#customer_statement_is').val(),
-                                            //    oran:  $('#oran_is').val(),
-                                            //    status:  $('#status_is').val(),
-                                            //    content:  $('#content_is').val(),
-                                            //    pers_id:  $('#pers_id_is').val(),
-                                            //    asama_id:  $('#milestone_is').val(),
-                                            //    quantity:  $('#quantity_is').val(),
-                                            //    fiyat:  $('#fiyat_is').val(),
-                                            //    toplam_fiyat:  $('#toplam_fiyat_is').val(),
-                                            //
-                                            //    olcu_birimi:  $('#olcu_birimi_is').val(),
-                                            //    project:  "<?php //echo $_GET['id'] ?>//"
-                                            //}
-                                            //     $.post(baseurl + 'projeiskalemleri/create',data,(response) => {
-                                            $.post(baseurl + 'razilastirma/save_razilastirma',$('#data_form_iskalemi').serialize(),(response)=>{
+                                            // Form Verilerini Gönder
+                                            $.post(baseurl + 'razilastirma/save_razilastirma', $('#data_form_iskalemi').serialize(), (response) => {
                                                 let responses = jQuery.parseJSON(response);
-                                                $('#loading-box').addClass('d-none');
-                                                if(responses.status==200){
+
+                                                // Yükleme Göstergesini Kaldır
+
+                                                // Başarılı Durum
+                                                if (responses.status === 200) {
+                                                    $('#loading-box').addClass('d-none');
+
                                                     $.alert({
                                                         theme: 'modern',
                                                         icon: 'fa fa-check',
@@ -4739,20 +4581,21 @@
                                                         columnClass: "small",
                                                         title: 'Başarılı',
                                                         content: responses.message,
-                                                        buttons:{
+                                                        buttons: {
                                                             formSubmit: {
                                                                 text: 'Tamam',
                                                                 btnClass: 'btn-blue',
                                                                 action: function () {
                                                                     $('#todotable').DataTable().destroy();
-                                                                    draw_data_iskalemleri();
+                                                                    draw_data_iskalemleri(); // Tabloyu yeniden çiz
                                                                 }
                                                             }
                                                         }
                                                     });
-
                                                 }
-                                                else if(responses.status==410){
+                                                // Hata Durumu
+                                                else if (responses.status === 410) {
+                                                    $('#loading-box').addClass('d-none');
 
                                                     $.alert({
                                                         theme: 'modern',
@@ -4763,7 +4606,7 @@
                                                         columnClass: "col-md-4 mx-auto",
                                                         title: 'Dikkat!',
                                                         content: responses.message,
-                                                        buttons:{
+                                                        buttons: {
                                                             prev: {
                                                                 text: 'Tamam',
                                                                 btnClass: "btn btn-link text-dark",
@@ -4771,9 +4614,9 @@
                                                         }
                                                     });
                                                 }
-                                            })
-
+                                            });
                                         }
+
                                     },
                                 },
                                 onContentReady: function () {
@@ -4906,8 +4749,55 @@
     }
 
 
+    function item_hesap(t) {
+        // Toplam ürün sayısını al
+        let itemCount = $('.qty').length;
 
-    function item_hesap(t){
+        // Toplamlar için başlangıç değerleri
+        let net_tutar = 0;
+        let kdv_tutar = 0;
+        let genel_tutar = 0;
+
+        // Vergi oranını al ve float'a çevir
+        let tax_oran = parseFloat($('#tax_oran').val()) || 0;
+
+        // Her bir ürünü hesapla
+        for (let i = 0; i < itemCount; i++) {
+            // Miktar ve fiyatı al
+            let item_qty = parseFloat($('.qty').eq(i).val()) || 0;
+            let item_price = parseFloat($('.price').eq(i).val()) || 0;
+
+            // Toplam tutar hesapla
+            let toplam_tutar = item_price * item_qty;
+
+            // DOM güncellemesi
+            $('.item_toplam_tutar').eq(i).text(currencyFormat(toplam_tutar));
+            $('.item_toplam_tutar_hidden').eq(i).val(toplam_tutar);
+
+            // Net toplamı güncelle
+            net_tutar += toplam_tutar;
+        }
+
+        // Vergi tutarını ve genel toplamı hesapla
+        if (tax_oran > 0) {
+            kdv_tutar = net_tutar * (tax_oran / 100);
+            genel_tutar = net_tutar + kdv_tutar;
+        } else {
+            genel_tutar = net_tutar;
+        }
+
+        // Genel toplam, vergi ve net toplamı DOM'a yaz
+        $('.net_tutar').text(currencyFormat(net_tutar));
+        $('.kdv_tutar').text(currencyFormat(kdv_tutar));
+        $('.genel_tutar').text(currencyFormat(genel_tutar));
+
+        // Gizli alanlara verileri yaz
+        $('.net_tutar_db').val(net_tutar);
+        $('.kdv_tutar_db').val(kdv_tutar);
+        $('.genel_tutar_db').val(genel_tutar);
+    }
+
+    function item_hesap_(t){
         let say = $('.qty').length;
         let item_price=0;
         let toplam_tutar=0;
@@ -5107,8 +4997,9 @@
         });
     });
 
-    $(document).on('click','.edit-bolum',function (){
-        let bolum_id =$(this).attr('bolum_id')
+    $(document).on('click', '.edit-bolum', function () {
+        let bolum_id = $(this).attr('bolum_id');
+
         $.confirm({
             theme: 'modern',
             closeIcon: true,
@@ -5118,73 +5009,83 @@
             animation: 'scale',
             useBootstrap: true,
             columnClass: "col-md-6 mx-auto",
-            containerFluid: !0,
+            containerFluid: true,
             smoothContent: true,
             draggable: false,
             content: function () {
                 let self = this;
-                let html = `<form>
-    <div class="form-group col-md-12">
-                                          <label for="name">Bölüm Kodu</label>
-                                          <input type="text" class="form-control" id="code" placeholder="Bölüm Kodu">
+                let html = `
+                <form>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="code">Bölüm Kodu</label>
+                            <input type="text" class="form-control" id="code" placeholder="Bölüm Kodu">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="name">Bölüm Adı</label>
+                            <input type="text" class="form-control" id="name" placeholder="Bölüm Adı">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="butce">Bütçe</label>
+                            <input type="number" class="form-control" id="butce" placeholder="300.000">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="content">Açıklama</label>
+                            <input type="text" class="form-control" id="content" placeholder="Detay">
+                        </div>
+                    </div>
+                </form>`;
 
-                                        </div>
-                              <div class="form-row">
-                                <div class="form-group col-md-12">
-                                  <label for="name">Bölüm Adı</label>
-                                  <input type="text" class="form-control" id="name" placeholder="Bina Adı">
-
-                                </div>
-                            </div>
-                            <div class="form-row">
-                             <div class="form-group col-md-6">
-                                  <label for="butce">Bütçe</label>
-                                    <input type="number" class="form-control" id="butce" placeholder="300.000">
-                                </div>
-                                <div class="form-group col-md-6">
-                                  <label for="content">Açıklama</label>
-                                  <input type="text" class="form-control" id="content" placeholder="detay">
-                                </div>
-                            </div>
-                            </form>`;
-                let data = {
-                    crsf_token: crsf_hash,
-                    bolum_id: bolum_id,
-                }
-
-                let table_report='';
-                $.post(baseurl + 'projebolumleri/get_info',data,(response) => {
-                    self.$content.find('#person-list').empty().append(html);
+                // Veriyi sunucudan çek ve formu doldur
+                $.post(baseurl + 'projebolumleri/get_info', { crsf_token: crsf_hash, bolum_id: bolum_id }, function (response) {
                     let responses = jQuery.parseJSON(response);
-                    $('#name').val(responses.item.name);
-                    $('#code').val(responses.item.code);
-                    $('#butce').val(responses.item.butce);
-                    $('#content').val(responses.item.exp);
-
+                    self.$content.find('#code').val(responses.item.code);
+                    self.$content.find('#name').val(responses.item.name);
+                    self.$content.find('#butce').val(responses.item.butce);
+                    self.$content.find('#content').val(responses.item.exp);
                 });
-                self.$content.find('#person-list').empty().append(html);
-                return $('#person-container').html();
+
+                return html;
             },
             buttons: {
                 formSubmit: {
                     text: 'Güncelle',
                     btnClass: 'btn-blue',
                     action: function () {
-                        $('#loading-box').removeClass('d-none');
-
+                        // Form verilerini al
                         let data = {
                             crsf_token: crsf_hash,
                             bolum_id: bolum_id,
-                            name:  $('#name').val(),
-                            code:  $('#code').val(),
-                            butce:  $('#butce').val(),
-                            content:  $('#content').val(),
-                            project:  "<?php echo $_GET['id'] ?>"
+                            code: $('#code').val(),
+                            name: $('#name').val(),
+                            butce: $('#butce').val(),
+                            content: $('#content').val(),
+                            project: "<?php echo $_GET['id'] ?>"
+                        };
+
+                        // Zorunlu alan kontrolü
+                        if (!data.name || !data.code || !data.butce) {
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                animation: 'scale',
+                                useBootstrap: true,
+                                columnClass: "col-md-4 mx-auto",
+                                title: 'Dikkat!',
+                                content: 'Tüm alanları doldurmanız gerekmektedir.',
+                            });
+                            return false;
                         }
-                        $.post(baseurl + 'projebolumleri/update',data,(response) => {
+
+                        // Sunucuya istekte bulun
+                        $.post(baseurl + 'projebolumleri/update', data, function (response) {
                             let responses = jQuery.parseJSON(response);
-                            $('#loading-box').addClass('d-none');
-                            if(responses.status==200){
+                            if (responses.status === 200) {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-check',
@@ -5194,7 +5095,7 @@
                                     columnClass: "small",
                                     title: 'Başarılı',
                                     content: responses.message,
-                                    buttons:{
+                                    buttons: {
                                         formSubmit: {
                                             text: 'Tamam',
                                             btnClass: 'btn-blue',
@@ -5205,10 +5106,7 @@
                                         }
                                     }
                                 });
-
-                            }
-                            else if(responses.status==410){
-
+                            } else if (responses.status === 410) {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
@@ -5218,60 +5116,25 @@
                                     columnClass: "col-md-4 mx-auto",
                                     title: 'Dikkat!',
                                     content: responses.message,
-                                    buttons:{
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
                                 });
                             }
-                        })
-
+                        });
                     }
-                },
+                }
             },
             onContentReady: function () {
+                // Select2 entegrasyonu
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
-                })
-
-                $('#fileupload_').fileupload({
-                    url: url,
-                    dataType: 'json',
-                    formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
-                    done: function (e, data) {
-                        var img='default.png';
-                        $.each(data.result.files, function (index, file) {
-                            img=file.name;
-                        });
-
-                        $('#image_text').val(img);
-                    },
-                    progressall: function (e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
-                    }
-                }).prop('disabled', !$.support.fileInput)
-                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                // bind to events
-                var jc = this;
-                this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
-                    e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
                 });
             }
         });
-
     });
 
 
-    $(document).on('click','.edit-asama',function (){
-        let asama_id =$(this).attr('asama_id');
+
+    $(document).on('click', '.edit-asama', function () {
+        let asama_id = $(this).attr('asama_id');
         $.confirm({
             theme: 'modern',
             closeIcon: true,
@@ -5281,164 +5144,185 @@
             animation: 'scale',
             useBootstrap: true,
             columnClass: "col-md-6 mx-auto",
-            containerFluid: !0,
+            containerFluid: true,
             smoothContent: true,
             draggable: false,
             content: function () {
                 let self = this;
                 let html = `<form>
-                                      <div class="form-row">
-                                        <div class="form-group col-md-12">
-                                            <label for="name">Proje Bölümleri</label>
-                                            <select class="form-control select-box" id="bolum_id" name="bolum">
-                                                <?php foreach ($bolumler as $blm)
-                {
-                    $id=$blm['id'];
-                    $name=$blm['name'];
-                    echo "<option value='$id'>$name</option>";
-                } ?>
-                                            </select>
-                                        </div>
-                                               <div class="form-group col-md-12">
-                                            <label for="name">Bağlı Olduğu Aşama</label>
-                                            <select class="form-control select-box" id="parent_id" name="parent_id">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                     <div class="form-group col-md-6">
-                                          <label for="name">Aşama Adı</label>
-                                            <input type="text" class="form-control" id="name" placeholder="Elektrik İşleri">
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                          <label for="content">Cari</label>
-                                               <select name="customer" class="form-control" id="customer_statement">
-                                                    <option value="0"><?php echo $this->lang->line('Select Customer') ?></option>
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label for="bolum_id">Proje Bölümleri</label>
+                        <select class="form-control select-box" id="bolum_id" name="bolum">
+                            <option value="">Seçiniz</option>
+                            <?php foreach ($bolumler as $blm): ?>
+                                <option value="<?= $blm['id'] ?>"><?= $blm['name'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-12">
+                        <label for="parent_id">Bağlı Olduğu Aşama</label>
+                        <select class="form-control select-box" id="parent_id" name="parent_id">
 
-                                                </select>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="name">Aşama Adı</label>
+                        <input type="text" class="form-control" id="name" placeholder="Elektrik İşleri" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="customer_statement">Cari</label>
+                        <select class="form-control select-box" id="customer_statement">
+                            <option value="">Seçiniz</option>
+                            <?php foreach (all_customer() as $blm): ?>
+                                <option value="<?= $blm->id ?>"><?= $blm->company ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="pers_id">Sorumlu Personel</label>
+                        <select class="form-control select-box" id="pers_id">
+                            <option value="">Seçiniz</option>
+                            <?php foreach (all_personel() as $blm): ?>
+                                <option value="<?= $blm->id ?>"><?= $blm->name ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="olcu_birimi">Ölçü Birimi</label>
+                        <select class="form-control select-box" id="olcu_birimi">
+                            <option value="">Seçiniz</option>
+                            <?php foreach (units() as $row): ?>
+                                <option value="<?= $row['id'] ?>"><?= $row['name'] ?> - <?= $row['code'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label for="quantity">Miktar</label>
+                        <input type="number" class="form-control" id="quantity" value="1" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="fiyat">Birim Fiyatı</label>
+                        <input type="number" class="form-control" id="fiyat" value="1" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label for="toplam_fiyat">Toplam Fiyat</label>
+                        <input type="number" class="form-control" id="toplam_fiyat" readonly>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="butce">Bütçe</label>
+                        <input type="number" class="form-control" id="butce" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label for="content">Açıklama</label>
+                        <input type="text" class="form-control" id="content" required>
+                    </div>
+                </div>
+            </form>`;
 
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                         <div class="form-group col-md-6">
-                                          <label for="name">Sorumlu Personel</label>
-                                              <select class="form-control select-box" id="pers_id">
-                                                    <?php foreach (all_personel() as $blm)
-                {
-                    $id=$blm->id;
-                    $name=$blm->name;
-                    echo "<option value='$id'>$name</option>";
-                } ?>
-                                                </select>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                          <label for="content">Ölçü Birimi</label>
-                                              <select name="olcu_birimi" class="form-control select-box" id="olcu_birimi">
-                                                    <?php
-                foreach (units() as $row) {
-                    $id = $row['id'];
-                    $cid = $row['code'];
-                    $title = $row['name'];
-                    echo "<option value='$id'>$title - $cid</option>";
-                }
-                ?>
-                                                </select>
-
-                                        </div>
-                                    </div>
-
-                                       <div class="form-row">
-                                         <div class="form-group col-md-4">
-                                          <label for="name">Miktar</label>
-                                           <input type="number" class="form-control" name="quantity" id="quantity" value="1">
-                                        </div>
-                                          <div class="form-group col-md-4">
-                                          <label for="name">Birim Fiyatı</label>
-                                            <input type="text" class="form-control" name="fiyat" id="fiyat" value="1">
-                                        </div>
-                                         <div class="form-group col-md-4">
-                                          <label for="name">Toplam Fiyatı</label>
-                                             <input type="text" class="form-control" name="toplam_fiyat" id="toplam_fiyat">
-                                        </div>
-                                      </div>
-                                      <div class="form-row">
-                                         <div class="form-group col-md-6">
-                                          <label for="name">Bütçe</label>
-                                             <input id="butce" name="butce" type="text" class="form-control">
-                                        </div>
-                                          <div class="form-group col-md-6">
-                                          <label for="name">Açıklama</label>
-                                            <input type="text" class="form-control" name="content" id="content">
-                                        </div>
-
-                                      </div>
-                                    </form>`;
-                let data = {
-                    crsf_token: crsf_hash,
-                    asama_id: asama_id,
-                }
-
-                let table_report='';
-                $.post(baseurl + 'projeasamalari/get_info',data,(response) => {
-                    self.$content.find('#person-list').empty().append(html);
+                $.post(baseurl + 'projeasamalari/get_info', { crsf_token: crsf_hash, asama_id: asama_id }, (response) => {
                     let responses = jQuery.parseJSON(response);
-                    $('#name').val(responses.item.name);
-                    $('#butce').val(responses.item.total);
-                    $('#content').val(responses.item.exp);
 
+                    // Önce parent_id güncellemesi için bir fonksiyon ekleyelim
+                    const updateParentOptions = () => {
+                        $.post(baseurl + 'projeasamalari/get_parent_options', {
+                            crsf_token: crsf_hash,
+                            bolum_id: self.$content.find('#bolum_id').val(),
+                            proje_id: $('#proje_id_hidden').val()
+                        }, (parentResponse) => {
+                            let parentOptions = jQuery.parseJSON(parentResponse);
 
-                    $('#quantity').val(responses.item.quantity);
-                    $('#fiyat').val(responses.item.fiyat);
-                    $('#toplam_fiyat').val(responses.item.toplam);
+                            // Parent seçeneklerini temizle ve yeni seçenekleri ekle
+                            let parentSelect = self.$content.find('#parent_id');
+                            parentSelect.empty();
+                            parentSelect.append('<option value="">Seçiniz</option>'); // Varsayılan seçenek
+                            parentOptions.forEach(option => {
+                                parentSelect.append(
+                                    `<option value="${option.id}" ${option.id === responses.item.parent_id ? 'selected' : ''}>${option.name}</option>`
+                                );
+                            });
 
-                    $('#customer_statement').append(new Option(responses.customer_details.company, responses.customer_details.customer_id, true, true)).trigger('change');
+                            parentSelect.trigger('change');
+                        });
+                    };
 
-                    $('#bolum_id').val(responses.item.bolum_id).select2().trigger('change')
-                    $('#pers_id').val(responses.item.pers_id).select2().trigger('change')
-                    $('#parent_id').val(responses.item.parent_id).select2().trigger('change')
-                    $('#olcu_birimi').val(responses.item.olcu_birimi).select2().trigger('change')
+                    // bolum_id alanını ayarla ve değişikliği tetikle
+                    self.$content.find('#bolum_id').val(responses.item.bolum_id).trigger('change');
 
+                    // bolum_id alanındaki change olayını dinle
+                    self.$content.find('#bolum_id').off('change').on('change', updateParentOptions);
+
+                    // İlk başta parent_id'yi güncelle
+                    updateParentOptions();
+
+                    // Diğer alanları doldur
+                    self.$content.find('#name').val(responses.item.name);
+                    self.$content.find('#butce').val(responses.item.total);
+                    self.$content.find('#content').val(responses.item.exp);
+                    self.$content.find('#quantity').val(responses.item.quantity);
+                    self.$content.find('#fiyat').val(responses.item.fiyat);
+                    self.$content.find('#toplam_fiyat').val(responses.item.toplam);
+                    self.$content.find('#pers_id').val(responses.item.pers_id).trigger('change');
+                    self.$content.find('#olcu_birimi').val(responses.item.olcu_birimi).trigger('change');
+                    self.$content.find('#customer_statement')
+                        .append(new Option(responses.customer_details.company, responses.customer_details.customer_id, true, true))
+                        .trigger('change');
                 });
-                self.$content.find('#person-list').empty().append(html);
-                return $('#person-container').html();
+
+
+                return html;
             },
             buttons: {
                 formSubmit: {
                     text: 'Güncelle',
                     btnClass: 'btn-blue',
                     action: function () {
-                        $('#loading-box').removeClass('d-none');
-
                         let data = {
                             crsf_token: crsf_hash,
-                            asama_id: asama_id,
-                            name:  $('#name').val(),
-                            customer:  $('#customer_statement').val(),
-                            content:  $('#content').val(),
-                            bolum:  $('#bolum_id').val(),
-                            parent_id:  $('#parent_id').val(),
-                            pers_id:  $('#pers_id').val(),
-                            butce:  $('#butce').val(),
-                            olcu_birimi:  $('#olcu_birimi').val(),
-                            quantity:  $('#quantity').val(),
-                            fiyat:  $('#fiyat').val(),
-                            toplam_fiyat:  $('#toplam_fiyat').val(),
-                            project:  "<?php echo $_GET['id'] ?>"
+                            asama_id,
+                            project: $('#proje_id_hidden').val(),
+                            name: $('#name').val(),
+                            customer: $('#customer_statement').val(),
+                            content: $('#content').val(),
+                            bolum: $('#bolum_id').val(),
+                            parent_id: $('#parent_id').val(),
+                            pers_id: $('#pers_id').val(),
+                            butce: $('#butce').val(),
+                            olcu_birimi: $('#olcu_birimi').val(),
+                            quantity: $('#quantity').val(),
+                            fiyat: $('#fiyat').val(),
+                            toplam_fiyat: $('#toplam_fiyat').val(),
+                        };
+
+                        if (!data.name || !data.bolum || !data.butce) {
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                title: 'Eksik Bilgi!',
+                                content: 'Lütfen gerekli tüm alanları doldurunuz.',
+                            });
+                            return false;
                         }
-                        $.post(baseurl + 'projeasamalari/update',data,(response) => {
+
+                        $.post(baseurl + 'projeasamalari/update', data, (response) => {
                             let responses = jQuery.parseJSON(response);
-                            $('#loading-box').addClass('d-none');
-                            if(responses.status==200){
+                            if (responses.status === 200) {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-check',
                                     type: 'green',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "small",
                                     title: 'Başarılı',
                                     content: responses.message,
-                                    buttons:{
+                                    buttons: {
                                         formSubmit: {
                                             text: 'Tamam',
                                             btnClass: 'btn-blue',
@@ -5449,80 +5333,46 @@
                                         }
                                     }
                                 });
-
-                            }
-                            else if(responses.status==410){
-
+                            } else {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
                                     type: 'red',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "col-md-4 mx-auto",
-                                    title: 'Dikkat!',
+                                    title: 'Hata!',
                                     content: responses.message,
-                                    buttons:{
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
                                 });
                             }
-                        })
-
+                        });
                     }
                 }
             },
             onContentReady: function () {
-
-
-                $("#customer_statement").select2({
+                $('#customer_statement').select2({
                     minimumInputLength: 1,
                     dropdownParent: $(".jconfirm-box-container"),
-                   tags: false,
                     ajax: {
                         url: baseurl + 'search/customer_select',
                         dataType: 'json',
                         type: 'POST',
-                        quietMillis: 50,
-                        data: function (customer) {
-                            return {
-                                customer: customer,
-                                '<?=$this->security->get_csrf_token_name()?>': crsf_hash
-                            };
-                        },
-                        processResults: function (data) {
-                            return {
-                                results: $.map(data, function (item) {
-                                    return {
-                                        text: item.company,
-                                        id: item.id
-                                    }
-                                })
-                            };
-                        },
+                        data: (params) => ({ customer: params.term, crsf_token: crsf_hash }),
+                        processResults: (data) => ({
+                            results: data.map(item => ({ text: item.company, id: item.id }))
+                        }),
                     }
                 });
-
-                $('.select-box').select2({
-                    dropdownParent: $(".jconfirm-box-container")
-                })
-                var jc = this;
-                this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
-                    e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
-                });
+                $('.select-box').select2({ dropdownParent: $(".jconfirm-box-container") });
             }
         });
+    });
 
 
-    })
+    $(document).on('click', '.edit-task', function () {
+        let task_id = $(this).attr('task_id');
+        const milestones = <?php echo json_encode($milestones); ?>;
+        const all_personel = <?php echo json_encode(all_personel()); ?>;
+        const units = <?php echo json_encode(units()); ?>;
+        const task_status = <?php echo json_encode($task_status); ?>;
 
-    $(document).on('click','.edit-task',function (){
-        let task_id =$(this).attr('task_id');
         $.confirm({
             theme: 'modern',
             closeIcon: true,
@@ -5532,231 +5382,168 @@
             animation: 'scale',
             useBootstrap: true,
             columnClass: "col-md-6 mx-auto",
-            containerFluid: !0,
+            containerFluid: true,
             smoothContent: true,
             draggable: false,
             content: function () {
                 let self = this;
-                let html = `<form>
-                                      <div class="form-row">
-                                        <div class="form-group col-md-12">
-                                            <label for="name">Proje Aşamalar</label>
-                                              <select name="milestone" class="form-control select-box" id="milestone_is">
-                                              <option value='0'>Seçiniz</option>
-                                                    <?php
-                foreach ($milestones as $row) {
-                    $cid = $row['id'];
-                    $parent_id = $row['parent_id'];
-                    $bolum_name=bolum_getir($row['bolum_id']);
+                //
+                // <div class="form-group col-md-12">
+                //     <label for="milestone_is">Proje Aşamalar</label>
+                //     <select name="milestone" class="form-control select-box" id="milestone_is">
+                //         <option value="0">Seçiniz</option>
+                //         ${milestones.map(row => {
+                //         const title = row.parent_id !== 0
+                //             ? `${row.bolum_name}-${row.parent_name}-${row.name}`
+                //             : `${row.name}-${row.bolum_name}`;
+                //         return `<option value="${row.id}">${title}</option>`;
+                //     }).join('')}
+                //     </select>
+                // </div>
+                // Form HTML içeriği
+                let formHtml = `
+                <form>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="name_is">İş Kalemi Adı</label>
+                            <input type="text" class="form-control" id="name_is" placeholder="Elektrik İşlerinin Görülmesi">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="pers_id_is">Sorumlu Personel</label>
+                            <select class="form-control select-box" id="pers_id_is">
+                                ${all_personel.map(person => `<option value="${person.id}">${person.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="customer_statement_is">Cari</label>
+                            <select name="customer" class="form-control" id="customer_statement_is">
+                                <option value="0">Seçiniz</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="olcu_birimi_is">Ölçü Birimi</label>
+                            <select name="olcu_birimi" class="form-control select-box" id="olcu_birimi_is">
+                                ${units.map(unit => `<option value="${unit.id}">${unit.name} - ${unit.code}</option>`).join('')}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="quantity_is">Miktar</label>
+                            <input type="number" class="form-control" id="quantity_is" value="1">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="fiyat_is">Birim Fiyatı</label>
+                            <input type="text" class="form-control" id="fiyat_is" value="1">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="toplam_fiyat_is">Toplam Fiyatı</label>
+                            <input type="text" class="form-control" id="toplam_fiyat_is">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="oran_is">Oran (%)</label>
+                            <input type="text" class="form-control" id="oran_is" value="100">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="status_is">Durum</label>
+                            <select name="status" class="form-control select-box" id="status_is">
+                                ${task_status.map(status => `<option value="${status.id}">${status.name}</option>`).join('')}
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="content_is">Açıklama</label>
+                            <input type="text" class="form-control" id="content_is">
+                        </div>
+                    </div>
+                </form>`;
 
-                    if($parent_id!=0)
-                    {
-                        $title=$bolum_name.'-'.task_to_asama($parent_id).'-'.$row['name'];
-                    }
-                    else
-                    {
-                        $title=$row['name'].'-'.$bolum_name;
-                    }
+                // Task bilgilerini getir ve formu doldur
+                $.post(`${baseurl}projeiskalemleri/get_info`, { crsf_token: crsf_hash, task_id }, (response) => {
+                    const { item, customer_details } = jQuery.parseJSON(response);
 
-                    echo "<option value='$cid'>$title </option>";
-
-                }
-                ?>
-                                                </select>
-                                        </div>
-                                               <div class="form-group col-md-12">
-                                            <label for="name">İş Kalemi Adı</label>
-                                             <input type="text" class="form-control" id="name_is" placeholder="Elektrik İşlerinin Görülmesi">
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                          <div class="form-group col-md-6">
-                                          <label for="name">Sorumlu Personel</label>
-                                              <select class="form-control select-box" id="pers_id_is">
-                                                    <?php foreach (all_personel() as $blm)
-                {
-                    $id=$blm->id;
-                    $name=$blm->name;
-                    echo "<option value='$id'>$name</option>";
-                } ?>
-                                                </select>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                          <label for="content">Cari</label>
-                                               <select name="customer" class="form-control" id="customer_statement_is">
-                                                    <option value="0"><?php echo $this->lang->line('Select Customer') ?></option>
-
-                                                </select>
-
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-
-                                        <div class="form-group col-md-12">
-                                          <label for="content">Ölçü Birimi</label>
-                                              <select name="olcu_birimi" class="form-control select-box" id="olcu_birimi_is">
-                                                    <?php
-                foreach (units() as $row) {
-                    $id = $row['id'];
-                    $cid = $row['code'];
-                    $title = $row['name'];
-                    echo "<option value='$id'>$title - $cid</option>";
-                }
-                ?>
-                                                </select>
-
-                                        </div>
-
-
-                                    </div>
-
-                                       <div class="form-row">
-                                         <div class="form-group col-md-3">
-                                          <label for="name">Miktar</label>
-                                           <input type="number" class="form-control" name="quantity_is" id="quantity_is" value="1">
-                                        </div>
-                                          <div class="form-group col-md-3">
-                                          <label for="name">Birim Fiyatı</label>
-                                            <input type="text" class="form-control" name="fiyat_is" id="fiyat_is" value="1">
-                                        </div>
-                                         <div class="form-group col-md-3">
-                                          <label for="name">Toplam Fiyatı</label>
-                                             <input type="text" class="form-control" name="toplam_fiyat_is" id="toplam_fiyat_is">
-                                        </div>
-                                        <div class="form-group col-md-3">
-                                          <label for="name">Oran (%)</label>
-                                            <input type="text" class="form-control" id="oran_is" value="100">
-                                        </div>
-                                      </div>
-                                      <div class="form-row">
-                                         <div class="form-group col-md-6">
-                                          <label for="name">Durum</label>
-                                           <select name="status" class="form-control select-box" id="status_is">
-                                                    <?php foreach ($task_status as $tsk)
-                                                            { $id=$tsk['id'];
-                                                            $name=$tsk['name'];
-                                                            ?>
-                                                        <option value="<?php echo $id; ?>"><?php echo $name; ?></option>
-                                                    <?php } ?>
-                                            </select>
-                                        </div>
-                                          <div class="form-group col-md-6">
-                                          <label for="name">Açıklama</label>
-                                            <input type="text" class="form-control" name="content_is" id="content_is">
-                                        </div>
-
-                                      </div>
-                                    </form>`;
-                let data = {
-                    crsf_token: crsf_hash,
-                    task_id: task_id,
-                }
-
-                let table_report='';
-                $.post(baseurl + 'projeiskalemleri/get_info',data,(response) => {
-                    self.$content.find('#person-list').empty().append(html);
-                    let responses = jQuery.parseJSON(response);
-                    $('#name_is').val(responses.item.name);
-                    $('#content_is').val(responses.item.description);
-
-
-                    $('#quantity_is').val(responses.item.quantity);
-                    $('#oran_is').val(responses.item.oran);
-                    $('#fiyat_is').val(responses.item.fiyat);
-                    $('#toplam_fiyat_is').val(responses.item.toplam_fiyat);
-
-                    $('#customer_statement_is').append(new Option(responses.customer_details.company, responses.customer_details.customer_id, true, true)).trigger('change');
-
-                    $('#pers_id_is').val(responses.item.eid).select2().trigger('change')
-                    $('#milestone_is').val(responses.item.asama_id).select2().trigger('change')
-                    $('#status_is').val(responses.item.status).select2().trigger('change')
-                    $('#olcu_birimi_is').val(responses.item.unit).select2().trigger('change')
-
+                    // Form içeriğini güncelle
+                    self.$content.find('#name_is').val(item.name);
+                    self.$content.find('#quantity_is').val(item.quantity);
+                    self.$content.find('#fiyat_is').val(item.fiyat);
+                    self.$content.find('#toplam_fiyat_is').val(item.toplam_fiyat);
+                    self.$content.find('#oran_is').val(item.oran);
+                    self.$content.find('#status_is').val(item.status).trigger('change');
+                    self.$content.find('#content_is').val(item.description);
+                    self.$content.find('#pers_id_is').val(item.eid).trigger('change');
+                    self.$content.find('#olcu_birimi_is').val(item.unit).trigger('change');
+                    self.$content.find('#customer_statement_is')
+                        .append(new Option(customer_details.company, customer_details.customer_id, true, true))
+                        .trigger('change');
                 });
-                self.$content.find('#person-list').empty().append(html);
-                return $('#person-container').html();
+
+                return formHtml;
             },
             buttons: {
                 formSubmit: {
                     text: 'Güncelle',
                     btnClass: 'btn-blue',
                     action: function () {
-                        $('#loading-box').removeClass('d-none');
-
-                        let data = {
+                        const data = {
                             crsf_token: crsf_hash,
-                            task_id: task_id,
-                            name:  $('#name_is').val(),
-                            customer:  $('#customer_statement_is').val(),
-                            oran:  $('#oran_is').val(),
-                            status:  $('#status_is').val(),
-                            content:  $('#content_is').val(),
-                            pers_id:  $('#pers_id_is').val(),
-                            asama_id:  $('#milestone_is').val(),
-                            quantity:  $('#quantity_is').val(),
-                            fiyat:  $('#fiyat_is').val(),
-                            toplam_fiyat:  $('#toplam_fiyat_is').val(),
-                            olcu_birimi:  $('#olcu_birimi_is').val(),
-                            project:  "<?php echo $_GET['id'] ?>"
-                        }
-                        $.post(baseurl + 'projeiskalemleri/update',data,(response) => {
-                            let responses = jQuery.parseJSON(response);
-                            $('#loading-box').addClass('d-none');
-                            if(responses.status==200){
+                            task_id,
+                            name: $('#name_is').val(),
+                            customer: $('#customer_statement_is').val(),
+                            oran: $('#oran_is').val(),
+                            status: $('#status_is').val(),
+                            content: $('#content_is').val(),
+                            pers_id: $('#pers_id_is').val(),
+                            asama_id: $('#milestone_is').val(),
+                            quantity: $('#quantity_is').val(),
+                            fiyat: $('#fiyat_is').val(),
+                            toplam_fiyat: $('#toplam_fiyat_is').val(),
+                            olcu_birimi: $('#olcu_birimi_is').val(),
+                            project: "<?php echo $_GET['id'] ?>"
+                        };
+
+                        $.post(`${baseurl}projeiskalemleri/update`, data, (response) => {
+                            const result = jQuery.parseJSON(response);
+
+                            if (result.status === 200) {
                                 $.alert({
                                     theme: 'modern',
-                                    icon: 'fa fa-check',
                                     type: 'green',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "small",
                                     title: 'Başarılı',
-                                    content: responses.message,
-                                    buttons:{
-                                        formSubmit: {
+                                    content: result.message,
+                                    buttons: {
+                                        ok: {
                                             text: 'Tamam',
-                                            btnClass: 'btn-blue',
-                                            action: function () {
-                                                $('#todotable').DataTable().destroy();
-                                                draw_data_iskalemleri();
+                                            action: () => {
+                                                $('#todotable').DataTable().ajax.reload();
                                             }
                                         }
                                     }
                                 });
-
                             }
-                            else if(responses.status==410){
-
+                            else {
                                 $.alert({
                                     theme: 'modern',
-                                    icon: 'fa fa-exclamation',
                                     type: 'red',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "col-md-4 mx-auto",
-                                    title: 'Dikkat!',
-                                    content: responses.message,
-                                    buttons:{
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
+                                    title: 'Hata',
+                                    content: result.message,
                                 });
                             }
-                        })
+                        });
+                    },
 
-                    }
                 }
             },
             onContentReady: function () {
-
-
+                // Müşteri seçimi için Select2 yapılandırması
                 $("#customer_statement_is").select2({
                     minimumInputLength: 1,
                     dropdownParent: $(".jconfirm-box-container"),
-                   tags: false,
+                    tags: false,
                     ajax: {
                         url: baseurl + 'search/customer_select',
                         dataType: 'json',
@@ -5774,27 +5561,48 @@
                                     return {
                                         text: item.company,
                                         id: item.id
-                                    }
+                                    };
                                 })
                             };
                         },
                     }
                 });
 
+                // Diğer Select2 alanları için genel yapılandırma
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
-                })
+                });
+
+                // Bölüm ID'yi değiştirdiğinizde Aşama (Parent ID) seçeneklerini yenileme
+                $("#milestone_is").on("change", function () {
+                    const milestoneId = $(this).val();
+                    $.post(baseurl + 'projeasamalari/get_parent_options', {
+                        crsf_token: crsf_hash,
+                        milestone_id: milestoneId
+                    }, (response) => {
+                        const options = JSON.parse(response);
+                        const parentSelect = $("#parent_id");
+                        parentSelect.empty(); // Önce mevcut seçenekleri temizle
+                        parentSelect.append('<option value="">Seçiniz</option>'); // Varsayılan seçenek ekle
+                        options.forEach(option => {
+                            parentSelect.append(
+                                `<option value="${option.id}">${option.name}</option>`
+                            );
+                        });
+                    });
+                });
+
+                // Form submit işlemi için enter tuşuna basıldığında tetikleme
                 var jc = this;
                 this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
                     e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    jc.$$formSubmit.trigger('click'); // Submit butonunu tetikle
                 });
             }
+
         });
+    });
 
-
-    })
 
     $(document).on('click','.delete-bolum',function (){
         let bolum_id =$(this).attr('bolum_id')
@@ -7785,6 +7593,24 @@
     })
 
 
+    function error_log_message(mesaj){
+        $.alert({
+            theme: 'modern',
+            icon: 'fa fa-exclamation',
+            type: 'red',
+            animation: 'scale',
+            useBootstrap: true,
+            columnClass: "col-md-4 mx-auto",
+            title: 'Dikkat!',
+            content: mesaj,
+            buttons: {
+                prev: {
+                    text: 'Tamam',
+                    btnClass: "btn btn-link text-dark",
+                }
+            }
+        });
+    }
 
 
 </script>
@@ -7818,6 +7644,8 @@
         font-weight: 700;
         background: #7a92bf;
     }
+
+
 </style>
                                             </div>
                                         </div>

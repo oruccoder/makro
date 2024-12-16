@@ -18,6 +18,10 @@ class Nakliye Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
@@ -350,6 +354,11 @@ class Nakliye Extends CI_Controller
             'toplam_tutar_float'=>$toplam_tutar,
             'cari'=>customer_details($data['details']->cari_id)['company'],
         ];
+
+
+        $data['note_list']=nakliye_not_list($id);
+
+
         $this->load->view('fixed/header', $head);
 
         $this->load->view('nakliye/view',$data);
@@ -360,12 +369,12 @@ class Nakliye Extends CI_Controller
         $this->db->trans_start();
         $result = $this->model->create_form_items();
         if($result['status']){
-            echo json_encode(array('status' => 'Success', 'message' =>"Başarılı Bir Şekilde Kayıt Edildi",'id'=>$result['id'],'talep_form_products_id'=>$result['talep_form_products_id']));
+            echo json_encode(array('status' => 'Success', 'message' =>$result['message'],'id'=>$result['id'],'talep_form_products_id'=>$result['talep_form_products_id']));
             $this->db->trans_complete();
         }
         else {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun.".' Hata '));
+            echo json_encode(array('status' => 'Error', 'message' =>$result['message'].' Hata '));
         }
     }
     public function create_form_items_satinalma(){
@@ -394,252 +403,189 @@ class Nakliye Extends CI_Controller
         }
     }
 
-    public function form_bildirim_olustur(){
+    public function form_bildirim_olustur() {
         $this->db->trans_start();
         $id = $this->input->post('talep_id');
         $type = $this->input->post('type');
-        $user_id=$this->aauth->get_user()->id;
-        $talep_kontrol  = $this->db->query("SELECT * FROM `talep_form_nakliye` where id=$id and aauth=$user_id")->num_rows();
-//        if($talep_kontrol){
-            $details = $this->model->details($id);
+        $user_id = $this->aauth->get_user()->id;
 
-
-            if($type==2){ // satınalma
-                $data = array(
-                    'satinalma_bildirimi' => 1,
-                );
-
-                $this->db->set($data);
-                $this->db->where('id', $id);
-                if ($this->db->update('talep_form_nakliye', $data)) {
-
-                    $users_ = onay_sort(16,$details->proje_id);
-                    if($users_){
-                        foreach ($users_ as $items){
-                            $staff=0;
-                            if($items['sort']==1){
-                                // bildirim maili at
-                                $mesaj=$details->code.' Numaralı Nakliye Talep Formu Onayınızı Beklemektedir';
-                                //$this->model->send_mail($items['user_id'],' Gider Talep Onayı',$mesaj);
-                                // bildirim maili at
-                                $staff=1;
-                            }
-                            $data_onay = array(
-                                'talep_id' => $id,
-                                'type' => $type,
-                                'staff' => $staff,
-                                'sort' => $items['sort'],
-                                'user_id' => $items['user_id'],
-                            );
-                            $this->db->insert('talep_onay_nakliye', $data_onay);
-                        }
-
-                        $this->model->talep_history($id,$this->aauth->get_user()->id,'Onay İşlemi Başlatıldı');
-                        $this->aauth->applog("Nakliye Talebinde Bildirim Başlatıldı :  ID : ".$id, $this->aauth->get_user()->username);
-                        $this->db->trans_complete();
-                        echo json_encode(array('status' => 'Success','message'=>'Başarıyla Bildirim Başlatıldı'));
-
-                    }
-                    else {
-
-                        echo json_encode(array('status' => 'Error', 'message' =>"Projenize Yetkili Kişiler Atanmamıştır.Bu Sebeple İşlem Yapamazsınız."));
-                        $this->db->trans_rollback();
-
-                    }
-
-
-
-                }
-                else {
-
-                    $this->db->trans_rollback();
-                    echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun."));
-                }
+        // Tip 1 ise kullanıcı yetkisi kontrol edilecek
+        if ($type == 1) {
+            $talep_kontrol = $this->db->query("SELECT * FROM `talep_form_nakliye` WHERE id = $id AND aauth = $user_id")->num_rows();
+            if (!$talep_kontrol) {
+                echo json_encode(['status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır."]);
+                $this->db->trans_rollback();
+                return;
             }
-            else {
-                $data = array(
-                    'bildirim_durumu' => 1,
-                );
-                $this->db->set($data);
-                $this->db->where('id', $id);
-                if ($this->db->update('talep_form_nakliye', $data)) {
-
-                    $users_ = onay_sort(11,$details->proje_id);
-                    if($users_){
-                        foreach ($users_ as $items){
-                            $staff=0;
-                            if($items['sort']==1){
-                                // bildirim maili at
-                                $mesaj=$details->code.' Numaralı Nakliye Talep Formu Onayınızı Beklemektedir';
-                                //$this->model->send_mail($items['user_id'],' Gider Talep Onayı',$mesaj);
-                                // bildirim maili at
-                                $staff=1;
-                            }
-                            $data_onay = array(
-                                'talep_id' => $id,
-                                'type' => $type,
-                                'staff' => $staff,
-                                'sort' => $items['sort'],
-                                'user_id' => $items['user_id'],
-                            );
-                            $this->db->insert('talep_onay_nakliye', $data_onay);
-                        }
-
-                        $this->model->talep_history($id,$this->aauth->get_user()->id,'Onay İşlemi Başlatıldı');
-                        $this->aauth->applog("Nakliye Talebinde Bildirim Başlatıldı :  ID : ".$id, $this->aauth->get_user()->username);
-                        $this->db->trans_complete();
-                        echo json_encode(array('status' => 'Success','message'=>'Başarıyla Bildirim Başlatıldı'));
-
-                    }
-                    else {
-
-                        echo json_encode(array('status' => 'Error', 'message' =>"Projenize Yetkili Kişiler Atanmamıştır.Bu Sebeple İşlem Yapamazsınız."));
-                        $this->db->trans_rollback();
-
-                    }
-
-
-
-                }
-                else {
-
-                    $this->db->trans_rollback();
-                    echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun."));
-                }
-            }
-
-
-//        }
-//        else {
-//            $this->db->trans_rollback();
-//            echo json_encode(array('status' => 'Error', 'message' =>"Yetkiniz Bulunmamaktadır."));
-//        }
-
-
-    }
-    public function onay_olustur(){
-        $this->db->trans_start();
-        $id = $this->input->post('talep_id');
-        $progress_status_id = $this->input->post('progress_status_id');
-        $details = $this->model->details($id);
-        $type = $this->input->post('type');
-        $data_talep_updata=['progress_status_id'=>$progress_status_id];
-        $this->db->where('id',$id);
-        $this->db->set($data_talep_updata);
-        $this->db->update('talep_form_nakliye_products', $data_talep_updata);
-
-
-        $new_id=0;
-        $new_user_id=0;
-        $new_id_control = $this->db->query("SELECT * FROM `talep_onay_nakliye` Where type=$type and talep_id=$id and staff=0 and status is Null ORDER BY `talep_onay_nakliye`.`id` ASC LIMIT 1");
-        if($new_id_control->num_rows()){
-            $new_id = $new_id_control->row()->id;
-            $new_user_id = $new_id_control->row()->user_id;
         }
 
-        $data = array(
+        $details = $this->model->details($id);
+        $update_data = [];
+
+        // Türüne göre bildirim oluştur
+        if ($type == 2) { // Satınalma
+            $update_data['satinalma_bildirimi'] = 1;
+            $onay_sort_type = 16;
+
+            //eğer tip 2 ise talep form itemde ki tüm bilgiler dolu olmalıdır.
+
+            $items = $this->db->query("SELECT * FROM talep_form_nakliye_products WHERE form_id = $id")->result();
+            foreach ($items as $values) {
+                if (empty($values->price) || empty($values->arac_id)  || empty($values->cari_id) || empty($values->product_qty)) {
+                    $this->db->trans_rollback();
+                    echo json_encode(['status' => 'Error', 'message' => 'Satınalma Bilgileri Zorunludur']);
+                    return; // Hatalı işlemden sonra işlemi durdur.
+                }
+            }
+
+
+        } else { // Diğer
+            $update_data['bildirim_durumu'] = 1;
+            $onay_sort_type = 11;
+        }
+
+        // Talep güncelleme
+        $this->db->set($update_data);
+        $this->db->where('id', $id);
+        if ($this->db->update('talep_form_nakliye', $update_data)) {
+            // Yetkili kullanıcılar belirleniyor
+            $users_ = onay_sort($onay_sort_type, $details->proje_id);
+            if ($users_) {
+                foreach ($users_ as $items) {
+                    $staff = ($items['sort'] == 1) ? 1 : 0;
+
+                    // Bildirim maili
+                    if ($staff == 1) {
+                        $mesaj = $details->code . ' Numaralı Nakliye Talep Formu Onayınızı Beklemektedir';
+                        // $this->model->send_mail($items['user_id'], 'Gider Talep Onayı', $mesaj);
+                    }
+
+                    $data_onay = [
+                        'talep_id' => $id,
+                        'type' => $type,
+                        'staff' => $staff,
+                        'sort' => $items['sort'],
+                        'user_id' => $items['user_id'],
+                    ];
+                    $this->db->insert('talep_onay_nakliye', $data_onay);
+                }
+
+                // Başarı durumu
+                $this->model->talep_history($id, $user_id, 'Onay İşlemi Başlatıldı');
+                $this->aauth->applog("Nakliye Talebinde Bildirim Başlatıldı : ID : " . $id, $this->aauth->get_user()->username);
+                $this->db->trans_complete();
+                echo json_encode(['status' => 'Success', 'message' => 'Başarıyla Bildirim Başlatıldı']);
+            } else {
+                // Yetkili atanmadıysa hata
+                echo json_encode(['status' => 'Error', 'message' => "Projenize Yetkili Kişiler Atanmamıştır. Bu Sebeple İşlem Yapamazsınız."]);
+                $this->db->trans_rollback();
+            }
+        } else {
+            // Talep güncelleme hatası
+            echo json_encode(['status' => 'Error', 'message' => "Hata Aldınız. Lütfen Yöneticinize Başvurun."]);
+            $this->db->trans_rollback();
+        }
+    }
+
+    public function onay_olustur()
+    {
+        $this->db->trans_start();
+
+        $id = intval($this->input->post('talep_id'));
+        $progress_status_id = intval($this->input->post('progress_status_id'));
+        $type = intval($this->input->post('type'));
+        $user_id = $this->aauth->get_user()->id;
+
+        // Talep detaylarını al
+        $details = $this->model->details($id);
+
+        // Talep ürünlerini güncelle
+        $data_talep_update = ['progress_status_id' => $progress_status_id];
+        $this->db->where('id', $id);
+        $this->db->update('talep_form_nakliye_products', $data_talep_update);
+
+        // Yeni onay sırasını al
+        $new_approval = $this->db
+            ->select('id, user_id')
+            ->from('talep_onay_nakliye')
+            ->where([
+                'type' => $type,
+                'talep_id' => $id,
+                'staff' => 0,
+                'status' => null
+            ])
+            ->order_by('id', 'ASC')
+            ->limit(1)
+            ->get()
+            ->row();
+
+        if ($new_approval) {
+            $new_id = $new_approval->id;
+            $new_user_id = $new_approval->user_id;
+        } else {
+            $new_id = 0;
+            $new_user_id = 0;
+        }
+
+        // Mevcut onayı tamamla
+        $update_data = [
             'status' => 1,
             'staff' => 0,
-        );
+        ];
+        $this->db->where([
+            'user_id' => $user_id,
+            'staff' => 1,
+            'type' => $type,
+            'talep_id' => $id
+        ]);
+        if ($this->db->update('talep_onay_nakliye', $update_data)) {
+            $this->model->talep_history($id, $user_id, 'Onay Verildi');
 
-        $this->db->where('user_id',$this->aauth->get_user()->id);
-        $this->db->where('staff',1);
-        $this->db->where('type',$type);
-        $this->db->set($data);
-        $this->db->where('talep_id', $id);
-        if ($this->db->update('talep_onay_nakliye', $data)) {
+            if ($new_id) {
+                // Yeni onay işlemini başlat
+                $this->db->set(['staff' => 1]);
+                $this->db->where('id', $new_id);
+                $this->db->update('talep_onay_nakliye');
 
-            $this->model->talep_history($id,$this->aauth->get_user()->id,'Onay Verildi');
-            if($new_id){
+                $mesaj = $details->code . ' Numaralı Nakliye Talep Formu Onayınızı Beklemektedir';
+                // $this->model->send_mail($new_user_id, 'Nakliye Talep Onayı', $mesaj);
 
-                $mesaj=$details->code.' Numaralı Nakliye Talep Formu Onayınızı Beklemektedir';
-                //$this->model->send_mail($new_user_id,'Gider Talep Onayı',$mesaj);
+            } else {
+                // Tüm onaylar tamamlandığında yapılacak işlemler
+                if ($details->status != 9) {
+                    $items_status = ($type == 2) ? 13 : 3;
+                    $form_status = ($type == 2) ? 5 : 3;
 
-                // Bir Sonraki Onay
-                $data_new=array(
-                    'staff'=>1,
-                );
-                $this->db->where('id',$new_id);
-                $this->db->set($data_new);
-                $this->db->update('talep_onay_nakliye', $data_new);
-                // Bir Sonraki Onay
-            }
-            else {
+                    $this->db->set(['status' => $form_status])->where('id', $id)->update('talep_form_nakliye');
+                    $this->db->set(['status' => $items_status])->where('form_id', $id)->update('talep_form_nakliye_products');
 
-//                $mesaj=$details->code.' Numaralı Gider Talep Formu Onaylanmıştır. İşleminiz Ödeme Emri Beklemektedir';
-//                $this->model->send_mail($details->talep_eden_pers_id,'Gider Talep Formu',$mesaj);
-                //Teklif
+                    $this->model->talep_history($id, $user_id, 'Nakliye Onaylandı');
 
+                    // Hizmet tipindeki ürünlerin durumunu güncelle
+                    $service_items = $this->db->select('id')
+                        ->from('talep_form_nakliye_products')
+                        ->where([
+                            'form_id' => $id,
+                            'nakliye_item_tip' => 3
+                        ])
+                        ->get()
+                        ->result();
 
-
-                ///alacak durumları önceden tamamlanmışsa hiç bir işlem yapma
-                if($details->status!=9){
-                    $items_status=3;
-                    $form_status=3;
-
-                    if($type==2){
-                        $items_status=13;
-                        $form_status=5;
+                    foreach ($service_items as $item) {
+                        $this->db->set(['status' => 2])->where('id', $item->id)->update('talep_form_nakliye_products');
                     }
-
-
-                    $data_Form = array(
-                        'status' => $form_status,
-                    );
-                    //Ödeme Bekliyor
-                    $this->db->set($data_Form);
-                    $this->db->where('id', $id);
-                    $this->db->update('talep_form_nakliye', $data_Form);
-
-
-                    $data_Form_items=array(
-                        'status'=>$items_status,
-                    );
-                    //Ödeme Bekliyor
-                    $this->db->set($data_Form_items);
-                    $this->db->where('form_id', $id);
-                    $this->db->update('talep_form_nakliye_products', $data_Form_items);
-
-                    $mesaj='Nakliye Onaylandı';
-                    // $this->model->send_mail(lojistik_yetkili_id(),' Nakliye Talep Onayı',$mesaj);
-
-                    //Hizmet İse status değiş
-                    $items_details= $this->db->query("SELECT * FROM talep_form_nakliye_products Where form_id=$id and nakliye_item_tip=3");
-                    if($items_details->num_rows()){
-                        foreach ($items_details->result() as $item_values){
-                            $data_Form_items=array(
-                                'status'=>2,
-                            );
-                            //Ödeme Bekliyor
-                            $this->db->set($data_Form_items);
-                            $this->db->where('id', $item_values->id);
-                            $this->db->update('talep_form_nakliye_products', $data_Form_items);
-                        }
-                    }
-                    //Hizmet İse status değiş
-
-
-                    //Kontrol Bekliyor
                 }
-
-                ///alacak durumları önceden tamamlanmışsa hiç bir işlem yapma
-
-
-
             }
 
-            $this->aauth->applog("Nakliye Talebine Onay Verildi :  ID : ".$id, $this->aauth->get_user()->username);
+            $this->aauth->applog("Nakliye Talebine Onay Verildi : ID : " . $id, $this->aauth->get_user()->username);
             $this->db->trans_complete();
-            echo json_encode(array('status' => 'Success','message'=>'Başarıyla Onay Verildi'));
-
-        }
-        else {
+            echo json_encode(['status' => 'Success', 'message' => 'Başarıyla Onay Verildi']);
+        } else {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun.".' Hata '));
-
+            echo json_encode(['status' => 'Error', 'message' => "Hata Aldınız. Lütfen Yöneticinizle İletişime Geçin."]);
         }
-
     }
+
 
     public function update_item_pers(){
         $this->db->trans_start();
@@ -700,34 +646,54 @@ class Nakliye Extends CI_Controller
         $user_id  = $this->aauth->get_user()->id;
         $yetkili_kontrol  = $this->db->query("SELECT * FROM `geopos_projects` where id = $details_form->proje_id and (  proje_sorumlusu_id=$user_id or proje_muduru_id=$user_id or muhasebe_muduru_id=$user_id or genel_mudur_id=$user_id)")->num_rows();
 
-        if($yetkili_kontrol || ($details_form->talep_eden_user_id == $user_id ||  $user_id == lojistik_yetkili_id() ||  $user_id == 289  ||  $user_id == 1006)) {
-            if ($type == 1) {
-                $this->model->talep_history($details->form_id, $this->aauth->get_user()->id, $product_name . ' Ürünü Güncellendi. Miktar : ' . $item_qty . ' Fiyat : ' . $item_price);
+        $satinalama_onay_kontrol = $this->db->query("SELECT * FROM talep_onay_nakliye Where talep_id=$details->form_id and type=2")->num_rows();
+
+        if(!$satinalama_onay_kontrol){
+            if ($yetkili_kontrol || ($details_form->talep_eden_user_id == $user_id || $user_id == lojistik_yetkili_id() || $user_id == 289 || $user_id == 1006 )) {
+                if ($user_id == lojistik_yetkili_id()) {
+
+                    // Eğer kullanıcı lojistik yetkiliyse miktar ve fiyat güncellenir
+                    $this->model->talep_history($details->form_id, $this->aauth->get_user()->id, $product_name . ' Ürünü Güncellendi. Miktar : ' . $item_qty . ' Fiyat : ' . $item_price);
+                    $data_update_product = array(
+                        'product_qty' => $item_qty,
+                        'price' => $item_price,
+                        'total' => floatval($item_price) * floatval($item_qty), // Total değeri güncellenir
+                        'arac_id' => $arac_id,
+                        'cari_id' => $cari_id,
+                        'method' => $method,
+                        'yukleme_yapacak_cari_id' => $yukleme_yapacak_cari_id,
+                    );
+
+                    // Güncelleme işlemi
+                    $this->db->set($data_update_product);
+                    $this->db->where('id', $id);
+                    if ($this->db->update('talep_form_nakliye_products', $data_update_product)) {
+                        $this->aauth->applog("Nakliye Talebinden Ürün Güncellendi  :  ID : " . $id, $this->aauth->get_user()->username);
+                        $this->db->trans_complete();
+                        echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
+                    } else {
+                        $this->db->trans_rollback();
+                        echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız. Lütfen Yöneticinize Başvurun."));
+                    }
+                }
+                else {
+                    // Diğer kullanıcılar için yalnızca belirli alanlar güncellenir
+                    $this->db->trans_rollback();
+                    echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Yoktur.."));
+                }
+
             }
-            $data_update_product = array(
-                'product_qty' => $item_qty,
-                'arac_id' => $arac_id,
-                'cari_id' => $cari_id,
-                'price' => $item_price,
-                'method' => $method,
-                'yukleme_yapacak_cari_id' => $yukleme_yapacak_cari_id,
-                'total' => floatval($item_price) * floatval($item_qty),
-            );
-            $this->db->set($data_update_product);
-            $this->db->where('id', $id);
-            if ($this->db->update('talep_form_nakliye_products', $data_update_product)) {
-                $this->aauth->applog("Nakliye Talebinden Ürün Güncellendi  :  ID : " . $id, $this->aauth->get_user()->username);
-                $this->db->trans_complete();
-                echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
-            } else {
+            else {
                 $this->db->trans_rollback();
-                echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
+                echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
             }
         }
         else {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
+            echo json_encode(array('status' => 'Error', 'message' => "Satınalma Başlamıştır Fiyat Güncellenemez"));
         }
+
+
     }
 
     public function update_item_form_teslimat()
@@ -1287,256 +1253,159 @@ Where
         }
     }
 
-    public function customer_payment_update(){
+    public function customer_payment_update()
+    {
         $this->db->trans_start();
+
+        // POST verilerini al
         $talep_item_id = $this->input->post('item_id');
         $account_id = $this->input->post('account_id');
+        $alacak_tutar = $this->input->post('alacak_tutar');
         $cach_personel = $this->input->post('cach_personel');
+        $not = $this->input->post('not');
+
+
         $cach_cari_id = $this->input->post('cach_cari_id');
         $cach_method = $this->input->post('cach_method');
-        $alacak_tutar = $this->input->post('alacak_tutar');
         $tip = $this->input->post('tip');
 
-        $details_item_form = $this->db->query("SELECT * FROM talep_form_nakliye_products where id=$talep_item_id")->row();
-        $talep_id=$details_item_form->form_id;
-        $details_form = $this->db->query("SELECT * FROM talep_form_nakliye where id=$talep_id")->row();
 
-        $not = $this->input->post('not').' '.$details_form->code.' İstinaden Ödeme';
-        $invoice_type_id = 4; //Ödeme
+        // Eksik verileri kontrol et
+        if (
+            empty($talep_item_id) || empty($account_id) || empty($cach_personel) ||
+            empty($cach_cari_id) || empty($cach_method) || empty($alacak_tutar) || empty($tip) || empty($not)
+        ) {
+            echo json_encode(['status' => 'Error', 'message' => 'Eksik veya geçersiz veri gönderildi.']);
+            return;
+        }
+
+        // Detayları al
+        $details_item_form = $this->db->query("SELECT * FROM talep_form_nakliye_products WHERE id = ?", [$talep_item_id])->row();
+        if (!$details_item_form) {
+            echo json_encode(['status' => 'Error', 'message' => 'Geçersiz talep ürünü ID.']);
+            return;
+        }
+
+        $talep_id = $details_item_form->form_id;
+        $details_form = $this->db->query("SELECT * FROM talep_form_nakliye WHERE id = ?", [$talep_id])->row();
+        if (!$details_form) {
+            echo json_encode(['status' => 'Error', 'message' => 'Geçersiz talep formu ID.']);
+            return;
+        }
+
+        $not .= ' ' . $details_form->code . ' İstinaden Ödeme';
+        $invoice_type_id = 4; // Ödeme
         $role_id = $this->aauth->get_user()->roleid;
         $form_total = $this->model->form_total($talep_id);
-        $user_id  = $this->aauth->get_user()->id;
+        $user_id = $this->aauth->get_user()->id;
 
-
-
-
-
-        if($user_id==$details_item_form->payment_personel_id || $role_id==1 ||  $role_id==48 ||  $role_id==6) {
-            $data = array(
+        // Yetki kontrolü
+        if ($user_id == $details_item_form->payment_personel_id || $role_id == 1 || $role_id == 48 || $role_id == 6) {
+            $data = [
                 'csd' => $cach_cari_id,
                 'payer' => customer_details($cach_cari_id)['company'],
-                'acid' => $account_id, //hesapID ekleneck
+                'acid' => $account_id,
                 'account' => account_details($account_id)->holder,
                 'total' => $alacak_tutar,
-                'invoice_type_id'=>$invoice_type_id,
-                'invoice_type_desc'=>invoice_type_desc($invoice_type_id),
+                'invoice_type_id' => $invoice_type_id,
+                'invoice_type_desc' => invoice_type_desc($invoice_type_id),
                 'method' => $cach_method,
-                'eid' => $this->aauth->get_user()->id, //user_id
+                'eid' => $this->aauth->get_user()->id,
                 'notes' => $not,
                 'term' => $talep_item_id,
                 'loc' => $this->session->userdata('set_firma_id'),
                 'proje_id' => $details_form->proje_id,
-            );
-            if($this->db->insert('geopos_invoices', $data)){
+            ];
+
+            if ($this->db->insert('geopos_invoices', $data)) {
+                // Ödeme işlemi ve güncellemeler
                 $last_id = $this->db->insert_id();
-                $data_pay = array(
-                    'form_item_id'=>$talep_item_id,
-                    'form_id'=>$talep_id,
-                    'transaction_id'=>$last_id,
-                    'tip'=>1,
-                    'total'=>$alacak_tutar,
-                    'cach_personel'=>$cach_personel,
-                );
+                $data_pay = [
+                    'form_item_id' => $talep_item_id,
+                    'form_id' => $talep_id,
+                    'transaction_id' => $last_id,
+                    'tip' => 1,
+                    'total' => $alacak_tutar,
+                    'cach_personel' => $cach_personel,
+                ];
                 $this->db->insert('talep_form_nakliye_payment', $data_pay);
                 $odeme_total = $this->model->odeme_total($talep_id);
 
-
-                if($form_total == $odeme_total) {
-
-
-                    //alacaklandırma kontrolü
-                    $details_item_form_items = $this->db->query("SELECT * FROM talep_form_nakliye_products where form_id=$talep_id")->result();
-                    $alacak_say = 0;
-                    $alacak_item_id = [];
-                    foreach ($details_item_form_items as $alacak_durums){
-                        if(is_null($alacak_durums->alacak_durum)){
-                            $alacak_say++;
-                            $alacak_item_id[]=$alacak_durums->id;
-                        }
-                    }
-
-                    if($alacak_say){
-                        foreach ($alacak_item_id as $it_id){
-                            $alacak_items = $this->db->query("SELECT * FROM talep_form_nakliye_products where id=$it_id")->row();
-                            if($alacak_items->method==1)// Nakit
-                            {
-                                // Cari Alacaklandır
-                                $not = $details_form->code.' | '.$alacak_items->code.' İstinaden Alacaklandırma';
-                                $data = array(
-                                    'csd' => $alacak_items->cari_id,
-                                    'payer' => customer_details($alacak_items->cari_id)['company'],
-                                    'acid' => 0, //hesapID ekleneck
-                                    'account' => 'Kasasız İşlem',
-                                    'total' => $alacak_items->total,
-                                    'invoice_type_id'=>39,
-                                    'invoice_type_desc'=>invoice_type_desc(39),
-                                    'method' => $alacak_items->method,
-                                    'eid' => $this->aauth->get_user()->id, //user_id
-                                    'notes' => $not,
-                                    'proje_id' => $details_form->proje_id,
-                                );
-                                if($this->db->insert('geopos_invoices', $data)) {
-                                    $data_talep_updata =
-                                        [
-                                            'alacak_durum' => 1,
-                                        ];
-                                    $this->db->where('id', $it_id);
-                                    $this->db->set($data_talep_updata);
-                                    $this->db->update('talep_form_nakliye_products', $data_talep_updata);
-                                }
-                                // Cari Alacaklandır
-                            }
-
-                        }
-                    }
-                    //alacaklandırma kontrolü
-
-
-                    $data_talep_updata =
-                        [
-                            'odeme_durum' => 1,
-                            'status' => 9,
-                        ];
-                    $this->db->where('id', $talep_id);
-                    $this->db->set($data_talep_updata);
-                    $this->db->update('talep_form_nakliye', $data_talep_updata);
+                if ($form_total == $odeme_total) {
+                    $this->handle_full_payment($talep_id, $details_form, $details_item_form);
                 }
 
-
-                //items İçin
-                $odeme_item_total = $this->model->odeme_total_item($talep_item_id);
-                if($details_item_form->total == $odeme_item_total) {
-
-                }
-
-               // $details_item_form->alacak_durum
-                $data_talep_updata =
-                    [
-                        'odeme_durum' => 1,
-                        'status' => 9,
-                    ];
-                $this->db->where('id', $talep_item_id);
-                $this->db->set($data_talep_updata);
-                $this->db->update('talep_form_nakliye_products', $data_talep_updata);
-
-                //items İçin
-
-                $talep_details = $this->db->query("SELECT talep_form_nakliye.*,talep_form_nakliye_products.form_id,talep_form_nakliye_products.arac_id,talep_form_nakliye_products.lokasyon,talep_form_nakliye_products.cari_id FROM talep_form_nakliye_products INNER JOIN talep_form_nakliye ON talep_form_nakliye_products.form_id = talep_form_nakliye.id  Where talep_form_nakliye_products.id=$talep_item_id")->row();
-                $lokasyon=$talep_details->lokasyon;
-                $arac_name='Araç Tanımlanmamış';
-                $cari_name='Cari Tanımlanmamış';
-                if($talep_details->arac_id){
-                    $arac_name=arac_details($talep_details->arac_id)->name;
-                }
-                if($cach_cari_id){
-                    $cari_name=customer_details($cach_cari_id)['company'];
-                }
-
-
-                $messages = $cari_name.' Ait '.$arac_name.' ile gidilen '.$lokasyon.' Lokasyon İçin Ödeme Yapıldı';
-
-                $this->model->talep_history($talep_id, $this->aauth->get_user()->id, $messages.' : '.amountFormat($alacak_tutar));
                 $this->db->trans_complete();
-                echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
-
-
-            }
-            else {
+                echo json_encode(['status' => 'Success', 'message' => 'Başarıyla Güncellendi']);
+            } else {
                 $this->db->trans_rollback();
-                echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
+                echo json_encode(['status' => 'Error', 'message' => 'Hata Aldınız. Lütfen yöneticinize başvurun.']);
             }
-        }
-        else {
+        } else {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
+            echo json_encode(['status' => 'Error', 'message' => 'Yetkiniz bulunmamaktadır.']);
         }
-
-
-//        if($tip=='muhasebe'){
-//            if($role_id==1){
-//                $data = array(
-//                    'csd' => $details_form->cari_id,
-//                    'payer' => customer_details($details_form->cari_id)['company'],
-//                    'acid' => $account_id, //hesapID ekleneck
-//                    'account' => account_details($account_id)->holder,
-//                    'total' => $alacak_tutar,
-//                    'invoice_type_id'=>$invoice_type_id,
-//                    'invoice_type_desc'=>invoice_type_desc($invoice_type_id),
-//                    'method' => $details_form->method,
-//                    'eid' => $this->aauth->get_user()->id, //user_id
-//                    'notes' => $not,
-//                    'loc' => $this->session->userdata('set_firma_id'),
-//                    'proje_id' => $details_form->proje_id,
-//                );
-//                if($this->db->insert('geopos_invoices', $data)){
-//                    $last_id_invoice_id = $this->db->insert_id();
-//                    $data_pay = array(
-//                        'form_id'=>$id,
-//                        'transaction_id'=>$last_id_invoice_id,
-//                        'total'=>$alacak_tutar,
-//                        'tip'=>2,
-//                        'cach_personel'=>$cach_personel,
-//                    );
-//                    $this->db->insert('talep_form_customer_new_payment', $data_pay);
-//                    $odeme_total = $this->model->odeme_total($id);
-//
-//
-//                    $this->model->talep_history($id, $this->aauth->get_user()->id, ' Ödeme Yapıldı : '.amountFormat($alacak_tutar));
-//                    $this->db->trans_complete();
-//                    echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
-//
-//
-//                }
-//                else {
-//                    $this->db->trans_rollback();
-//                    echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
-//                }
-//            }
-//            else {
-//                $this->db->trans_rollback();
-//                echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
-//            }
-//        }
-//        else {
-//
-//        }
-
     }
 
-    public function delete_item_form(){
+    private function handle_full_payment($talep_id, $details_form, $details_item_form)
+    {
+        // Tüm ödemeler tamamlandıysa güncelleme
+        $data_talep_updata = [
+            'odeme_durum' => 1,
+            'status' => 9,
+        ];
+        $this->db->where('id', $talep_id);
+        $this->db->set($data_talep_updata);
+        $this->db->update('talep_form_nakliye');
+    }
+
+
+    public function delete_item_form()
+    {
         $this->db->trans_start();
-        $id = $this->input->post('item_id');
-        $details = $this->db->query("SELECT * FROM talep_form_nakliye_products Where id=$id")->row();
-        $type = $this->input->post('type');
-        $product_name = '';
 
-        $details_form = $this->model->details($details->form_id);
-        $user_id  = $this->aauth->get_user()->id;
-        $yetkili_kontrol  = $this->db->query("SELECT * FROM `geopos_projects` where id = $details_form->proje_id and (  proje_sorumlusu_id=$user_id or proje_muduru_id=$user_id or muhasebe_muduru_id=$user_id or genel_mudur_id=$user_id)")->num_rows();
-        $aauth  = $this->db->query("SELECT * FROM `talep_form_nakliye` where id = $details->form_id and aauth=$user_id")->num_rows();
+        $id = intval($this->input->post('item_id')); // Sadece tam sayı kabul edilir.
+        $details = $this->db->get_where('talep_form_nakliye_products', ['id' => $id])->row();
 
-        if($yetkili_kontrol || $aauth ||  $user_id == lojistik_yetkili_id()) {
-            if($type==1){
-                $this->model->talep_history($details->form_id,$this->aauth->get_user()->id,$product_name.' Ürünü Kaldırıldı');
-            }
-
-            if($this->db->delete('talep_form_nakliye_products', array('id' => $id))){
-
-                $this->aauth->applog("Nakliye Talebinden Ürün Silindi  :  ID : ".$id, $this->aauth->get_user()->username);
-                $this->db->trans_complete();
-                echo json_encode(array('status' => 'Success','message'=>'Başarıyla Silindi'));
-            }
-            else {
-                $this->db->trans_rollback();
-                echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun.".' Hata '));
-            }
-        }
-        else {
+        if (!$details) {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
+            echo json_encode(['status' => 'Error', 'message' => 'Silinecek ürün bulunamadı.']);
+            return;
         }
 
+        $user_id = $this->aauth->get_user()->id;
+        $details_form = $this->model->details($details->form_id);
+
+        // Yetki kontrolü
+        $this->db->select('*');
+        $this->db->from('geopos_projects');
+        $this->db->where('id', $details_form->proje_id);
+        $this->db->group_start()
+            ->where('proje_sorumlusu_id', $user_id)
+            ->or_where('proje_muduru_id', $user_id)
+            ->or_where('muhasebe_muduru_id', $user_id)
+            ->or_where('genel_mudur_id', $user_id)
+            ->group_end();
+        $yetkili_kontrol = $this->db->get()->num_rows();
+
+        $aauth = $this->db->get_where('talep_form_nakliye', ['id' => $details->form_id, 'aauth' => $user_id])->num_rows();
+
+        if ($yetkili_kontrol || $aauth || $user_id == lojistik_yetkili_id()) {
+            $this->model->talep_history($details->form_id, $user_id, 'Ürün Kaldırıldı');
+            if ($this->db->delete('talep_form_nakliye_products', ['id' => $id])) {
+                $this->aauth->applog("Nakliye Talebinden Ürün Silindi: ID: $id", $this->aauth->get_user()->username);
+                $this->db->trans_complete();
+                echo json_encode(['status' => 'Success', 'message' => 'Başarıyla Silindi']);
+            } else {
+                $this->db->trans_rollback();
+                echo json_encode(['status' => 'Error', 'message' => "Silme işlemi sırasında bir hata oluştu."]);
+            }
+        } else {
+            $this->db->trans_rollback();
+            echo json_encode(['status' => 'Error', 'message' => "Yetkiniz bulunmamaktadır."]);
+        }
     }
+
 
     public function dashboard_nakiye_item_status_change(){
         $this->db->trans_start();

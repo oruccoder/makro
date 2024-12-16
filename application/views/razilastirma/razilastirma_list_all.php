@@ -637,6 +637,10 @@
         $('.kdv_tutar_db').val(kdv_tutar);
         $('.genel_tutar_db').val(genel_tutar);
 
+        console.log('Genel Tutar : '+genel_tutar);
+        console.log('KDV Tutar : '+kdv_tutar);
+        console.log('Net Tutar : '+net_tutar);
+
 
     }
 

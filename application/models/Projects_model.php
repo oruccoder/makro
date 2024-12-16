@@ -175,6 +175,9 @@ class Projects_model extends CI_Model
             $this->db->where('geopos_projects.loc =', $this->session->userdata('set_firma_id')); //2019-11-23 14:28:57
         }
 
+        $this->db->where_in('geopos_projects.status ', [0,1,2]); //2019-11-23 14:28:57
+
+
 
 
 
@@ -359,115 +362,70 @@ class Projects_model extends CI_Model
 
 
 
-    public function addproject($name, $status, $priority, $progress, $customer, $sdate, $edate, $tag, $phase, $content, $budget, $customerview, $customer_comment, $link_to_cal, $color, $ptype,
-                               $employee,$project_adresi,$project_sehir,$project_yetkili_adi, $project_yetkili_no,
-                               $sozlesme_tutari,$sozlesme_numarasi,$proje_muduru,$project_yetkili_email,$sozlesme_date,$proje_sorumlusu_id,
-                                                                                                                       $proje_muduru_id,
-                                                                                                                       $muhasebe_muduru_id,
-                                                                                                                       $genel_mudur_id,$code)
+    public function addproject()
     {
-        $code =  numaric(22);
+        $code = $this->input->post('code', true);
 
-        $data = array(
-            'name' => $name,
+        // Eğer kod boşsa otomatik numara oluştur
+        if (empty($code)) {
+            $code = numaric(22);
+            numaric_update(22);
+        }
+
+        // Gelen verileri düzenli bir şekilde al
+        $data = [
+            'name' => $this->input->post('name', true),
+            'status' => $this->input->post('status', true),
+            'priority' => $this->input->post('priority', true),
+            'progress' => $this->input->post('progress', true),
+            'cid' => $this->input->post('customer', true),
+            'sdate' => $this->convertToDatabaseDate($this->input->post('sdate', true)),
+            'edate' => $this->convertToDatabaseDate($this->input->post('edate', true)),
+            'sozlesme_tutari' => $this->input->post('sozlesme_tutari', true),
+            'ptype' => $this->input->post('ptype', true),
+            'project_adresi' => $this->input->post('project_adresi', true),
+            'sozlesme_numarasi' => $this->input->post('sozlesme_numarasi', true),
+            'sozlesme_date' => $this->convertToDatabaseDate($this->input->post('sozlesme_date', true)),
             'code' => $code,
-            'status' => $status,
-            'priority' => $priority,
-            'progress' => $progress,
-            'cid' => $customer,
-            'sdate' => $sdate,
-            'edate' => $edate,
-            'tag' => $tag,
-            'phase' => $phase,
-            'note' => $content,
-            'worth' => $budget,
-            'ptype' => $ptype,
-            'project_adresi' => $project_adresi,
-            'project_sehir' => $project_sehir,
-            'project_yetkili_adi' => $project_yetkili_adi,
-            'project_yetkili_no' => $project_yetkili_no,
-            'sozlesme_tutari' => $sozlesme_tutari,
-            'sozlesme_numarasi' => $sozlesme_numarasi,
-            'proje_muduru' => $proje_muduru_id,
-            'project_yetkili_email' => $project_yetkili_email,
-            'sozlesme_date' => $sozlesme_date,
-            'proje_muduru_id'=>$proje_muduru_id,
-            'proje_sorumlusu_id'=>$proje_sorumlusu_id,
-            'muhasebe_muduru_id'=>$muhasebe_muduru_id,
-            'genel_mudur_id'=>$genel_mudur_id,
-            'loc'=>$this->session->userdata('set_firma_id')
+            'loc' => $this->session->userdata('set_firma_id'),
+        ];
 
-        );
+        // Veritabanına ekleme işlemi
+        if ($this->db->insert('geopos_projects', $data)) {
+            $proje_id = $this->db->insert_id();
 
-        $this->db->insert('geopos_projects', $data);
-
-        $last = $this->db->insert_id();
-
-
-        $operator= "deger+1";
-        $this->db->set('deger', "$operator", FALSE);
-        $this->db->where('tip', 22);
-        $this->db->update('numaric');
-
-        kont_kayit(33,$last);
-
-        $lid=$this->session->userdata('set_firma_id');
-
-        $this->addwarehouse($name, $name,$lid,$last);
-
-        $title = '[Proje Oluşturuldu] ';
-
-        $this->add_activity($title, $last);
-
-        $data = array('pid' => $last, 'meta_key' => 2, 'meta_data' => $customerview, 'value' => $customer_comment);
-
-        $this->db->insert('geopos_project_meta', $data);
-
-
-
-        if ($employee) {
-
-            foreach ($employee as $key => $value) {
-
-
-
-                $data = array('pid' => $last, 'meta_key' => 19, 'meta_data' => $value);
-
-                $this->db->insert('geopos_project_meta', $data);
-
-            }
-
-        } else {
-
-            $data = array('pid' => $last, 'meta_key' => 19, 'meta_data' => $this->aauth->get_user()->id);
-
-            $this->db->insert('geopos_project_meta', $data);
-
-        }
-
-
-
-
-
-        if ($link_to_cal > 0) {
-
-            if ($link_to_cal == 1) {
-
-                $sdate = $edate;
-
-            }
-            $data = array(
-                'title' => '[Proje Adı] ' . $name,
-                'start' => $sdate,
-                'end' => $edate,
-                'description' => $priority . ' priority. Start date: ' . $sdate . ' End Date: ' . $edate, 'color' => $color,
-                'rel' => 1,
-                'rid' => $last
+            // Depo oluşturma işlemi
+            $this->addwarehouse(
+                $this->input->post('name', true),
+                $this->input->post('name', true),
+                $this->session->userdata('set_firma_id'),
+                $proje_id
             );
-            $this->db->insert('geopos_events', $data);
+            // Uygulama kaydı
+            $this->aauth->applog(
+                "Proje Oluşturuldu. ID : " . $proje_id,
+                $this->aauth->get_user()->username
+            );
+            return [
+                'status'=>1,
+                'message'=>'Başarıyla Oluşturuldu'
+            ];
+        } else {
+            // Hata durumunda false döndür
+            return [
+                'status'=>0,
+                'message'=>'Hata Aldınız'
+            ];
         }
+    }
 
-        return $last;
+// Yardımcı metot: Tarih formatını veritabanı uyumlu hale çevirir
+    private function convertToDatabaseDate($date)
+    {
+        if (!empty($date)) {
+            return datefordatabase($date);
+        }
+        return null;
     }
 
     public function addwarehouse($cat_name, $cat_desc,$lid,$proje_id=0)
@@ -485,120 +443,50 @@ class Projects_model extends CI_Model
 
 
 
-    public function editproject($id, $name, $status, $priority, $progress, $customer, $sdate, $edate, $tag, $phase, $content,
-                                $budget, $customerview, $customer_comment, $link_to_cal, $color, $ptype, $employee,$project_adresi,
-                                $project_sehir,$project_yetkili_adi, $project_yetkili_no,$sozlesme_tutari,$sozlesme_numarasi,
-                                $proje_muduru,$project_yetkili_email,$sozlesme_date,$proje_sorumlusu_id,$muhasebe_muduru_id,$genel_mudur_id
-    )
-
+    public function updateProje()
     {
 
-        $title = '[Proje Düzenlendi] ';
-
-        $this->add_activity($title, $id);
-
-        $data = array(
-            'name' => $name,
-            'proje_sorumlusu_id' => $proje_sorumlusu_id,
-            'muhasebe_muduru_id' => $muhasebe_muduru_id,
-            'genel_mudur_id' => $genel_mudur_id,
-            'proje_muduru_id' => $proje_muduru,
-            'status' => $status,
-            'priority' => $priority,
-            'progress' => $progress,
-            'cid' => $customer,
-            'sdate' => $sdate,
-            'edate' => $edate,
-            'tag' => $tag,
-            'phase' => $phase,
-            'note' => $content,
-            'worth' => $budget,
-            'ptype' => $ptype,
-            'project_adresi' => $project_adresi,
-            'project_sehir' => $project_sehir,
-            'project_yetkili_adi' => $project_yetkili_adi,
-            'project_yetkili_no' => $project_yetkili_no,
-            'sozlesme_tutari' => $sozlesme_tutari,
-            'sozlesme_numarasi' => $sozlesme_numarasi,
-            'proje_muduru' => $proje_muduru,
-            'project_yetkili_email' => $project_yetkili_email,
-            'sozlesme_date' => $sozlesme_date
-        );
+        $id= $this->input->post('p_id');
+        $data = [
+            'name' => $this->input->post('name', true),
+            'status' => $this->input->post('status', true),
+            'priority' => $this->input->post('priority', true),
+            'progress' => $this->input->post('progress', true),
+            'cid' => $this->input->post('customer', true),
+            'sdate' => $this->convertToDatabaseDate($this->input->post('sdate', true)),
+            'edate' => $this->convertToDatabaseDate($this->input->post('edate', true)),
+            'sozlesme_tutari' => $this->input->post('sozlesme_tutari', true),
+            'ptype' => $this->input->post('ptype', true),
+            'project_adresi' => $this->input->post('project_adresi', true),
+            'sozlesme_numarasi' => $this->input->post('sozlesme_numarasi', true),
+            'proje_muduru_id' => $this->input->post('proje_muduru_id',true),
+            'proje_sorumlusu_id' => $this->input->post('proje_sorumlusu_id',true),
+            'muhasebe_muduru_id' => $this->input->post('muhasebe_muduru_id',true),
+            'genel_mudur_id' => $this->input->post('genel_mudur_id',true),
+            'sozlesme_date' => $this->convertToDatabaseDate($this->input->post('sozlesme_date', true)),
+        ];
 
         $this->db->set($data);
-
         $this->db->where('id', $id);
-
-        $out = $this->db->update('geopos_projects');
-
-
-        kont_kayit(34,$id);
-
-
-
-        $this->db->delete('geopos_events', array('rel' => 1, 'rid' => $id));
-
-        if ($link_to_cal > 0) {
-
-            if ($link_to_cal == 1) {
-
-                $sdate = $edate;
-
-            }
-
-            $data = array(
-
-                'title' => '[Proje Adı] ' . $name,
-
-                'start' => $sdate,
-
-                'end' => $edate,
-
-                'description' => $priority . ' priority. Start date: ' . $sdate . ' End Date: ' . $edate, 'color' => $color,
-
-                'rel' => 1,
-
-                'rid' => $id
-
+        if ($this->db->update('geopos_projects')) {
+            $this->aauth->applog(
+                "Proje Oluşturuldu. ID : " . $id,
+                $this->aauth->get_user()->username
             );
-
-            $this->db->insert('geopos_events', $data);
-
+            return [
+                'status'=>1,
+                'message'=>'Başarıyla Güncellendi'
+            ];
+        }
+        else {
+            return [
+                'status'=>0,
+                'message'=>'Güncelleme Olurken Hata Aldınız'
+            ];
         }
 
-        if ($employee) {
-
-            $this->db->delete('geopos_project_meta', array('pid' => $id, 'meta_key' => 19));
-
-            foreach ($employee as $key => $value) {
-
-
-
-                $data = array('pid' => $id, 'meta_key' => 19, 'meta_data' => $value);
-
-                $this->db->insert('geopos_project_meta', $data);
-
-            }
-
-        }
-
-
-
-        $data1 = array('meta_data' => $customerview, 'value' => $customer_comment);
-
-        $this->db->set($data1);
-
-        $this->db->where('pid', $id);
-
-        $this->db->where('meta_key', 2);
-
-
-
-        return $this->db->update('geopos_project_meta');
 
     }
-
-
 
 
     public function updateTask($oran,$new_prd_id,$name, $status, $priority, $stdate, $tdate, $employee, $assign, $content, $prid, $milestone,$quantity,$fiyat,$olcu_birimi,$total,$cari_id,$gorev_tipi,$task_id,$proje_id,$simeta_status)

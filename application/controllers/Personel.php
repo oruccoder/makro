@@ -18,12 +18,13 @@ class Personel Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
-
-        // Oturumdan veritabanı seçimini al
-
         $this->load->model('Personel_model', 'model');
     }
 
@@ -200,22 +201,51 @@ class Personel Extends CI_Controller
 
     public function view($id)
     {
+        // Tüm personelleri görme yetkisi var mı?
         if (!$this->aauth->premission(7)->read) {
-            exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
+            exit('<h3>Üzgünüm! Giriş Yetkiniz Bulunmamaktadır</h3>');
         }
 
-        $data['point_value']=$this->model->point_value($id);
-        $data['details'] = $this->model->details($id);
-        $data['users_details'] = $this->model->users_details($id);
-        $data['salary_details'] = $this->model->salary_details($id);
+        $user = $this->aauth->get_user()->id; // Giriş yapan kullanıcı ID'si
+        $role_id = $this->aauth->get_user()->roleid; // Kullanıcı rolü
+        $santiye_id = personel_salary_details_get($user)->proje_id; // Kullanıcının şantiyesi
+        $status = true;
 
+        // Kullanıcı tüm personelleri görme yetkisine sahip değilse
+        if (!$this->aauth->premission(95)->read) {
+            if (in_array($role_id, [10, 40, 48,6,19,30])) {
+                // Proje Müdürü veya Şantiye Muhasebecisi ise, şantiye kontrolü yap
+                $santiye_id_personel = personel_salary_details_get($id)->proje_id; // Görüntülenmek istenen personelin şantiyesi
+                if ($santiye_id != $santiye_id_personel) {
+                    $status = false; // Eğer personel başka bir şantiyede ise yetkisiz
+                }
+            } else {
+                // Diğer rollerde kullanıcı yetkisiz
+                $status = false;
+            }
+        }
 
-        $head['usernm'] = $this->aauth->get_user()->username;
-        $head['title'] = 'Personel Listesi';
-        $this->load->view('fixed/header', $head);
-        $this->load->view('personel/view',$data);
-        $this->load->view('fixed/footer');
+        if ($status) {
+            // Kullanıcı yetkili ise personel detaylarını getir
+            $data['point_value'] = $this->model->point_value($id);
+            $data['details'] = $this->model->details($id);
+            $data['users_details'] = $this->model->users_details($id);
+            $data['salary_details'] = $this->model->salary_details($id);
+
+            // Başlık ve kullanıcı adı
+            $head['usernm'] = $this->aauth->get_user()->username;
+            $head['title'] = 'Personel Detayları';
+
+            // Görünüm yükle
+            $this->load->view('fixed/header', $head);
+            $this->load->view('personel/view', $data);
+            $this->load->view('fixed/footer');
+        } else {
+            // Yetkisiz kullanıcı için mesaj
+            exit('<h3>Üzgünüm! Bu Personeli Görme Yetkiniz Yoktur</h3>');
+        }
     }
+
 
 
     public function apiview($id)

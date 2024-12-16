@@ -14,6 +14,7 @@
                 <div class="row">
                     <div class="col-md-1">
                         <select class="form-control" id="hesap_yil" style="background: #576c93;color: white;border: #5f7399;">
+                            <option value="2024">2024</option>
                             <option value="2023">2023</option>
                             <option value="2022">2022</option>
                             <option value="2021">2021</option>

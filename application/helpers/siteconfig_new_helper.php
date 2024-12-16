@@ -6361,14 +6361,11 @@ function invoice_status($id=0)
     $ci =& get_instance();
     $ci->load->database();
 
-    if($id!=0)
+    if($id)
     {
         $query2 = $ci->db->query("SELECT * FROM `invoice_status` WHERE  id =$id")->row_array();
         return $query2['name'];
     }
-
-
-
     else
     {
         $query2 = $ci->db->query("SELECT * FROM `invoice_status`");
@@ -12526,7 +12523,8 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
                 $data = [
                     ['sort'=>1,'user_id'=>1007],
                     ['sort'=>2,'user_id'=>$sorumlu_pers_id],
-                    ['sort'=>3,'user_id'=>62]
+                    ['sort'=>3,'user_id'=>62],
+                    ['sort'=>4,'user_id'=>39],
 
                 ];
             }
@@ -12535,7 +12533,9 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
                     ['sort'=>1,'user_id'=>1007],
                     ['sort'=>2,'user_id'=>$sorumlu_pers_id],
                     ['sort'=>3,'user_id'=>$proje_muduru],
-                    ['sort'=>4,'user_id'=>62]
+                    ['sort'=>4,'user_id'=>62],
+                    ['sort'=>5,'user_id'=>39],
+
 
                 ];
             }

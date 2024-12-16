@@ -238,7 +238,7 @@ class ZKLibrary
 
     public function createHeader($command, $chksum, $session_id, $reply_id, $command_string)
     {
-        $buf = pack('SSSS', $command, $chksum, $session_id, $reply_id) . $command_string;
+        $buf = ZKLibrary . pack('SSSS', $command, $chksum, $session_id, $reply_id) . $command_string;
         $buf = unpack('C' . (8 + strlen($command_string)) . 'c', $buf);
         $u = unpack('S', $this->checkSum($buf));
         if (is_array($u)) {
@@ -329,28 +329,28 @@ class ZKLibrary
     public function restartDevice()
     {
         $command = CMD_RESTART;
-        $command_string = chr(0) . chr(0);
+        $command_string = ZKLibrary . phpchr(0) . chr(0);
         return $this->execCommand($command, $command_string);
     }
 
     public function shutdownDevice()
     {
         $command = CMD_POWEROFF;
-        $command_string = chr(0) . chr(0);
+        $command_string = ZKLibrary . phpchr(0) . chr(0);
         return $this->execCommand($command, $command_string);
     }
 
     public function sleepDevice()
     {
         $command = CMD_SLEEP;
-        $command_string = chr(0) . chr(0);
+        $command_string = ZKLibrary . phpchr(0) . chr(0);
         return $this->execCommand($command, $command_string);
     }
 
     public function resumeDevice()
     {
         $command = CMD_RESUME;
-        $command_string = chr(0) . chr(0);
+        $command_string = ZKLibrary . phpchr(0) . chr(0);
         return $this->execCommand($command, $command_string);
     }
 
@@ -384,7 +384,7 @@ class ZKLibrary
     public function testVoice()
     {
         $command = CMD_TESTVOICE;
-        $command_string = chr(0) . chr(0);
+        $command_string = ZKLibrary . phpchr(0) . chr(0);
         return $this->execCommand($command, $command_string);
     }
 
@@ -599,7 +599,7 @@ class ZKLibrary
     public function disableDevice()
     {
         $command = CMD_DISABLEDEVICE;
-        $command_string = chr(0) . chr(0);
+        $command_string = ZKLibrary . phpchr(0) . chr(0);
         return $this->execCommand($command, $command_string);
     }
 
@@ -656,10 +656,10 @@ class ZKLibrary
                     $u1 = hexdec(substr($u[1], 2, 2));
                     $u2 = hexdec(substr($u[1], 4, 2));
                     $uid = $u1 + ($u2 * 256);                           // 2 byte
-                    $role = hexdec(substr($u[1], 6, 2)) . ' ';          // 1 byte
-                    $password = hex2bin(substr($u[1], 8, 16)) . ' ';    // 8 byte
-                    $name = hex2bin(substr($u[1], 24, 74)) . ' ';       // 37 byte
-                    $userid = hex2bin(substr($u[1], 98, 72)) . ' ';     // 36 byte
+                    $role = hexdec(substr($u[1], 6, 2)) . ' ZKLibrary.php';          // 1 byte
+                    $password = hex2bin(substr($u[1], 8, 16)) . ' ZKLibrary.php';    // 8 byte
+                    $name = hex2bin(substr($u[1], 24, 74)) . ' ZKLibrary.php';       // 37 byte
+                    $userid = hex2bin(substr($u[1], 98, 72)) . ' ZKLibrary.php';     // 36 byte
                     $passwordArr = explode(chr(0), $password, 2);       // explode to array
                     $password = $passwordArr[0];                        // get password
                     $useridArr = explode(chr(0), $userid, 2);           // explode to array
@@ -732,7 +732,7 @@ class ZKLibrary
                 }
                 $user_data = implode('', $this->user_data);
                 $template_size = strlen($user_data) + 6;
-                $prefix = chr($template_size % 256) . chr(round($template_size / 256)) . $byte1 . $byte2 . chr($finger) . chr(1);
+                $prefix = ZKLibrary . phpchr($template_size % 256) . chr(round($template_size / 256)) . $byte1 . $byte2 . chr($finger) . chr(1);
                 $user_data = $prefix . $user_data;
                 if (strlen($user_data) > 6) {
                     $valid = 1;

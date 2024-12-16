@@ -21,13 +21,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Projebolumleri_model extends CI_Model
 {
-    var $table_news = 'geopos_project_bolum ';
-
-    var $column_order = array('id', 'name', 'exp', 'butce');
-
-    var $column_search = array('id', 'name', 'exp', 'butce');
-
-    var $order = array('id' => 'DESC');
+    private $table_news = 'geopos_project_bolum';
+    private $column_order = ['id', 'name', 'exp', 'butce'];
+    private $column_search = ['id', 'name', 'exp', 'butce'];
+    private $order = ['id' => 'DESC'];
 
 
     public function __construct()
@@ -38,222 +35,243 @@ class Projebolumleri_model extends CI_Model
     }
 
     private function _bolum_datatables_query($cday = '')
-
     {
-
-        $this->db->from('geopos_project_bolum');
+        $this->db->from($this->table_news); // Dinamik tablo adı kullanımı
 
         $i = 0;
 
-        foreach ($this->column_search as $item) // loop column
-
-        {
-
+        foreach ($this->column_search as $item) { // Aranabilir sütunlar üzerinde döngü
             $search = $this->input->post('search');
-
-            $value = $search['value'];
+            $value = $search['value'] ?? null;
 
             if ($value) {
-
-
-
                 if ($i === 0) {
-
-                    $this->db->group_start();
-
+                    $this->db->group_start(); // İlk aramada grup başlat
                     $this->db->like($item, $value);
-
                 } else {
-
                     $this->db->or_like($item, $value);
-
                 }
 
-
-
-                if (count($this->column_search) - 1 == $i) //last loop
-
-                    $this->db->group_end(); //close bracket
-
+                if (count($this->column_search) - 1 == $i) {
+                    $this->db->group_end(); // Son sütunda grup kapat
+                }
             }
-
             $i++;
-
         }
 
-        $search = $this->input->post('order');
-
-        if ($search) {
-
-            $this->db->order_by($this->column_search[$search['0']['column']], $search['0']['dir']);
-
+        // Sıralama işlemi
+        $order = $this->input->post('order');
+        if ($order) {
+            $this->db->order_by(
+                $this->column_order[$order[0]['column']] ?? 'id',
+                $order[0]['dir'] ?? 'ASC'
+            );
         } else if (isset($this->order)) {
-
-            $order = $this->order;
-
-            $this->db->order_by(key($order), $order[key($order)]);
-
+            $this->db->order_by(key($this->order), $this->order[key($this->order)]);
         }
-
     }
-    function bolumler_datatables($cday = '')
 
+// Datatables sorgu sonucu
+    public function bolumler_datatables($cday = '')
     {
-
-
         $this->_bolum_datatables_query($cday);
 
+        // Limit ve başlangıç noktası
+        $length = $this->input->post('length', true) ?? -1;
+        $start = $this->input->post('start', true) ?? 0;
 
+        if ($length != -1) {
+            $this->db->limit($length, $start);
+        }
 
-        if ($this->input->post('length') != -1)
-
-            $this->db->limit($this->input->post('length'), $this->input->post('start'));
-
-        $this->db->where('pid=', $cday);
-
+        // Projeye göre filtreleme
+        $this->db->where('pid', $cday);
         $query = $this->db->get();
 
         return $query->result();
-
     }
-    function bolum_count_filtered($cday = '')
 
+// Filtrelenmiş toplam sayısı
+    public function bolum_count_filtered($cday = '')
     {
-
         $this->_bolum_datatables_query($cday);
-        $this->db->where('pid=', $cday);
+        $this->db->where('pid', $cday);
 
-        $query = $this->db->get();
-
-        return $query->num_rows();
-
+        return $this->db->count_all_results(); // Daha hızlı işlem için count_all_results() kullanıldı
     }
+
+// Toplam kayıt sayısı
     public function bolum_count_all($cday = '')
-
     {
+        $this->db->from($this->table_news);
+        $this->db->where('pid', $cday);
 
-        $this->_bolum_datatables_query($cday);
-
-        $this->db->where('pid=', $cday);
-
-        $query = $this->db->get();
-
-        return $query->num_rows();
-
+        return $this->db->count_all_results();
     }
 
-    public function create(){
+    public function create()
+    {
+        // Kullanıcıdan gelen verileri al ve doğrula
+        $name = $this->input->post('name', true);
+        $content = $this->input->post('content', true);
+        $butce = $this->input->post('butce', true);
+        $code = $this->input->post('code', true);
+        $simeta_code = $this->input->post('simeta_code', true);
+        $prid = $this->input->post('project', true);
 
-        $name = $this->input->post('name');
-        $content = $this->input->post('content');
-        $butce = $this->input->post('butce');
-        $code = $this->input->post('code');
-        $simeta_code = $this->input->post('simeta_code');
-        $code = isEmptyFunction($this->input->post('product_code'),numaric(46));
-        $simeta_code = isEmptyFunction($this->input->post('simeta_code'),$code);
-        $prid = $this->input->post('project');
-        $data = array(
+        // Gerekli alanların kontrolü
+        if (empty($name) || empty($content) || empty($prid)) {
+            return [
+                'status' => 0,
+                'message' => 'Tüm alanları doldurmanız gerekmektedir.',
+                'id' => 0
+            ];
+        }
+
+        // Kodları varsayılan değerlerle doldur
+        $code = isEmptyFunction($code, numaric(46));
+        $simeta_code = isEmptyFunction($simeta_code, $code);
+
+        // Veritabanına kaydedilecek veriler
+        $data = [
             'pid' => $prid,
             'name' => $name,
             'code' => $code,
-            'butce' => 0,
+            'butce' => !empty($butce) ? $butce : 0, // Bütçe boşsa 0 olarak ayarlanır
             'simeta_code' => $simeta_code,
-            'exp' => $content);
+            'exp' => $content
+        ];
 
+        // Veritabanına ekleme işlemi
         if ($this->db->insert('geopos_project_bolum', $data)) {
             $last_id = $this->db->insert_id();
             numaric_update(46);
-            $this->proje_model_new->talep_history($last_id, $this->aauth->get_user()->id,' Proje Bölümü Eklendi.Bölüm Adı : '.$name);
+
+            // Tarihçe kaydı ekle
+            $this->proje_model_new->talep_history(
+                $last_id,
+                $this->aauth->get_user()->id,
+                'Proje Bölümü Eklendi. Bölüm Adı: ' . $name
+            );
 
             return [
-                'status'=>1,
-                'message'=>'Başarılı Bir Şekilde Bölüm Eklendi',
-                'id'=>$last_id
+                'status' => 1,
+                'message' => 'Başarılı bir şekilde bölüm eklendi.',
+                'id' => $last_id
             ];
-        }
-        else {
+        } else {
             return [
-                'status'=>0,
-                'message'=>'Hata Aldınız.Yöneticiye Başvurun',
-                'id'=>0
+                'status' => 0,
+                'message' => 'Hata aldınız. Yöneticiye başvurun.',
+                'id' => 0
             ];
         }
     }
 
-    public function update(){
 
-        $bolum_id = $this->input->post('bolum_id');
-        $code = $this->input->post('code');
-        $simeta_code = $this->input->post('simeta_code');
-        $code = isEmptyFunction($this->input->post('product_code'),numaric(46));
-        $simeta_code = isEmptyFunction($this->input->post('simeta_code'),$code);
+    public function update()
+    {
+        // Girdi verilerini alın
+        $bolum_id = $this->input->post('bolum_id', true);
+        $code = $this->input->post('code', true);
+        $name = $this->input->post('name', true);
+        $content = $this->input->post('content', true);
+        $butce = $this->input->post('butce', true);
+        $prid = $this->input->post('project', true);
 
-        $name = $this->input->post('name');
-        $content = $this->input->post('content');
-        $butce = $this->input->post('butce');
-        $prid = $this->input->post('project');
-        $data = array(
+        // Varsayılan değerler
+        $code = isEmptyFunction($code, numaric(46));
+        $simeta_code = isEmptyFunction($this->input->post('simeta_code', true), $code);
+
+        // Zorunlu alan kontrolü
+        if (empty($bolum_id) || empty($name) || empty($butce) || empty($prid)) {
+            return [
+                'status' => 0,
+                'message' => 'Gerekli alanlar doldurulmadı. Lütfen tüm alanları doldurun.',
+                'id' => 0,
+            ];
+        }
+
+        // Güncellenecek veriler
+        $data = [
             'pid' => $prid,
             'name' => $name,
             'code' => $code,
             'simeta_code' => $simeta_code,
             'butce' => $butce,
-            'exp' => $content);
+            'exp' => $content,
+        ];
 
-        $this->db->where('id',$bolum_id);
-        $this->db->set($data);
+        // Veritabanında güncelleme
+        $this->db->where('id', $bolum_id);
         if ($this->db->update('geopos_project_bolum', $data)) {
-            numaric_update(46);
-
-            $this->proje_model_new->talep_history($prid, $this->aauth->get_user()->id,' Proje Bölümü Düzenlendi.Bölüm Adı : '.$name);
-
+            // Güncelleme başarılıysa tarihçeye kaydet
+            $this->proje_model_new->talep_history($prid, $this->aauth->get_user()->id, 'Proje Bölümü Düzenlendi. Bölüm Adı: ' . $name);
 
             return [
-                'status'=>1,
-                'message'=>'Başarılı Bir Şekilde Bölüm Güncellendi',
-                'id'=>$bolum_id
+                'status' => 1,
+                'message' => 'Başarılı bir şekilde bölüm güncellendi.',
+                'id' => $bolum_id,
             ];
-        }
-        else {
+        } else {
+            // Güncelleme başarısızsa hata mesajı döndür
             return [
-                'status'=>0,
-                'message'=>'Hata Aldınız.Yöneticiye Başvurun',
-                'id'=>0
+                'status' => 0,
+                'message' => 'Hata aldınız. Lütfen yöneticinizle iletişime geçin.',
+                'id' => 0,
             ];
         }
     }
 
-    public function delete(){
 
-        $bolum_id = $this->input->post('bolum_id');
+    public function delete()
+    {
+        // Kullanıcı kimlik doğrulama kontrolü
+        if ($this->aauth->get_user()->id != 21) {
+            return [
+                'status' => 0,
+                'message' => 'Yetkiniz Bulunmamaktadır',
+                'id' => 0
+            ];
+        }
+        // Bölüm ID'sini al
+        $bolum_id = $this->input->post('bolum_id', true);
+        // Bölüm detaylarını al
         $details = $this->details($bolum_id);
-        $kontrol = $this->db->query("SELECT * FROM geopos_milestones Where bolum_id=$bolum_id")->num_rows();
-        if(!$kontrol){
-            if($this->db->delete('geopos_project_bolum', array('id' => $bolum_id))){
-                $this->proje_model_new->talep_history($details->pid, $this->aauth->get_user()->id,' Proje Bölümü Silindi.Bölüm Adı : '.$details->name);
+        // Bölüme bağlı aşama kontrolü
+        $kontrol = $this->db->query("SELECT * FROM geopos_milestones WHERE bolum_id = ?", [$bolum_id])->num_rows();
+        if (!$kontrol) {
+            // Bölüm silme işlemi
+            if ($this->db->delete('geopos_project_bolum', ['id' => $bolum_id])) {
+                // Silme işlemi başarılıysa tarihçeye kaydet
+                $this->proje_model_new->talep_history(
+                    $details->pid,
+                    $this->aauth->get_user()->id,
+                    'Proje Bölümü Silindi. Bölüm Adı: ' . $details->name
+                );
                 return [
-                    'status'=>1,
-                    'message'=>'Başarılı Bir Şekilde Bölüm Silindi',
-                    'id'=>$bolum_id
+                    'status' => 1,
+                    'message' => 'Başarılı Bir Şekilde Bölüm Silindi',
+                    'id' => $bolum_id
+                ];
+            } else {
+                // Silme işlemi başarısızsa hata döndür
+                return [
+                    'status' => 0,
+                    'message' => 'Hata Aldınız. Yöneticiye Başvurun',
+                    'id' => 0
                 ];
             }
-            else {
-                return [
-                    'status'=>0,
-                    'message'=>'Hata Aldınız.Yöneticiye Başvurun',
-                    'id'=>0
-                ];
-            }
-        }
-        else {
+        } else {
+            // Bölüme bağlı aşama varsa silme işlemi engellenir
             return [
-                'status'=>0,
-                'message'=>'Bölüme Bağlı Aşama Bulunmaktadır. Bu sebeple Silinemez',
-                'id'=>0
+                'status' => 0,
+                'message' => 'Bölüme Bağlı Aşama Bulunmaktadır. Bu sebeple Silinemez',
+                'id' => 0
             ];
         }
-
     }
+
 
 
     public function details($bolum_id){

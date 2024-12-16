@@ -150,106 +150,108 @@
 
   </div>
   <hr>
-    <div class="form-row">
-    <div class="form-group col-md-3">
-      <label for="proje_muduru_id">Proje Müdürü</label>
-        <select class="form-control select-box required" id="proje_muduru_id">
-     <?php foreach (all_personel() as $emp){
-                            $emp_id=$emp->id;
-                            $name=$emp->name;
-                            ?>
-            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-        <?php } ?>
-        </select>
 
-    </div>
-  <div class="form-group col-md-3">
-      <label for="genel_mudur_id">Proje Sorumlusu</label>
-         <select class="form-control select-box required" id="proje_sorumlusu_id">
-     <?php foreach (all_personel() as $emp){
-                            $emp_id=$emp->id;
-                            $name=$emp->name;
-                            ?>
-            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-        <?php } ?>
-        </select>
-    </div>
-    <div class="form-group col-md-3">
-      <label for="teknika_sorumlu_id">Muhasebe Müdürü</label>
-       <select class="form-control select-box required" id="muhasebe_muduru_id">
-     <?php foreach (all_personel() as $emp){
-                            $emp_id=$emp->id;
-                            $name=$emp->name;
-                            ?>
-            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-        <?php } ?>
-        </select>
-    </div>
-     <div class="form-group col-md-3">
-      <label for="teknika_sorumlu_id">Genel Müdür</label>
-       <select class="form-control select-box required" id="genel_mudur_id">
-     <?php foreach (all_personel() as $emp){
-                            $emp_id=$emp->id;
-                            $name=$emp->name;
-                            ?>
-            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-        <?php } ?>
-        </select>
-    </div>
-</div>
 </form>`,
                             buttons: {
                                 formSubmit: {
                                     text: 'Ekle',
                                     btnClass: 'btn-blue',
                                     action: function () {
-                                        let benzin_talebi =$('#benzin_talebi').is(':checked')?1:0;
+                                        let errors = [];
 
-                                        let benzin_miktari=0;
-                                        let yemek_tutari=0;
-                                        if(benzin_talebi==1){
-                                            benzin_miktari=$('#benzin_miktari').val();
+                                        // Alan doğrulamaları
+                                        if (!$('#name').val()) {
+                                            errors.push('Proje Adı zorunludur.');
+                                        }
+                                        if (!$('#project_adresi').val()) {
+                                            errors.push('Proje Adresi zorunludur.');
+                                        }
+                                        if (!$('#status').val()) {
+                                            errors.push('Durum seçilmelidir.');
+                                        }
+                                        if (!$('#customer_statement').val()) {
+                                            errors.push('Müşteri seçilmelidir.');
+                                        }
+                                        if (!$('#start_date').val()) {
+                                            errors.push('Başlangıç Tarihi zorunludur.');
+                                        }
+                                        if (!$('#edate').val()) {
+                                            errors.push('Vade Tarihi zorunludur.');
+                                        }
+                                        if (!$('#worth').val()) {
+                                            errors.push('Bütçe zorunludur.');
+                                        }
+                                        if (!$('#sozlesme_tutari').val()) {
+                                            errors.push('Sözleşme Tutarı zorunludur.');
+                                        }
+                                        if (!$('#sozlesme_numarasi').val()) {
+                                            errors.push('Sözleşme Numarası zorunludur.');
+                                        }
+                                        if (!$('#sozlesme_date').val()) {
+                                            errors.push('Sözleşme Tarihi zorunludur.');
+                                        }
+                                        // if (!$('#proje_muduru_id').val()) {
+                                        //     errors.push('Proje Müdürü seçilmelidir.');
+                                        // }
+                                        // if (!$('#proje_sorumlusu_id').val()) {
+                                        //     errors.push('Proje Sorumlusu seçilmelidir.');
+                                        // }
+                                        // if (!$('#muhasebe_muduru_id').val()) {
+                                        //     errors.push('Muhasebe Müdürü seçilmelidir.');
+                                        // }
+                                        // if (!$('#genel_mudur_id').val()) {
+                                        //     errors.push('Genel Müdür seçilmelidir.');
+                                        // }
+
+                                        // Eğer hata varsa, hataları göster ve işlemi durdur
+                                        if (errors.length > 0) {
+                                            $.alert({
+                                                theme: 'modern',
+                                                icon: 'fa fa-exclamation',
+                                                type: 'red',
+                                                animation: 'scale',
+                                                useBootstrap: true,
+                                                columnClass: "col-md-4 mx-auto",
+                                                title: 'Hata',
+                                                content: errors.join('<br>'),
+                                                buttons: {
+                                                    prev: {
+                                                        text: 'Tamam',
+                                                        btnClass: "btn btn-link text-dark",
+                                                    }
+                                                }
+                                            });
+                                            return false; // İşlemi durdur
                                         }
 
-                                        let yemek_talebi =$('#yemek_talebi').is(':checked')?1:0;
-
-                                        if(yemek_talebi==1){
-                                            yemek_tutari=$('#yemek_tutari').val();
-                                        }
-
-                                        $('#loading-box').removeClass('d-none');
-
-                                        let emp=[];
-                                        // $.each($('[name="employee[]"]').val(),function(index,item){
-                                        //     emp.push(item);
-                                        // })
-
+                                        // Eğer tüm doğrulamalardan geçerse verileri gönder
                                         let data = {
                                             crsf_token: crsf_hash,
                                             name: $('#name').val(),
                                             project_adresi: $('#project_adresi').val(),
-                                            status:$('#status').val(),
-                                            customer:$('#customer_statement').val(),
-                                            sdate:$('#start_date').val(),
-                                            edate:$('#edate').val(),
-                                            worth:$('#worth').val(),
-                                            code:$('#code').val(),
-                                            sozlesme_tutari:$('#sozlesme_tutari').val(),
-                                            sozlesme_numarasi:$('#sozlesme_numarasi').val(),
-                                            sozlesme_date:$('#sozlesme_date').val(),
-                                            proje_muduru_id:$('#proje_muduru_id').val(),
-                                            proje_sorumlusu_id:$('#proje_sorumlusu_id').val(),
-                                            genel_mudur_id:$('#genel_mudur_id').val(),
-                                            muhasebe_muduru_id:$('#muhasebe_muduru_id').val(),
-                                            employee:emp,
-                                            ptype:0,
-                                            progress:0,
-                                            priority:"Yüksek",
-                                        }
-                                        $.post(baseurl + 'projects/addproject',data,(response) => {
+                                            status: $('#status').val(),
+                                            customer: $('#customer_statement').val(),
+                                            sdate: $('#start_date').val(),
+                                            edate: $('#edate').val(),
+                                            worth: $('#worth').val(),
+                                            code: $('#code').val(),
+                                            sozlesme_tutari: $('#sozlesme_tutari').val(),
+                                            sozlesme_numarasi: $('#sozlesme_numarasi').val(),
+                                            sozlesme_date: $('#sozlesme_date').val(),
+                                            // proje_muduru_id: $('#proje_muduru_id').val(),
+                                            // proje_sorumlusu_id: $('#proje_sorumlusu_id').val(),
+                                            // genel_mudur_id: $('#genel_mudur_id').val(),
+                                            // muhasebe_muduru_id: $('#muhasebe_muduru_id').val(),
+                                            ptype: 0,
+                                            progress: 0,
+                                            priority: "Yüksek",
+                                        };
+
+                                        $('#loading-box').removeClass('d-none');
+                                        $.post(baseurl + 'projects/addproject', data, (response) => {
                                             let responses = jQuery.parseJSON(response);
                                             $('#loading-box').addClass('d-none');
-                                            if(responses.status=='Success'){
+                                            if (responses.status == 200) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-check',
@@ -259,7 +261,7 @@
                                                     columnClass: "small",
                                                     title: 'Başarılı',
                                                     content: responses.message,
-                                                    buttons:{
+                                                    buttons: {
                                                         formSubmit: {
                                                             text: 'Tamam',
                                                             btnClass: 'btn-blue',
@@ -270,10 +272,8 @@
                                                         }
                                                     }
                                                 });
-
                                             }
-                                            else if(responses.status=='Error'){
-
+                                            else if (responses.status == 410) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-exclamation',
@@ -283,7 +283,7 @@
                                                     columnClass: "col-md-4 mx-auto",
                                                     title: 'Dikkat!',
                                                     content: responses.message,
-                                                    buttons:{
+                                                    buttons: {
                                                         prev: {
                                                             text: 'Tamam',
                                                             btnClass: "btn btn-link text-dark",
@@ -291,9 +291,9 @@
                                                     }
                                                 });
                                             }
-                                        })
-
+                                        });
                                     }
+
                                 },
                             },
                             onContentReady: function () {
@@ -577,7 +577,7 @@
         })
 
     })
-    $(document).on('click','.edit_proje',function (){
+    $(document).on('click', '.edit_proje', function () {
         let proje_id = $(this).attr('proje_id');
         $.confirm({
             theme: 'modern',
@@ -591,10 +591,10 @@
             containerFluid: !0,
             smoothContent: true,
             draggable: false,
-            content: function (){
+            content: function () {
                 let self = this;
-                let html=`<form>
-  <div class="form-row">
+                let html = `<form>
+ <div class="form-row">
   	<div class="form-group col-md-12">
         <label class="col-form-label" for="name"><?php echo $this->lang->line('Project Title') ?></label>
          <input type="text" placeholder="Proje Adı" class="form-control margin-bottom  required" name="name" id='name'>
@@ -711,13 +711,14 @@
         </select>
     </div>
 </div>
-</form>`;
+
+            </form>`;
+
                 let data = {
                     proje_id: proje_id,
-                }
+                };
 
-                $.post(baseurl + 'projects/proje_info',data,(response) => {
-                    self.$content.find('#person-list').empty().append(html);
+                $.post(baseurl + 'projects/proje_info', data, (response) => {
                     let responses = jQuery.parseJSON(response);
                     $('#name').val(responses.items.name);
                     $('#project_adresi').val(responses.items.project_adresi);
@@ -735,49 +736,69 @@
                     $('#genel_mudur_id').val(responses.items.genel_mudur_id).select2().trigger('change');
                 });
 
-                self.$content.find('#person-list').empty().append(html);
-                return $('#person-container').html();
+                return html;
             },
             buttons: {
                 formSubmit: {
                     text: 'Güncelle',
                     btnClass: 'btn-blue',
                     action: function () {
+                        let name = $('#name').val().trim();
+                        let project_adresi = $('#project_adresi').val().trim();
+                        let status = $('#status').val();
+                        let customer = $('#customer_statement').val();
+                        let sdate = $('#start_date').val();
+                        let edate = $('#edate').val();
+                        let worth = $('#worth').val();
+                        let sozlesme_tutari = $('#sozlesme_tutari').val();
+                        let sozlesme_numarasi = $('#sozlesme_numarasi').val();
+                        let sozlesme_date = $('#sozlesme_date').val();
+                        let proje_muduru_id = $('#proje_muduru_id').val();
+                        let proje_sorumlusu_id = $('#proje_sorumlusu_id').val();
+                        let muhasebe_muduru_id = $('#muhasebe_muduru_id').val();
+                        let genel_mudur_id = $('#genel_mudur_id').val();
 
+                        // Tüm alanlar için kontrol
+                        if (!name || !project_adresi || !status || !customer || !sdate || !edate || !worth || !sozlesme_tutari || !sozlesme_numarasi || !sozlesme_date || !proje_muduru_id || !proje_sorumlusu_id || !muhasebe_muduru_id || !genel_mudur_id) {
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                animation: 'scale',
+                                useBootstrap: true,
+                                columnClass: "col-md-4 mx-auto",
+                                title: 'Eksik Bilgi!',
+                                content: 'Lütfen tüm alanları doldurun.',
+                            });
+                            return false; // İşlemi durdur
+                        }
 
+                        // AJAX ile veri gönderimi
                         $('#loading-box').removeClass('d-none');
-
-                        let emp=[];
-                        // $.each($('[name="employee[]"]').val(),function(index,item){
-                        //     emp.push(item);
-                        // })
 
                         let data = {
                             crsf_token: crsf_hash,
                             p_id: proje_id,
-                            name: $('#name').val(),
-                            project_adresi: $('#project_adresi').val(),
-                            status:$('#status').val(),
-                            customer:$('#customer_statement').val(),
-                            sdate:$('#start_date').val(),
-                            edate:$('#edate').val(),
-                            worth:$('#worth').val(),
-                            sozlesme_tutari:$('#sozlesme_tutari').val(),
-                            sozlesme_numarasi:$('#sozlesme_numarasi').val(),
-                            sozlesme_date:$('#sozlesme_date').val(),
-                            proje_muduru_id:$('#proje_muduru_id').val(),
-                            proje_sorumlusu_id:$('#proje_sorumlusu_id').val(),
-                            genel_mudur_id:$('#genel_mudur_id').val(),
-                            muhasebe_muduru_id:$('#muhasebe_muduru_id').val(),
-                            employee:emp,
-                            ptype:0,
-                            progress:0,
-                            priority:"Yüksek",
-                        }
-                        $.post(baseurl + 'projects/update_proje',data,(response) => {
+                            name: name,
+                            project_adresi: project_adresi,
+                            status: status,
+                            customer: customer,
+                            sdate: sdate,
+                            edate: edate,
+                            worth: worth,
+                            sozlesme_tutari: sozlesme_tutari,
+                            sozlesme_numarasi: sozlesme_numarasi,
+                            sozlesme_date: sozlesme_date,
+                            proje_muduru_id: proje_muduru_id,
+                            proje_sorumlusu_id: proje_sorumlusu_id,
+                            genel_mudur_id: genel_mudur_id,
+                            muhasebe_muduru_id: muhasebe_muduru_id,
+                        };
+
+                        $.post(baseurl + 'projects/updateProje', data, (response) => {
                             let responses = jQuery.parseJSON(response);
                             $('#loading-box').addClass('d-none');
-                            if(responses.status=='Success'){
+                            if (responses.status == 200) {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-check',
@@ -787,7 +808,7 @@
                                     columnClass: "small",
                                     title: 'Başarılı',
                                     content: responses.message,
-                                    buttons:{
+                                    buttons: {
                                         formSubmit: {
                                             text: 'Tamam',
                                             btnClass: 'btn-blue',
@@ -798,10 +819,7 @@
                                         }
                                     }
                                 });
-
-                            }
-                            else if(responses.status=='Error'){
-
+                            } else {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
@@ -809,39 +827,22 @@
                                     animation: 'scale',
                                     useBootstrap: true,
                                     columnClass: "col-md-4 mx-auto",
-                                    title: 'Dikkat!',
+                                    title: 'Hata!',
                                     content: responses.message,
-                                    buttons:{
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
                                 });
                             }
-                        })
-
+                        });
                     }
                 },
             },
             onContentReady: function () {
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
-                })
-
-
-
-
-                var jc = this;
-                this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
-                    e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
                 });
             }
         });
+    });
 
-    })
 
 
 </script>

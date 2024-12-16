@@ -245,64 +245,46 @@
                                         text: 'Sorğunu Açın',
                                         btnClass: 'btn-blue',
                                         action: function () {
+                                            let proje_id = $('.proje_id_new').val();
+                                            let desc = $('#desc').val();
+
+                                            // Proje ID doğrulama
+                                            if (!parseInt(proje_id)) {
+                                                showAlert('Proje Zorunludur');
+                                                return false;
+                                            }
+
+                                            // Açıklama doğrulama
+                                            if (!desc) {
+                                                showAlert('Açıklama Zorunludur');
+                                                return false;
+                                            }
 
                                             $('#loading-box').removeClass('d-none');
+
+                                            // Form verilerini toplama
                                             let data = {
                                                 crsf_token: crsf_hash,
-                                                progress_status_id:  $('#progress_status_id').val(),
-                                                talep_eden_user_id:  $('#talep_eden_user_id').val(),
-                                                proje_id:  $('#proje_id').val(),
-                                                method:  0,
-                                                cari_id:  0,
-                                                desc:  $('#desc').val(),
-                                                image_text:  $('#image_text').val(),
-                                            }
-                                            $.post(baseurl + 'nakliye/create_save',data,(response) => {
+                                                progress_status_id: $('#progress_status_id').val(),
+                                                talep_eden_user_id: $('#talep_eden_user_id').val(),
+                                                proje_id: proje_id,
+                                                method: 0,
+                                                cari_id: 0,
+                                                desc: desc,
+                                                image_text: $('#image_text').val(),
+                                            };
+
+                                            // POST isteği
+                                            $.post(baseurl + 'nakliye/create_save', data, (response) => {
                                                 let responses = jQuery.parseJSON(response);
                                                 $('#loading-box').addClass('d-none');
-                                                if(responses.status=='Success'){
-                                                    $.alert({
-                                                        theme: 'modern',
-                                                        icon: 'fa fa-check',
-                                                        type: 'green',
-                                                        animation: 'scale',
-                                                        useBootstrap: true,
-                                                        columnClass: "small",
-                                                        title: 'Başarılı',
-                                                        content: responses.message,
-                                                        buttons:{
-                                                            formSubmit: {
-                                                                text: 'Tamam',
-                                                                btnClass: 'btn-blue',
-                                                                action: function () {
-                                                                    location.href = responses.index
-                                                                }
-                                                            }
-                                                        }
-                                                    });
 
+                                                if (responses.status === 'Success') {
+                                                    showAlert(responses.message, 'Başarılı', 'green', 'fa-check', responses.index);
+                                                } else if (responses.status === 'Error') {
+                                                    showAlert(responses.message, 'Dikkat!', 'red', 'fa-exclamation');
                                                 }
-                                                else if(responses.status=='Error'){
-
-                                                    $.alert({
-                                                        theme: 'modern',
-                                                        icon: 'fa fa-exclamation',
-                                                        type: 'red',
-                                                        animation: 'scale',
-                                                        useBootstrap: true,
-                                                        columnClass: "col-md-4 mx-auto",
-                                                        title: 'Dikkat!',
-                                                        content: responses.message,
-                                                        buttons:{
-                                                            prev: {
-                                                                text: 'Tamam',
-                                                                btnClass: "btn btn-link text-dark",
-                                                            }
-                                                        }
-                                                    });
-                                                }
-                                            })
-
+                                            });
                                         }
                                     },
                                 },
@@ -360,6 +342,27 @@
             });
         };
     })
+
+    // Yardımcı fonksiyon: Uyarı mesajı gösterme
+    function showAlert(message, title = 'Dikkat!', type = 'red', icon = 'fa-exclamation', redirectUrl = null) {
+        $.alert({
+            theme: 'material',
+            icon: `fa ${icon}`,
+            type: type,
+            animation: 'scale',
+            useBootstrap: true,
+            columnClass: "col-md-4 mx-auto",
+            title: title,
+            content: message,
+            buttons: {
+                prev: {
+                    text: 'Tamam',
+                    btnClass: "btn btn-link text-dark",
+                    action: redirectUrl ? () => location.href = redirectUrl : null
+                }
+            }
+        });
+    }
 
     $(document).on('click', ".talep_sil", function (e) {
         let talep_id = $(this).attr('talep_id');

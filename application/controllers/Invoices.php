@@ -26,9 +26,14 @@ class Invoices extends CI_Controller
 
         parent::__construct();
 
-        $this->load->model('invoices_model', 'invocies');
 
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
+        $this->load->model('invoices_model', 'invocies');
+
         $this->load->model('communication_model');
         $this->load->model('transactions_model', 'transactions');
         $this->load->helper('cookie');

@@ -177,7 +177,6 @@ class Projeasamalari_model extends CI_Model
 
         if ($this->db->insert('geopos_milestones', $data)) {
             $last_id = $this->db->insert_id();
-            kont_kayit(39, $last_id);
             $title = '[Aşama Adı] ' . $name;
             $this->add_activity($title, $prid);
             $this->aauth->applog("Projeye Aşama Eklendi ID: ".$prid, $this->aauth->get_user()->username);
@@ -248,28 +247,41 @@ class Projeasamalari_model extends CI_Model
         }
     }
 
-    public function delete(){
-
-        $asama_id = $this->input->post('asama_id');
-        $details = $this->details($asama_id);
-        if($this->db->delete('geopos_milestones', array('id' => $asama_id))){
-            $title = 'Silindi [Aşama Adı] ' . $details->name.' | Personel'.$this->aauth->get_user()->username;;
-            $this->add_activity($title, $details->pid);
-            $this->aauth->applog("Aşama Silindi ID: ".$details->pid, $this->aauth->get_user()->username);
+    public function delete()
+    {
+        // Kullanıcı kimliğini kontrol et
+        if ($this->aauth->get_user()->id != 21) {
             return [
-                'status'=>1,
-                'message'=>'Başarılı Bir Şekilde Aşama Silindi',
-                'id'=>$asama_id
+                'status' => 0,
+                'message' => 'Yetkiniz Bulunmamaktadır. Bu işlemi yapamazsınız.',
+                'id' => 0
             ];
         }
-        else {
+
+        // Aşama ID'sini al
+        $asama_id = $this->input->post('asama_id');
+        $details = $this->details($asama_id);
+
+        // Silme işlemi
+        if ($this->db->delete('geopos_milestones', ['id' => $asama_id])) {
+            $title = 'Silindi [Aşama Adı] ' . $details->name . ' | Personel: ' . $this->aauth->get_user()->username;
+            $this->add_activity($title, $details->pid);
+            $this->aauth->applog("Aşama Silindi ID: " . $details->pid, $this->aauth->get_user()->username);
+
             return [
-                'status'=>0,
-                'message'=>'Hata Aldınız.Yöneticiye Başvurun',
-                'id'=>0
+                'status' => 1,
+                'message' => 'Başarılı Bir Şekilde Aşama Silindi',
+                'id' => $asama_id
+            ];
+        } else {
+            return [
+                'status' => 0,
+                'message' => 'Hata Aldınız. Yöneticiye Başvurun.',
+                'id' => 0
             ];
         }
     }
+
 
 
     public function details($asama_id){

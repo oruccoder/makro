@@ -253,68 +253,89 @@ class Personelgidertalep_model extends CI_Model
         return $query->row();
     }
 
-    public function create_form_items(){
-
-
+    public function create_form_items()
+    {
+        // Gelen POST verilerini al
         $group_id_arr = $this->input->post('group_id');
-        $group_id = $group_id_arr[array_key_last($group_id_arr)];
-        $ar_count=count($group_id_arr);
+        $group_id = $group_id_arr[array_key_last($group_id_arr)] ?? 0;
+        $ar_count = count($group_id_arr);
 
-
-        if($group_id==0){
-            $eq = intval($ar_count)-1;
-            if($eq<=0){
-                $group_id=0;
-            }
-            else {
-                $eq=$eq-1;
-                $group_id=$group_id_arr[$eq];
-            }
+        // Grup ID'si 0 ise önceki gruba dön
+        if ($group_id == 0) {
+            $eq = $ar_count - 1;
+            $group_id = ($eq > 0) ? $group_id_arr[$eq - 1] : 0;
         }
 
-
+        // POST verilerini al
         $product_id = $group_id;
         $product_desc = $this->input->post('product_desc');
         $unit_id = $this->input->post('unit_id');
-        $product_qty = $this->input->post('product_qty');
-        $product_price = $this->input->post('product_price');
+        $product_qty = floatval($this->input->post('product_qty'));
+        $product_price = floatval($this->input->post('product_price'));
         $form_id = $this->input->post('form_id');
+        $user_id = $this->aauth->get_user()->id;
 
+        // Zorunlu alanları kontrol et
+        if (
+            empty($product_id) ||
+            empty($product_desc) ||
+            empty($unit_id) ||
+            empty($product_qty) ||
+            empty($product_price)
+        ) {
+            return [
+                'status' => 0,
+                'message' => 'Zorunlu alanlardan biri veya birkaçı eksik.',
+            ];
+        }
 
-        $data = array(
+        // Verileri hazırlama
+        $data = [
             'cost_id' => $product_id,
             'product_desc' => $product_desc,
             'unit_id' => $unit_id,
             'product_qty' => $product_qty,
             'price' => $product_price,
-            'total' => floatval($product_price)*floatval(($product_qty)),
+            'total' => $product_price * $product_qty,
             'form_id' => $form_id,
-            'aauth' => $this->aauth->get_user()->id
-        );
+            'aauth' => $user_id,
+        ];
+
+        // Veriyi ekle
         if ($this->db->insert('talep_form_personel_products', $data)) {
             $talep_form_products_id = $this->db->insert_id();
 
-            $product_name= who_demirbas($product_id)->name;
-            $unit_name = units_($unit_id)['name'];
-            $this->talep_history($form_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | '.$product_qty.' '.$unit_name);
-            $last_id = $this->db->insert_id();
-            $this->aauth->applog("Malzeme Talebine Ürünler Eklendi  : Talep ID : ".$form_id, $this->aauth->get_user()->username);
+            // İlgili isimleri getir
+            $product_name = who_demirbas($product_id)->name ?? 'Bilinmeyen Ürün';
+            $unit_name = units_($unit_id)['name'] ?? 'Bilinmeyen Birim';
 
+            // Tarihçeye ekle
+            $this->talep_history($form_id, $user_id, "Gider Eklendi: $product_name | $product_qty $unit_name");
+
+            // Log ekle
+            $this->aauth->applog("Malzeme Talebine Ürünler Eklendi: Talep ID: $form_id", $this->aauth->get_user()->username);
+
+            // Başarılı yanıt
             return [
-                'status'=>1,
-                'id'=>$last_id,
-                'talep_form_products_id'=>$talep_form_products_id,
-                'product_name'=>who_demirbas($product_id)->name,
-                'qyt_birim'=>$product_qty.' '.units_($unit_id)['name'],
+                'status' => 1,
+                'id' => $talep_form_products_id,
+                'talep_form_products_id' => $talep_form_products_id,
+                'product_name' => $product_name,
+                'qyt_birim' => "$product_qty $unit_name",
+                'message' => 'Başarılı Bir Şekilde Eklendi.',
+
             ];
-        }
-        else {
+        } else {
+            // Başarısız yanıt
             return [
-                'status'=>0,
-                'id'=>0
+                'status' => 0,
+                'id' => 0,
+                'message' => 'Hata Aldınız.',
+
             ];
         }
     }
+
 
     public function talep_history($id,$user_id,$desc){
         date_default_timezone_set('Asia/Baku');

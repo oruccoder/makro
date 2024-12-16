@@ -25,6 +25,10 @@ class Projeiskalemleri Extends CI_Controller
         parent::__construct();
 
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         $this->load->model('projeiskalemleri_model', 'iskalemleri');
         $this->load->model('projeiskalemlerinew_model', 'model');
         $this->load->model('tools_model', 'tools');

@@ -266,7 +266,7 @@ class Projeiskalemleri_model extends CI_Model
         $fiyat = $this->input->post('fiyat_is');
         $toplam_fiyat = $this->input->post('toplam_fiyat_is');
         $oran = $this->input->post('oran_is');
-        $status = $this->input->post('status_is');
+        $status = $this->input->post('status');
 
         //$group_id = $this->input->post('asama_id');
 
@@ -380,7 +380,8 @@ class Projeiskalemleri_model extends CI_Model
 
     }
 
-    public function update(){
+    public function update()
+    {
 
         $task_id = $this->input->post('task_id');
         $name = $this->input->post('name');
@@ -394,89 +395,117 @@ class Projeiskalemleri_model extends CI_Model
         $toplam_fiyat = $this->input->post('toplam_fiyat');
         $oran = $this->input->post('oran');
         $status = $this->input->post('status');
-        $milestone = $this->input->post('asama_id');
-        $iptal=0;
-        $forma2_kontrol = $this->db->query("SELECT * FROM geopos_invoice_items Where pid = $task_id and invoice_type_id IN (29,30)");
-        if($forma2_kontrol->num_rows()){
-            foreach ($forma2_kontrol->result() as $f_items){
+
+
+        // Forma2 kontrolü
+        if ($this->has_active_forma2($task_id)) {
+            return [
+                'status' => 0,
+                'message' => 'Bu iş kalemine ait kesilmiş forma2 mevcuttur. Bu sebeple iş kaleminde değişiklik yapamazsınız!',
+                'id' => 0
+            ];
+        }
+
+        // Güncelleme verileri
+        $data = [
+            'name' => $name,
+            'oran' => $oran,
+            'status' => $status,
+            'description' => $content,
+            'eid' => $employee,
+            'related' => 1,
+            'priority' => 'Medium',
+            'rid' => $prid,
+            'proje_id' => $prid,
+            'quantity' => $quantity,
+            'fiyat' => $fiyat,
+            'toplam_fiyat' => $toplam_fiyat,
+            'unit' => $olcu_birimi,
+            'cari_id' => $customer,
+            'gorev_tipi' => 1,
+            'simeta_status' => 1,
+        ];
+
+        // Veritabanında güncelleme işlemi
+        $this->db->where('id', $task_id);
+        if ($this->db->update('geopos_todolist', $data)) {
+            $title = 'Güncelleme Yapıldı [İş Kalemi Adı] ' . $name;
+            $this->add_activity($title, $prid);
+            $this->aauth->applog("İş Kalemi Güncellendi ID: " . $prid, $this->aauth->get_user()->username);
+
+            return [
+                'status' => 1,
+                'message' => 'Başarılı Bir Şekilde İş Kalemi Güncellendi',
+                'id' => $task_id
+            ];
+        } else {
+            return [
+                'status' => 0,
+                'message' => 'Hata Aldınız. Yöneticiye Başvurun.',
+                'id' => 0
+            ];
+        }
+    }
+
+// Forma2 kontrolü
+    private function has_active_forma2($task_id)
+    {
+        $forma2_kontrol = $this->db->query("SELECT * FROM geopos_invoice_items WHERE pid = $task_id AND invoice_type_id IN (29,30)");
+
+        if ($forma2_kontrol->num_rows()) {
+            foreach ($forma2_kontrol->result() as $f_items) {
                 $form2_id = $f_items->tid;
-                $form2_status_kontrol =  $this->db->query("Select * From geopos_invoices where id = $form2_id and status!=3");
-                if($form2_status_kontrol->num_rows()){
-                    $iptal++;
+                $form2_status_kontrol = $this->db->query("SELECT * FROM geopos_invoices WHERE id = $form2_id AND status != 3");
+                if ($form2_status_kontrol->num_rows()) {
+                    return true;
                 }
             }
         }
-        if(!$iptal){
-            $data = [
-                'name' => $name,
-                'oran' => $oran,
-                'status' => $status,
-                'description' => $content,
-                'eid' => $employee,
-                'related' => 1,
-                'priority' => 'Medium',
-                'rid' => $prid,
-                'proje_id' => $prid,
-                'asama_id' => $milestone,
-                'quantity' => $quantity,
-                'fiyat' => $fiyat,
-                'toplam_fiyat' => $toplam_fiyat,
-                'unit' => $olcu_birimi,
-                'cari_id' => $customer,
-                'gorev_tipi' => 1,
-                'simeta_status' => 1,
 
-            ];
-            $this->db->where('id',$task_id);
-            $this->db->set($data);
-            if ($this->db->update('geopos_todolist', $data)) {
-                $title = 'Güncelleme Yapıldı [İş Kalemi Adı] ' . $name;
-                $this->add_activity($title, $prid);
-                $this->aauth->applog("Aşama Güncellendi ID: ".$prid, $this->aauth->get_user()->username);
-
-                return [
-                    'status'=>1,
-                    'message'=>'Başarılı Bir Şekilde İş Kalemi Güncellendi',
-                    'id'=>$task_id
-                ];
-            }
-            else {
-                return [
-                    'status'=>0,
-                    'message'=>'Hata Aldınız.Yöneticiye Başvurun',
-                    'id'=>0
-                ];
-            }
-        }
-        else {
-            return [
-                'status'=>0,
-                'message'=>'Bu iş kalemine ait kesilmiş forma2 mevcuttur. Bu sebeple iş kaleminde değişiklik yapamazsınız!',
-                'id'=>0
-            ];
-        }
-
+        return false;
     }
+
 
     public function delete(){
 
-        $task_id = $this->input->post('task_id');
-        $details = $this->details($task_id);
-        if($this->db->delete('geopos_todolist', array('id' => $task_id))){
-            $title = 'Silindi [İş Kalemi Adı] ' . $details->name.' | Personel'.$this->aauth->get_user()->username;
-            $this->add_activity($title, $details->rid);
-            $this->aauth->applog("İş Kalemi Silindi ID: ".$details->rid, $this->aauth->get_user()->username);
+        // Kullanıcı kimliğini kontrol et
+        if ($this->aauth->get_user()->id != 21) {
             return [
-                'status'=>1,
-                'message'=>'Başarılı Bir Şekilde İş Kalemi Silindi',
-                'id'=>$task_id
+                'status' => 0,
+                'message' => 'Yetkiniz Bulunmamaktadır. Bu işlemi yapamazsınız.',
+                'id' => 0
             ];
         }
-        else {
+
+        $task_id = $this->input->post('task_id');
+        // İş kalemi detaylarını al
+        $details = $this->details($task_id);
+
+        if ($details) {
+            // İş kalemini veritabanından sil
+            if ($this->db->delete('geopos_todolist', array('id' => $task_id))) {
+                // Silme işlemi başarılıysa logları ve aktiviteleri güncelle
+                $title = 'Silindi [İş Kalemi Adı] ' . $details->name . ' | Personel: ' . $this->aauth->get_user()->username;
+                $this->add_activity($title, $details->rid);
+                $this->aauth->applog("İş Kalemi Silindi ID: " . $details->rid, $this->aauth->get_user()->username);
+
+                return [
+                    'status' => 1,
+                    'message' => 'Başarılı Bir Şekilde İş Kalemi Silindi',
+                    'id' => $task_id
+                ];
+            } else {
+                return [
+                    'status' => 0,
+                    'message' => 'Hata Aldınız. Yöneticiye Başvurun.',
+                    'id' => 0
+                ];
+            }
+        } else {
             return [
-                'status'=>0,
-                'message'=>'Hata Aldınız.Yöneticiye Başvurun',
-                'id'=>0
+                'status' => 0,
+                'message' => 'Silmek istediğiniz iş kalemi bulunamadı.',
+                'id' => 0
             ];
         }
     }

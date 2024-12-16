@@ -18,6 +18,11 @@ class Personelp Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
@@ -48,23 +53,19 @@ class Personelp Extends CI_Controller
             $disable= "<button pers_id='$prd->id' class='btn btn-outline-success disabled_button' ><i class='fa fa-chain-broken'></i>Pasifleştir</button>&nbsp;";
 
             $podradci= "<button personel_id='$prd->id' class='btn btn-outline-success podradci_button' ><i class='fa fa-building'></i> Bağlı Olduğu Podradçı</button>&nbsp;";
-
-
-            $podradci_name=' Herhangi Bir Podradçiya Bağlanmamış';
             $ana_podradci=' Herhangi Bir Podradçiya Bağlanmamış';
             $podradci_list = $this->db->query("SELECT * FROM podradci Where id=$prd->podradci_id");
             if($podradci_list->num_rows()){
                 if($podradci_list->row()->ana_cari){
                     $ana_podradci=customer_details($podradci_list->row()->ana_cari)['company'];
                 }
-                $podradci_name=$podradci_list->row()->company;;
             }
             else {
                 if($prd->ana_cari){
                     $ana_podradci=customer_details($prd->ana_cari)['company'];
                 }
             }
-            $new_title = parent_podradci_kontrol_list($prd->podradci_id).$podradci_name;
+            $new_title = parent_podradci_kontrol_list($prd->podradci_id);
 
             //$maas_proje= "<button  data-object-id='" . $prd->id . "' class='btn btn-outline-info  maas_pers' title='Maas Düzenleme'><i class='fa fa-money'></i> Maaş / Proje</button>";
             $mezuniyet=mezuniyet_report($prd->id)['mezuniyet_total'];

@@ -13,6 +13,48 @@
             <div class="content">
                 <div class="card">
                     <div class="card-body">
+                        <div id="notify" class="alert alert-success" style="display:none;">
+                            <a href="#" class="close" data-dismiss="alert">&times;</a>
+                            <div class="message"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-3">
+                                <select class="select-box form-control" id="proje_id_filt" name="proje_id_filt" >
+                                    <option value="0">Proje Seçiniz</option>
+                                    <?php foreach (all_projects() as $rows)
+                                    {
+                                        ?><option value="<?php echo $rows->id?>"><?php echo $rows->code?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <select class="select-box form-control" id="cari_id" name="cari_id" >
+                                    <option value="0">Ana Podradçı</option>
+                                    <?php foreach (all_customer() as $rows)
+                                    {
+                                        ?><option value="<?php echo $rows->id?>"><?php echo $rows->name?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <select class="select-box form-control" id="parent_id" name="parent_id" >
+                                    <option value="0">Alt Podradçı</option>
+                                    <?php
+                                    foreach (all_list_podradci() as $items){
+                                        $new_title = parent_podradci_kontrol_list($items->id);
+                                        echo "<option value='$items->id'>$new_title</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="col-lg-2">
+                                <input type="button" name="search" id="search" value="Filtrele" class="btn btn-info btn-md"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
                         <div class="container-fluid">
                             <section>
                                 <div class="row">
@@ -57,7 +99,17 @@
     });
 
 
-    function draw_data() {
+
+    $('#search').on('click',function (){
+        let proje_id = $('#proje_id_filt').val();
+        let cari_id = $('#cari_id').val();
+        let parent_id = $('#parent_id').val();
+        $('#personel').DataTable().destroy();
+        draw_data(proje_id,cari_id,parent_id);
+
+    })
+
+    function draw_data(proje_id = null,cari_id=null,parent_id=null) {
         $('#personel').DataTable({
             'processing': true,
             'serverSide': true,
@@ -73,11 +125,14 @@
                 'type': 'POST',
                 'data': {
                     '<?=$this->security->get_csrf_token_name()?>': crsf_hash,
+                    proje_id:proje_id,
+                    cari_id:cari_id,
+                    parent_id:parent_id,
                 }
             },
             'columnDefs': [
                 {
-                    'targets': [0,5,6],
+                    'targets': [0,2,6,7,8,9],
                     'orderable': false,
                 },
             ],
@@ -85,11 +140,11 @@
             buttons: [
                 {
                     text: '<i class="fa fa-user-plus"></i> Yeni Personel Kartı Oluştur',
-                    action: function ( e, dt, node, config ) {
+                    action: function (e, dt, node, config) {
                         $.confirm({
                             theme: 'modern',
                             closeIcon: true,
-                            title: 'Yeni Personel Kartı Əlavə Edin ',
+                            title: 'Yeni Personel Kartı Əlavə Edin',
                             icon: 'fa fa-user-plus',
                             type: 'dark',
                             animation: 'scale',
@@ -98,13 +153,12 @@
                             containerFluid: !0,
                             smoothContent: true,
                             draggable: false,
-
-                            content:`<form>
+                            content:`<form id='data_form'>
                               <div class="form-row">
   <div class="form-group col-md-6">
                    <label>Bağlı Olduğu  Podradçi</label>
-                   <select class="form-control select-box ana_cari">
-                    <option value="0">Bağlı Olduğu Podradci</option>
+                   <select class="form-control select-box ana_cari required">
+                    <option value="">Bağlı Olduğu Podradci</option>
                     <?php foreach (all_customer() as $items){
                                 $new_title = $items->company;
                                 echo "<option value='$items->id'>$new_title</option>";
@@ -116,7 +170,7 @@
                    <select class="form-control select-box parent_id">
                     <option value="0">Bağlı Olduğu Podradci</option>
                     <?php foreach (all_list_podradci() as $items){
-                                $new_title = parent_podradci_kontrol_list($items->id).$items->company;
+                                $new_title = parent_podradci_kontrol_list($items->id);
                                 echo "<option value='$items->id'>$new_title</option>";
                             } ?>
                     </select>
@@ -126,7 +180,7 @@
   <div class="form-row">
        <div class="form-group col-md-2">
           <label for="name">Ad Soyad</label>
-           <input type='text' class='form-control zorunlu_text' id='name'>
+           <input type='text' class='form-control required' id='name'>
         </div>
         <div class="form-group col-md-2">
           <label for="name">Medeni Durumu</label>
@@ -137,30 +191,30 @@
         </div>
         <div class="form-group col-md-1">
           <label for="name">Fin Kodu</label>
-           <input type='text' class='form-control zorunlu_text' id='fin_no'>
+           <input type='text' class='form-control required' id='fin_no'>
         </div>
              <div class="form-group col-md-1">
           <label for="name">Seri No</label>
-           <input type='text' class='form-control zorunlu_text' id='seri_no'>
+           <input type='text' class='form-control required' id='seri_no'>
         </div>
          <div class="form-group col-md-2">
           <label for="name">Telefon</label>
-           <input type='number' class='form-control zorunlu_text' id='phone'>
+           <input type='number' class='form-control required' id='phone'>
         </div>
             <div class="form-group col-md-2">
           <label for="name">E-Mail</label>
-           <input type='text' class='form-control zorunlu_text' id='email'>
+           <input type='text' class='form-control required' id='email'>
         </div>
           <div class="form-group col-md-2">
           <label for="name">Açık Adres</label>
-           <input type='text' class='form-control zorunlu_text' id='address'>
+           <input type='text' class='form-control required' id='address'>
         </div>
     </div>
 
     <div class="form-row">
  <div class="form-group col-md-3">
       <label for="name">Vatandaşlık</label>
-       <select name="vatandaslik" class="form-control select-box zorunlu" id="vatandaslik">
+       <select name="vatandaslik" class="form-control select-box required" id="vatandaslik">
            <?php foreach (vatandaslik() as $vat) {?>
                <option value="<?php echo $vat['id']; ?>"><?php echo $vat['name']; ?> </option>
             <?php } ?>
@@ -168,29 +222,29 @@
     </div>
          <div class="form-group col-md-3">
           <label for="name">Rayon</label>
-           <input type='text' class='form-control zorunlu_text' id='city'>
+           <input type='text' class='form-control required' id='city'>
         </div>
         <div class="form-group col-md-3">
           <label for="name">Şeher</label>
-           <input type='text' class='form-control zorunlu_text' id='region'>
+           <input type='text' class='form-control required' id='region'>
         </div>
          <div class="form-group col-md-3">
           <label for="name">Ülke</label>
-           <input type='text' class='form-control zorunlu_text' id='country'>
+           <input type='text' class='form-control required' id='country'>
         </div>
     </div>
      <div class="form-row">
 
      <div class="form-group col-md-3">
       <label for="name">Cinsiyet</label>
-       <select name="cinsiyet" class="form-control select-box zorunlu" id="cinsiyet">
+       <select name="cinsiyet" class="form-control select-box required" id="cinsiyet">
             <option value="Kadın">Kadın</option>
             <option value="Erkek">Erkek</option>
         </select>
     </div>
     <div class="form-group col-md-3">
       <label for="name">Pozisyon</label>
-       <select name="roleid" class="form-control select-box zorunlu" id="roleid">
+       <select name="roleid" class="form-control select-box required" id="roleid">
            <?php foreach (role_name() as $rol){
                             ?>
                  <option value="<?php echo $rol['role_id']; ?>"><?php echo $rol['name']; ?> </option>
@@ -199,7 +253,7 @@
     </div>
     <div class="form-group col-md-3">
       <label for="name">Sorumlu Personel</label>
-       <select name="roleid" class="form-control select-box zorunlu" id="sorumlu_pers_id">
+       <select name="roleid" class="form-control select-box required" id="sorumlu_pers_id">
            <?php foreach (all_personel() as $rol){
                             ?>
          <option value="<?php echo $rol->id; ?>"><?php echo $rol->name; ?> </option>
@@ -208,7 +262,7 @@
     </div>
     <div class="form-group col-md-3">
           <label for="name">Proje</label>
-           <select name="proje_id" class="form-control select-box zorunlu" id="proje_id">
+           <select name="proje_id" class="form-control select-box required" id="proje_id">
                <?php foreach (all_projects() as $vat) {?>
                    <option value="<?php echo $vat->id; ?>"><?php echo $vat->name; ?> </option>
                 <?php } ?>
@@ -219,7 +273,7 @@
 
         <div class="form-group col-md-3">
           <label for="name">Çalışma Şekli</label>
-           <select name="proje_id" class="form-control select-box zorunlu" id="calisma_sekli">
+           <select name="proje_id" class="form-control select-box required" id="calisma_sekli">
                <?php  foreach (calisma_sekli(1) as $row) {
                                 echo ' <option value="' . $row['id'] . '"> ' . $row['name'] . '</option>';
                             }
@@ -228,11 +282,11 @@
         </div>
         <div class="form-group col-md-2">
           <label for="name">İşe Başlama Tarihi</label>
-          <input type='date' class='form-control zorunlu_text' id='ise_baslangic_tarihi'>
+          <input type='date' class='form-control required' id='ise_baslangic_tarihi'>
         </div>
         <div class="form-group col-md-2">
           <label for="name">Maaş Tipi</label>
-           <select name="salary_type" class="form-control select-box zorunlu" id="salary_type">
+           <select name="salary_type" class="form-control select-box required" id="salary_type">
               <?php foreach (salary_type() as $type){
                                 echo ' <option value="' . $type->id . '"> ' . $type->name . '</option>';
                             }
@@ -241,7 +295,7 @@
         </div>
         <div class="form-group col-md-2">
           <label for="name">Sifarişçi Firma</label>
-           <select name="loc_id" class="form-control select-box zorunlu" id="loc_id">
+           <select name="loc_id" class="form-control select-box required" id="loc_id">
               <?php foreach (firmalar() as $type){
                                 echo ' <option value="' . $type->id . '"> ' . $type->cname . '</option>';
                             }
@@ -279,16 +333,37 @@
                                     text: 'Ekle',
                                     btnClass: 'btn-blue',
                                     action: function () {
+                                        let errorMessage = 'Tüm Alanlar Zorunludur';
 
-                                        let name_say = $('.zorunlu_text').length;
-                                        let req = 0 ;
-                                        for (let i = 0; i < name_say;i++){
-                                            let name = $('.zorunlu_text').eq(i).val();
-                                            if(!(name)){
-                                                req++;
+                                        let valid = true;
+
+// Gerekli alanları kontrol et
+                                        $('#data_form .required').each(function () {
+                                            let element = $(this);
+
+                                            if (element.is('select')) {
+                                                // Select2 öğesi için özel kontrol
+                                                if (!element.val() || element.val() === "") {
+                                                    element.next('.select2').find('.select2-selection').addClass('is-invalid-select2');
+                                                    valid = false;
+                                                } else {
+                                                    element.next('.select2').find('.select2-selection').removeClass('is-invalid-select2');
+                                                }
                                             }
-                                        }
-                                        if(req > 0){
+
+                                            else {
+                                                // Diğer inputlar için kontrol
+                                                if (!element.val()) {
+                                                    element.addClass('is-invalid');
+                                                    valid = false;
+                                                } else {
+                                                    element.removeClass('is-invalid');
+                                                }
+                                            }
+                                        });
+
+                                        // Eğer tüm kontrollerden geçemezse uyarı göster
+                                        if (!valid) {
                                             $.alert({
                                                 theme: 'material',
                                                 icon: 'fa fa-exclamation',
@@ -297,8 +372,8 @@
                                                 useBootstrap: true,
                                                 columnClass: "col-md-4 mx-auto",
                                                 title: 'Dikkat!',
-                                                content: 'Tüm Alanlar Zorunludur',
-                                                buttons:{
+                                                content: errorMessage,
+                                                buttons: {
                                                     prev: {
                                                         text: 'Tamam',
                                                         btnClass: "btn btn-link text-dark",
@@ -307,42 +382,45 @@
                                             });
                                             return false;
                                         }
+
+                                        // Eğer tüm alanlar doluysa işlemi devam ettir
                                         $('#loading-box').removeClass('d-none');
 
                                         let data = {
                                             crsf_token: crsf_hash,
-                                            salary_day:  $('#salary_day').val(),
-                                            net_salary:  $('#net_salary').val(),
-                                            bank_salary:  $('#bank_salary').val(),
-                                            salary:  $('#salary').val(),
-                                            salary_type:  $('#salary_type').val(),
-                                            loc_id:  $('#loc_id').val(),
-                                            ise_baslangic_tarihi:  $('#ise_baslangic_tarihi').val(),
-                                            calisma_sekli:  $('#calisma_sekli').val(),
-                                            proje_id:  $('#proje_id').val(),
-                                            sorumlu_pers_id:  $('#sorumlu_pers_id').val(),
-                                            roleid:  $('#roleid').val(),
-                                            cinsiyet:  $('#cinsiyet').val(),
-                                            vatandaslik:  $('#vatandaslik').val(),
-                                            country:  $('#country').val(),
-                                            region:  $('#region').val(),
-                                            city:  $('#city').val(),
-                                            address:  $('#address').val(),
-                                            birthday:  $('#birthday').val(),
-                                            email:  $('#email').val(),
-                                            phone:  $('#phone').val(),
-                                            name:  $('#name').val(),
-                                            medeni_durumu:  $('#medeni_durumu').val(),
-                                            fin_no:  $('#fin_no').val(),
-                                            seri_no:  $('#seri_no').val(),
-                                            aylik_maas:  $('#aylik_maas').val(),
+                                            salary_day: $('#salary_day').val(),
+                                            net_salary: $('#net_salary').val(),
+                                            bank_salary: $('#bank_salary').val(),
+                                            salary: $('#salary').val(),
+                                            salary_type: $('#salary_type').val(),
+                                            loc_id: $('#loc_id').val(),
+                                            ise_baslangic_tarihi: $('#ise_baslangic_tarihi').val(),
+                                            calisma_sekli: $('#calisma_sekli').val(),
+                                            proje_id: $('#proje_id').val(),
+                                            sorumlu_pers_id: $('#sorumlu_pers_id').val(),
+                                            roleid: $('#roleid').val(),
+                                            cinsiyet: $('#cinsiyet').val(),
+                                            vatandaslik: $('#vatandaslik').val(),
+                                            country: $('#country').val(),
+                                            region: $('#region').val(),
+                                            city: $('#city').val(),
+                                            address: $('#address').val(),
+                                            birthday: $('#birthday').val(),
+                                            email: $('#email').val(),
+                                            phone: $('#phone').val(),
+                                            name: $('#name').val(),
+                                            medeni_durumu: $('#medeni_durumu').val(),
+                                            fin_no: $('#fin_no').val(),
+                                            seri_no: $('#seri_no').val(),
+                                            aylik_maas: $('#aylik_maas').val(),
                                             podradci_id: $('.parent_id').val(),
                                             ana_cari: $('.ana_cari').val(),
-                                        }
-                                        $.post(baseurl + 'personelp/create_save',data,(response) => {
+                                        };
+
+                                        $.post(baseurl + 'personelp/create_save', data, (response) => {
                                             let responses = jQuery.parseJSON(response);
                                             $('#loading-box').addClass('d-none');
-                                            if(responses.status==200){
+                                            if (responses.status == 200) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-check',
@@ -352,7 +430,7 @@
                                                     columnClass: "small",
                                                     title: 'Başarılı',
                                                     content: responses.message,
-                                                    buttons:{
+                                                    buttons: {
                                                         formSubmit: {
                                                             text: 'Tamam',
                                                             btnClass: 'btn-blue',
@@ -363,10 +441,7 @@
                                                         }
                                                     }
                                                 });
-
-                                            }
-                                            else if(responses.status==410){
-
+                                            } else if (responses.status == 410) {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-exclamation',
@@ -376,7 +451,7 @@
                                                     columnClass: "col-md-4 mx-auto",
                                                     title: 'Dikkat!',
                                                     content: responses.message,
-                                                    buttons:{
+                                                    buttons: {
                                                         prev: {
                                                             text: 'Tamam',
                                                             btnClass: "btn btn-link text-dark",
@@ -384,11 +459,10 @@
                                                     }
                                                 });
                                             }
-                                        })
-
+                                        });
                                     }
                                 },
-                                cancel:{
+                                cancel: {
                                     text: 'Vazgeç',
                                     btnClass: "btn btn-danger btn-sm",
                                 }
@@ -396,35 +470,6 @@
                             onContentReady: function () {
                                 $('.select-box').select2({
                                     dropdownParent: $(".jconfirm-box-container")
-                                })
-
-                                $('#fileupload_').fileupload({
-                                    url: url,
-                                    dataType: 'json',
-                                    formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
-                                    done: function (e, data) {
-                                        var img='default.png';
-                                        $.each(data.result.files, function (index, file) {
-                                            img=file.name;
-                                        });
-
-                                        $('#image_text').val(img);
-                                    },
-                                    progressall: function (e, data) {
-                                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                                        $('#progress .progress-bar').css(
-                                            'width',
-                                            progress + '%'
-                                        );
-                                    }
-                                }).prop('disabled', !$.support.fileInput)
-                                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                                // bind to events
-                                var jc = this;
-                                this.$content.find('form').on('submit', function (e) {
-                                    // if the user submits the form by pressing enter in the field.
-                                    e.preventDefault();
-                                    jc.$$formSubmit.trigger('click'); // reference the button and click it
                                 });
                             }
                         });
@@ -478,7 +523,7 @@
                                        <select class="form-control select-box parent_id">
                                         <option value="0">Bağlı Olduğu Podradci</option>
                                         <?php foreach (all_list_podradci() as $items){
-                        $new_title = parent_podradci_kontrol_list($items->id).$items->company;
+                        $new_title = parent_podradci_kontrol_list($items->id);
                         echo "<option value='$items->id'>$new_title</option>";
                     } ?>
                                         </select>
@@ -664,7 +709,7 @@
   <div class="form-row">
        <div class="form-group col-md-3">
           <label for="name">Ad Soyad</label>
-           <input type='text' class='form-control zorunlu_text' id='name'>
+           <input type='text' class='form-control required' id='name'>
         </div>
         <div class="form-group col-md-3">
           <label for="name">Medeni Durumu</label>
@@ -675,34 +720,34 @@
         </div>
         <div class="form-group col-md-1">
           <label for="name">Fin Kodu</label>
-           <input type='text' class='form-control zorunlu_text' id='fin_no'>
+           <input type='text' class='form-control required' id='fin_no'>
         </div>
            <div class="form-group col-md-2">
           <label for="name">Seri No</label>
-           <input type='text' class='form-control zorunlu_text' id='seri_no'>
+           <input type='text' class='form-control required' id='seri_no'>
         </div>
          <div class="form-group col-md-3">
           <label for="name">Telefon</label>
-           <input type='number' class='form-control zorunlu_text' id='phone'>
+           <input type='number' class='form-control required' id='phone'>
         </div>
     </div>
 
     <div class="form-row">
       <div class="form-group col-md-3">
           <label for="name">Açık Adres</label>
-           <input type='text' class='form-control zorunlu_text' id='address'>
+           <input type='text' class='form-control required' id='address'>
         </div>
          <div class="form-group col-md-3">
           <label for="name">Rayon</label>
-           <input type='text' class='form-control zorunlu_text' id='city'>
+           <input type='text' class='form-control required' id='city'>
         </div>
         <div class="form-group col-md-3">
           <label for="name">Şeher</label>
-           <input type='text' class='form-control zorunlu_text' id='region'>
+           <input type='text' class='form-control required' id='region'>
         </div>
          <div class="form-group col-md-3">
           <label for="name">Ülke</label>
-           <input type='text' class='form-control zorunlu_text' id='country'>
+           <input type='text' class='form-control required' id='country'>
         </div>
     </div>
      <div class="form-row">
@@ -760,7 +805,7 @@
         </div>
         <div class="form-group col-md-2">
           <label for="name">İşe Başlama Tarihi</label>
-          <input type='date' class='form-control zorunlu_text' id='ise_baslangic_tarihi'>
+          <input type='date' class='form-control required' id='ise_baslangic_tarihi'>
         </div>
         <div class="form-group col-md-2">
           <label for="name">Maaş Tipi</label>

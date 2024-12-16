@@ -69,8 +69,8 @@
                                                 <header>
                                                     <h4>Məlumat Sorğunun</h4></header>
                                                 <div class="borderedccc no-padding">
-                                                    <div class="widget-body">
-                                                        <div class="col col-xs-12 col-sm-12 col-md-12 no-padding">
+                                                    <div class="widget-body row">
+                                                        <div class="col col-xs-10 col-sm-10 col-md-10 no-padding">
                                                             <div class="table-responsive">
                                                                 <table class="table table-responsive">
                                                                     <tbody>
@@ -138,6 +138,12 @@
                                                                     </tr>
                                                                     </tbody>
                                                                 </table>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="col col-xs-2 col-sm-2 col-md-2 no-padding">
+                                                            <div class="table-responsive">
+                                                                <?php echo pay_images_personel($details->id); ?>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -448,18 +454,18 @@
                                                                 if($note_list){
                                                                     $button_dikkat="<i class='fas fa-exclamation-triangle button_view_notes' onmouseover='details_notes()' style='
 
-    padding: 0px;
-    margin-left: 11px;
-    color: red;
-    font-size: 34px;
-    position: relative;
-    top: 7px;
-    animation-name: flash;
-    -webkit-animation-duration: 2s;
-    -webkit-animation-timing-function: linear;
-    -webkit-animation-iteration-count: infinite;
-
-'></i>";
+                                                                        padding: 0px;
+                                                                        margin-left: 11px;
+                                                                        color: red;
+                                                                        font-size: 34px;
+                                                                        position: relative;
+                                                                        top: 7px;
+                                                                        animation-name: flash;
+                                                                        -webkit-animation-duration: 2s;
+                                                                        -webkit-animation-timing-function: linear;
+                                                                        -webkit-animation-iteration-count: infinite;
+                                                                    
+                                                                    '></i>";
                                                                 }
 
 
@@ -1234,7 +1240,7 @@
                     useBootstrap: true,
                     columnClass: "col-md-4 mx-auto",
                     title: 'Başarılı',
-                    content: 'Başarılı Bir Şekilde Ürün Eklendi!',
+                    content: responses.message,
                     buttons:{
                         formSubmit: {
                             text: 'Tamam',
@@ -1259,7 +1265,7 @@
                     useBootstrap: true,
                     columnClass: "col-md-4 mx-auto",
                     title: 'Dikkat!',
-                    content: 'Kriterlere Uygun Ürün Bulunamadı!',
+                    content: responses.message,
                     buttons:{
                         prev: {
                             text: 'Tamam',
