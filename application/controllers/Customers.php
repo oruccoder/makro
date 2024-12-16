@@ -12,15 +12,19 @@
 
 
 defined('BASEPATH') OR exit('No direct script access allowed');
-
+//test
 class Customers extends CI_Controller
 {
     public function __construct()
     {
         parent::__construct();
+        $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         $this->load->model('customers_model', 'customers');
         $this->load->model('customeravanstalep_model', 'customeravans');
-        $this->load->library("Aauth");
         $this->load->library("Custom");
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
@@ -1928,7 +1932,7 @@ class Customers extends CI_Controller
                 $file_type = file_type_details($document->file_type_id)->name;
             }
 
-            $edit = "<button class='btn btn-warning edit' talep_id='$document->id'><i class='fa fa-pencil'></i></button>&nbsp;";
+            $edit = "<button class='btn btn-warning edit' talep_id='$document->id'><i class='fa fa-pen'></i></button>&nbsp;";
             $cancel = "<button class='btn btn-danger talep_sil' talep_id='$document->id' type='button'><i class='fa fa-ban'></i></button>&nbsp;";
             $view = "<a class='btn btn-success view' href='".base_url('userfiles/documents/' . $document->filename)."' type='button'><i class='fa fa-eye'></i></a>&nbsp;";
 
@@ -1963,20 +1967,39 @@ class Customers extends CI_Controller
     }
 
 
-    public function remove_document(){
-        $this->db->trans_start();
-        $id = $this->input->post('edit_id');
-        if($this->db->delete('geopos_documents', array('id' => $id))){
-            $this->aauth->applog("cariden  File Silindi  : File ID : ".$id, $this->aauth->get_user()->username);
-            $this->db->trans_complete();
-            echo json_encode(array('status' => 'Success','message'=>'Başarıyla Silindi'));
-        }
-        else {
-            $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun."));
+    public function remove_document() {
+        $user_id = $this->aauth->get_user()->id;
+
+        // Kullanıcı yetkisini kontrol et
+        if ($user_id != 21) {
+            echo json_encode(array(
+                'status' => 'Error',
+                'message' => 'Yetkiniz Bulunmamaktadır. Bu işlemi yapamazsınız.'
+            ));
+            return;
         }
 
+        $this->db->trans_start();
+        $id = $this->input->post('edit_id');
+
+        if ($this->db->delete('geopos_documents', array('id' => $id))) {
+            $this->aauth->applog("Cariden File Silindi: File ID : " . $id, $this->aauth->get_user()->username);
+            $this->db->trans_complete();
+
+            echo json_encode(array(
+                'status' => 'Success',
+                'message' => 'Başarıyla Silindi'
+            ));
+        } else {
+            $this->db->trans_rollback();
+
+            echo json_encode(array(
+                'status' => 'Error',
+                'message' => 'Hata Aldınız. Lütfen Yöneticinize Başvurun.'
+            ));
+        }
     }
+
 
     public function add_document(){
         $this->db->trans_start();
@@ -2001,7 +2024,9 @@ class Customers extends CI_Controller
             'proje_id'=>$proje_id
         );
         if($this->db->insert('geopos_documents', $data)){
-            $this->aauth->applog("Cariye Belge Eklendi : ".$cari_id, $this->aauth->get_user()->username);
+            $last_id = $this->db->insert_id();
+
+            $this->aauth->applog("Cariye Belge Eklendi Cari ID: ".$cari_id.' Belge ID: '.$last_id, $this->aauth->get_user()->username);
             $this->db->trans_complete();
             echo json_encode(array('status' => 'Success','message'=>'Başarıyla Dosya Eklendi'));
 
@@ -2013,41 +2038,50 @@ class Customers extends CI_Controller
         }
     }
 
-    public function update_document(){
-        $this->db->trans_start();
-        $id = $this->input->post('edit_id');
-        $bitis_date = $this->input->post('bitis_date');
-        $baslangic_date = $this->input->post('baslangic_date');
-        $file_type_id = $this->input->post('file_type_id');
-        $name = $this->input->post('name');
-        $cari_id = $this->input->post('cari_id');
-        $image_text = $this->input->post('image_text');
-        $proje_id = $this->input->post('proje_id');
+    public function update_document()
+    {
+
+        $this->db->trans_start(); // İşlemi başlat
+        $id = $this->input->post('edit_id', true); // Güvenlik için `true` ile filtreleme
+        $bitis_date = $this->input->post('bitis_date', true);
+        $baslangic_date = $this->input->post('baslangic_date', true);
+        $file_type_id = $this->input->post('file_type_id', true);
+        $name = $this->input->post('name', true);
+        $cari_id = $this->input->post('cari_id', true);
+        $image_text = $this->input->post('image_text', true);
+        $proje_id = $this->input->post('proje_id', true);
+
+        // Gerekli alanların boş olup olmadığını kontrol et
+        if (empty($id) || empty($name) || empty($file_type_id) || empty($image_text) || empty($cari_id)) {
+            $this->db->trans_rollback();
+            echo json_encode(array('status' => 'Error', 'message' => 'Zorunlu alanlar doldurulmalıdır.'));
+            return;
+        }
 
         $data = array(
             'baslangic_date' => $baslangic_date,
             'bitis_date' => $bitis_date,
             'title' => $name,
             'filename' => $image_text,
-            'fid'=>$cari_id,
-            'rid'=>1,
-            'file_type_id'=>$file_type_id,
-            'proje_id'=>$proje_id
+            'fid' => $cari_id,
+            'rid' => 1, // Sabit değer, isteğe göre düzenlenebilir
+            'file_type_id' => $file_type_id,
+            'proje_id' => $proje_id,
         );
-        $this->db->where('id',$id);
-        $this->db->set($data);
-        if($this->db->update('geopos_documents', $data)){
-            $this->aauth->applog("Cariye Belge Güncellendi : ".$cari_id, $this->aauth->get_user()->username);
+
+        $this->db->where('id', $id);
+        if ($this->db->update('geopos_documents', $data)) {
+            // Güncelleme başarılı
+            $this->aauth->applog("Cariye Belge Güncellendi Belge ID: " . $id, $this->aauth->get_user()->username);
             $this->db->trans_complete();
-            echo json_encode(array('status' => 'Success','message'=>'Başarıyla Dosya Güncellendi'));
-
-        }
-        else {
+            echo json_encode(array('status' => 'Success', 'message' => 'Dosya başarıyla güncellendi.'));
+        } else {
+            // Güncelleme başarısız
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun."));
-
+            echo json_encode(array('status' => 'Error', 'message' => 'Dosya güncellenirken bir hata oluştu. Lütfen tekrar deneyiniz.'));
         }
     }
+
 
     public function adddocument()
     {

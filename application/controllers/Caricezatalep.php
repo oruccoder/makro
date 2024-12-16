@@ -929,7 +929,6 @@ class Caricezatalep Extends CI_Controller
     public function status_upda(){
         if (!$this->aauth->premission(47)->write) {
             echo json_encode(array('status' => 410, 'message' =>'İptal Etmek İçin Yetkiniz Bulunmamaktadır'));
-
         }
         else {
             $this->db->trans_start();

@@ -282,8 +282,8 @@ class Malzemetalep_model extends CI_Model
 
 
 
-    public function create_save(){
-        //$all_users = $this->input->post('all_users');
+    public function create_save()
+    {
         $progress_status_id = $this->input->post('progress_status_id');
         $talep_eden_user_id = $this->input->post('talep_eden_user_id');
         $proje_id = $this->input->post('proje_id');
@@ -293,19 +293,20 @@ class Malzemetalep_model extends CI_Model
         $desc = $this->input->post('desc');
         $image_text = $this->input->post('image_text');
         $talep_type = $this->input->post('talep_type');
-        $gider_durumu = $this->input->post('gider_durumu');
-        $demirbas_id=0;
-        $firma_demirbas_id=0;
-        if($talep_type==3){
-            $gider_durumu=1;
-            $demirbas_id = $this->input->post('demirbas_id');
-            $firma_demirbas_id = $this->input->post('firma_demirbas_id');
+        $gider_durumu = $this->input->post('gider_durumu', true) ?? 0;
+        $demirbas_id = $this->input->post('demirbas_id', true) ?? 0;
+        $firma_demirbas_id = $this->input->post('firma_demirbas_id', true) ?? 0;
+
+        // Talep tipi 3 ise özel durum
+        if ($talep_type == 3) {
+            $gider_durumu = 1;
         }
 
-
-
+        // Talep numarası oluştur
         $talep_no = numaric(2);
-        $data = array(
+
+        // Talep verilerini hazırla
+        $data = [
             'code' => $talep_no,
             'progress_status_id' => $progress_status_id,
             'talep_type' => $talep_type,
@@ -319,64 +320,66 @@ class Malzemetalep_model extends CI_Model
             'demirbas_id' => $demirbas_id,
             'gider_durumu' => intval($gider_durumu),
             'aauth' => $this->aauth->get_user()->id,
-            'loc' =>  $this->session->userdata('set_firma_id'),
-        );
+            'loc' => $this->session->userdata('set_firma_id'),
+        ];
+
         if ($this->db->insert('talep_form', $data)) {
             $last_id = $this->db->insert_id();
 
+            // Talep numarası sayacını güncelle
+            numaric_update(2);
 
-            $this->db->set('deger', "deger+1",FALSE);
-            $this->db->where('tip', 2);
-            $this->db->update('numaric');
+            // Zamanlama bilgisi ekle
+            $this->add_time_schedule($last_id);
 
-            if(time_day_get(1)){
-
-                 $data_time=
-                     [
-                         'mt_id'=>$last_id,
-                         'status'=>1,
-                         'start_time'=>n_gun_sonra(time_day_get(1))['start_date'],
-                         'end_time'=>n_gun_sonra(time_day_get(1))['end_date'],
-
-                     ];
-
-                $this->db->insert('talep_time', $data_time);
+            // Görselleri kaydet
+            if($image_text){
+                $this->save_images($last_id, $image_text);
             }
 
 
-
-
-            //all_users
-//            foreach ($all_users as $user_id){
-//                $data_step = array(
-//                    'user_id' => $user_id,
-//                    'form_id' => $last_id,
-//                );
-//                $this->db->insert('talep_form_users', $data_step);
-//            }
-            //all_user
-            //images
-            $data_images = array(
-                'image_text' => $image_text,
-                'form_id' => $last_id,
+            // Log kaydı
+            $this->aauth->applog(
+                "Malzeme Talebi Oluşturuldu: Talep No: " . $talep_no,
+                $this->aauth->get_user()->username
             );
-            $this->db->insert('talep_form_files', $data_images);
-            //all_user
-
-            $this->aauth->applog("Malzame Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
 
             return [
-                'status'=>1,
-                'id'=>$last_id
+                'status' => 1,
+                'id' => $last_id,
             ];
-        }
-        else {
+        } else {
             return [
-                'status'=>0,
-                'id'=>0
+                'status' => 0,
+                'id' => 0,
             ];
         }
     }
+
+
+
+    private function add_time_schedule($talep_id)
+    {
+        if (time_day_get(1)) {
+            $data_time = [
+                'mt_id' => $talep_id,
+                'status' => 1,
+                'start_time' => n_gun_sonra(time_day_get(1))['start_date'],
+                'end_time' => n_gun_sonra(time_day_get(1))['end_date'],
+            ];
+            $this->db->insert('talep_time', $data_time);
+        }
+    }
+
+    private function save_images($talep_id, $image_text)
+    {
+        $data_images = [
+            'image_text' => $image_text,
+            'form_id' => $talep_id,
+        ];
+        $this->db->insert('talep_form_files', $data_images);
+    }
+
 
     public function create_save_notes(){
         //$all_users = $this->input->post('all_users');
@@ -2423,7 +2426,7 @@ WHERE talep_onay_new.type = 1 AND  talep_form.status=1 and talep_form.talep_type
             //$this->db->where('virman.loc =', $this->session->userdata('set_firma_id')); //2019-11-23 14:28:57
         }
         $aauth_id = $this->aauth->get_user()->id;
-        if($aauth_id==39){
+        if($aauth_id==39 || $aauth_id==1135 || $aauth_id==174){
             $count = $this->db->query("SELECT * FROM `talep_form` INNER JOIN 
 geopos_projects On talep_form.proje_id =geopos_projects.id  WHERE talep_form.status = 8 and talep_form.talep_type =1  $where_talep_form")->num_rows();
             return [

@@ -162,7 +162,7 @@
                                                                             <th>#</th>
                                                                             <th>Kod</th>
                                                                             <th>Lokasyon</th>
-                                                                            <th>Yükleme Yapacak Firma</th>
+                                                                            <th>Yükleme Yapacak Firma / Sorumlu Personel</th>
                                                                             <th>Talep Tipi</th>
                                                                             <th>Açıklama</th>
 <!--                                                                            <th>Miktar</th>-->
@@ -187,11 +187,20 @@
                                                                                 <td><?php echo $i ?></td>
                                                                                 <td><?php echo $values->code ?></td>
                                                                                 <td><?php echo $values->lokasyon ?></td>
-                                                                                <td><?php echo customer_details($values->yukleme_yapacak_cari_id)['company'] ?></td>
-<!--                                                                                <td>--><?php //echo account_type_sorgu($values->method) ?><!--</td>-->
+                                                                                <td>
+                                                                                    <?php
+                                                                                    if ($values->cari_pers_type == 1) {
+                                                                                        echo customer_details($values->yukleme_yapacak_cari_id)['company'];
+                                                                                    } elseif ($values->cari_pers_type == 2) {
+                                                                                        echo personel_details($values->yukleme_yapacak_cari_id);
+                                                                                    } else {
+                                                                                        echo "Bilinmeyen Tip";
+                                                                                    }
+                                                                                    ?>
+                                                                                </td>
                                                                                 <td>
                                                                                 <span style="<?php echo nakliye_item_tip_who($values->nakliye_item_tip,$values->id)['style'] ?>" class="txt-color-darken no-padding " data-html="true" data-popup="popover" title="" data-trigger="hover" data-content="<?php echo nakliye_item_tip_who($values->nakliye_item_tip,$values->id)['messages'] ?>" data-original-title="Talep Tipi"><b><?php echo nakliye_item_tip_who($values->nakliye_item_tip)['name'] ?></b></span>
-
+                                                                                </td>
 </td>
                                                                                 <td><?php echo $values->product_desc ?></td>
 <!--                                                                                <td><input  eq="--><?php //echo $eq ?><!--" item_id="--><?php //echo $values->id?><!--" type="number" value="--><?php //echo $values->product_qty ?><!--" class="form-control item_qty"></td>-->
@@ -230,16 +239,24 @@
                                                                         <h2 style="text-align: center">Zəhmət olmasa material əlavə etməyi unutmayın...</h2>
                                                                     </div>
                                                                     <?php
-                                                                }?>
+                                                                }
+                                                                $disable_add_button='';
+                                                                if($details->bildirim_durumu!=0){
+                                                                    $disable_add_button='disabled';
+                                                                }
+                                                                ?>
+
+
                                                                 <div class="text-center">
-                                                                    <button  type="button" class="btn btn-primary add_product" demirbas_id="<?php echo $details->demirbas_id ?>" firma_demirbas_id="<?php echo $details->firma_demirbas_id ?>" style="margin: 20px;"><i class="fa fa-plus"></i> Tələb etmək üçün material təyin edin</button>
+                                                                    <button  type="button" <?php echo $disable_add_button;?>  class="btn btn-primary add_product" demirbas_id="<?php echo $details->demirbas_id ?>" firma_demirbas_id="<?php echo $details->firma_demirbas_id ?>" style="margin: 20px;"><i class="fa fa-plus"></i> Tələb etmək üçün material təyin edin</button>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        <?php } else {
+                                        <?php }
+                                        else {
                                             $iptal_status=0;
                                             $nav_style='';
                                             $chevron_stye='';
@@ -357,7 +374,7 @@
                                                                             <tr>
                                                                                 <th>#</th>
                                                                                 <th>Kod</th>
-                                                                                <th width="7%">Yükleme Yapacak Firma</th>
+                                                                                <th width="12%">Yükleme Yapacak Firma</th>
                                                                                 <th width="7%">Cari</th>
                                                                                 <th width="7%">Araç</th>
                                                                                 <th>Lokasyon</th>
@@ -391,22 +408,49 @@
                                                                                 <tr  id="remove<?php echo $values->id?>">
                                                                                     <td><?php echo $i ?></td>
                                                                                     <td><?php echo $values->code ?></td>
-                                                                                    <td>
-                                                                                        <select class='form-control select-box yukleme_yapacak_cari_id'>
-                                                                                            <option value='0'>Cari Seçiniz</option>
-                                                                                            <?php foreach (all_customer() as $customer_item){
-                                                                                                $id=$customer_item->id;
-                                                                                                $name=$customer_item->company;
-                                                                                                $selected='';
-                                                                                                if($id==$values->yukleme_yapacak_cari_id){
-                                                                                                    $selected='selected';
-                                                                                                }
-                                                                                                echo "<option $selected  value='$id'>$name</option>";
-                                                                                            } ?>
-                                                                                        </select>
 
-                                                                                    </td>
                                                                                     <td>
+                                                                                        <?php
+                                                                                        if ($values->cari_pers_type == 1) {
+                                                                                            ?>
+
+                                                                                            <select class='form-control select-box yukleme_yapacak_cari_id'>
+                                                                                                <option value='0'>Cari Seçiniz</option>
+                                                                                                <?php foreach (all_customer() as $customer_item){
+                                                                                                    $id=$customer_item->id;
+                                                                                                    $name=$customer_item->company;
+                                                                                                    $selected='';
+                                                                                                    if($id==$values->yukleme_yapacak_cari_id){
+                                                                                                        $selected='selected';
+                                                                                                    }
+                                                                                                    echo "<option $selected  value='$id'>$name</option>";
+                                                                                                } ?>
+                                                                                            </select>
+
+                                                                                            <?php
+                                                                                        } elseif ($values->cari_pers_type == 2) {
+                                                                                            ?>
+                                                                                            <select class='form-control select-box yukleme_yapacak_cari_id'>
+                                                                                                <option value='0'>Personel Seçiniz</option>
+                                                                                                <?php foreach (all_personel() as $personel_item){
+                                                                                                    $id=$personel_item->id;
+                                                                                                    $name=$personel_item->name;
+                                                                                                    $selected='';
+                                                                                                    if($id==$values->yukleme_yapacak_cari_id){
+                                                                                                        $selected='selected';
+                                                                                                    }
+                                                                                                    echo "<option $selected  value='$id'>$name</option>";
+                                                                                                } ?>
+                                                                                            </select>
+
+                                                                                            <?php
+                                                                                        }
+                                                                                        ?>
+                                                                                    </td>
+
+
+                                                                                    <td>
+
                                                                                         <select class='form-control select-box cari_id'>
                                                                                             <option value='0'>Cari Seçiniz</option>
                                                                                             <?php foreach (all_customer() as $customer_item){
@@ -523,7 +567,7 @@
                                                                             <tr>
                                                                                 <th>#</th>
                                                                                 <th>Kod</th>
-                                                                                <th width="7%">Yükleme Yapacak Firma</th>
+                                                                                <th width="12%">Yükleme Yapacak Firma / Sorumlu Personel</th>
                                                                                 <th width="7%">Cari</th>
                                                                                 <th width="7%">Araç</th>
                                                                                 <th>Lokasyon</th>
@@ -558,7 +602,16 @@
                                                                                     <td><?php echo $i ?></td>
                                                                                     <td><?php echo $values->code ?></td>
                                                                                     <td>
-                                                                                        <?php echo customer_details($values->yukleme_yapacak_cari_id)['company']?>
+                                                                                        <?php
+
+                                                                                        if($values->cari_pers_type==1){
+                                                                                            echo customer_details($values->yukleme_yapacak_cari_id)['company'];
+                                                                                        }
+                                                                                        elseif($values->cari_pers_type==2){
+                                                                                            echo personel_details($values->yukleme_yapacak_cari_id);
+
+                                                                                        }
+                                                                                        ?>
                                                                                     </td>
                                                                                     <td>
                                                                                         <?php echo customer_details($values->cari_id)['company']?>
@@ -786,7 +839,27 @@
                                                             <header> <h4>Təsdiqləmə qaydaları</h4></header>
                                                             <p style="text-align: center">TƏSDIQLƏMƏ SIRASI</p>
                                                             <table class="table">
-                                                                <?php foreach (talep_onay_nakliye(1,$details->id) as $items) {
+
+
+                                                                <?php
+                                                                $button_dikkat='';
+                                                                if($note_list){
+                                                                    $button_dikkat="<i class='fas fa-exclamation-triangle button_view_notes' onmouseover='details_notes()' style='
+
+                                                                    padding: 0px;
+                                                                    margin-left: 11px;
+                                                                    color: red;
+                                                                    font-size: 34px;
+                                                                    position: relative;
+                                                                    top: 7px;
+                                                                    animation-name: flash;
+                                                                    -webkit-animation-duration: 2s;
+                                                                    -webkit-animation-timing-function: linear;
+                                                                    -webkit-animation-iteration-count: infinite;
+                                                                
+                                                                '></i>";
+                                                                }
+                                                                foreach (talep_onay_nakliye(1,$details->id) as $items) {
                                                                     $durum='-';
                                                                     $button='<button class="btn btn-warning"><i class="fa fa-question"></i>&nbsp;Sıra Gelmedi</button>';
                                                                     if($items->status==1){
@@ -795,7 +868,7 @@
                                                                     }
                                                                     if($items->staff==1 && $items->status==0){
                                                                         $durum='Gözləmedə';
-                                                                        $button='<button class="btn btn-info onayla" type="1" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>';
+                                                                        $button='<button class="btn btn-info onayla" type="1" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
                                                                     }
                                                                     ?>
                                                                     <tr>
@@ -819,7 +892,7 @@
                                                                         }
                                                                         if($items->staff==1 && $items->status==0){
                                                                             $durum='Gözləmedə';
-                                                                            $button='<button class="btn btn-info onayla" type="2" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>';
+                                                                            $button='<button class="btn btn-info onayla" type="2" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
                                                                         }
                                                                         ?>
                                                                         <tr>
@@ -1306,7 +1379,7 @@
             }
         });
     })
-    $(document).on('click','.add_product',function (){
+    $(document).on('click', '.add_product', function () {
         $.confirm({
             theme: 'modern',
             closeIcon: true,
@@ -1319,62 +1392,64 @@
             containerFluid: !0,
             smoothContent: true,
             draggable: false,
-            content:`<form action="" class="formName" id='data_form'>
-                                         <div class="row">
-                                           <div class="col col-xs-12 col-sm-12 col-md-12">
-
-                                                <table class="table table_products">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Açıklama</th>
-                                                            <th>Lokasyon (Yükleme Yeri)</th>
-                                                            <th>Yükleme Yapacak Cari</th>
-                                                            <th>Talep Tipi</th>
-                                                            <th>İşlem</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-
-                                                            <td><input type='text' class='form-control' name='product_desc'></td>
-                                                             <td><input type='text' class='form-control' name='lokasyon'></td>
-                                                             <td>
-
-                                                             <select class='form-control select-box' name="yukleme_yapacak_cari_id">
-                                                               <option value='0'>Seçiniz</option>
-                                                                        <?php foreach (all_customer() as $items){
+            content: `<form action="" class="formName" id='data_form'>
+            <div class="row">
+                <div class="col col-xs-12 col-sm-12 col-md-12">
+                    <table class="table table_products">
+                        <thead>
+                            <tr>
+                                <th>Açıklama</th>
+                                <th>Lokasyon (Yükleme Yeri)</th>
+                                <th>Yükleme Tipi</th>
+                                <th>Yükleme Yapacak Cari/Personel</th>
+                                <th>Talep Tipi</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type='text' class='form-control' name='product_desc'></td>
+                                <td><input type='text' class='form-control' name='lokasyon'></td>
+                                <td>
+                                    <select class='form-control select-box' name='cari_pers_type' id='cari_pers_type'>
+                                        <option value='0'>Seçiniz</option>
+                                        <option value='1'>Cari</option>
+                                        <option value='2'>Personel</option>
+                                    </select>
+                                </td>
+                                <td id="yukleme_yapacak_container">
+                                    <select class='form-control select-box' name="yukleme_yapacak_cari_id">
+                                        <option value='0'>Seçiniz</option>
+                                        <?php foreach (all_customer() as $items) {
                 echo "<option value='$items->id'>$items->company</option>";
             } ?>
-                                                                    </select>
-                                                                </td>
-
-                                                       <td>
-                                                             <select class='form-control' name="nakliye_item_tip">
-                                                               <option value='0'>Seçiniz</option>
-                                                                        <?php foreach (nakliye_item_tip() as $items){
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class='form-control' name="nakliye_item_tip">
+                                        <option value='0'>Seçiniz</option>
+                                        <?php foreach (nakliye_item_tip() as $items) {
                 echo "<option value='$items->id'>$items->name</option>";
             } ?>
-                                                                    </select>
-                                                                </td>
-
-                                                            <td><button type='button' class='btn btn-success add_items'><i class='fa fa-plus'></td>
-
-                                                            <input type='hidden' value='<?php echo $details->id?>' name='form_id'>
-                                                            </td>
-
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                        </div>
-                                    </div>
-
-
-                                        </form>`,
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type='button' class='btn btn-success add_items'>
+                                        <i class='fa fa-plus'></i>
+                                    </button>
+                                    <input type='hidden' value='<?php echo $details->id ?>' name='form_id'>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>`,
             buttons: {
-                cancel:{
+                cancel: {
                     text: 'Vazgeç',
                     btnClass: "btn btn-danger btn-sm",
-                    action:function(){
+                    action: function () {
                         location.reload();
                     }
                 }
@@ -1382,18 +1457,58 @@
             onContentReady: function () {
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
-                })
-                // bind to events
+                });
+
+                // Dinamik yükleme tipi değişikliği
+                $('#cari_pers_type').on('change', function () {
+                    let type = $(this).val();
+                    let container = $('#yukleme_yapacak_container');
+                    container.empty(); // Önce mevcut seçenekleri temizle
+
+                    if (type == '1') {
+                        // Cari seçimi
+                        container.append(`
+                        <select class='form-control select-box' name="yukleme_yapacak_cari_id">
+                            <option value='0'>Seçiniz</option>
+                            <?php foreach (all_customer() as $items) {
+                            echo "<option value='$items->id'>$items->company</option>";
+                        } ?>
+                        </select>
+                    `);
+                    } else if (type == '2') {
+                        // Personel seçimi
+                        container.append(`
+                        <select class='form-control select-box' name="yukleme_yapacak_cari_id">
+                            <option value='0'>Seçiniz</option>
+                            <?php foreach (all_personel() as $items) {
+                            echo "<option value='$items->id'>$items->name</option>";
+                        } ?>
+                        </select>
+                    `);
+                    } else {
+                        container.append(`
+                        <select class='form-control select-box' name="yukleme_yapacak_cari_id">
+                            <option value='0'>Seçiniz</option>
+                        </select>
+                    `);
+                    }
+
+                    // Yeni eklenen select-box için Select2 başlat
+                    container.find('.select-box').select2({
+                        dropdownParent: $(".jconfirm-box-container")
+                    });
+                });
+
+                // Form içeriği gönderme işlemi
                 var jc = this;
                 this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
                     e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    jc.$$formSubmit.trigger('click');
                 });
             }
         });
+    });
 
-    })
     $(document).on('click','.add_product_teklif',function (){
         $.confirm({
             theme: 'modern',
@@ -1602,7 +1717,7 @@
                     useBootstrap: true,
                     columnClass: "col-md-4 mx-auto",
                     title: 'Başarılı',
-                    content: 'Başarılı Bir Şekilde Ürün Eklendi!',
+                    content: responses.message,
                     buttons:{
                         formSubmit: {
                             text: 'Tamam',
@@ -1627,7 +1742,7 @@
                     useBootstrap: true,
                     columnClass: "col-md-4 mx-auto",
                     title: 'Dikkat!',
-                    content: 'Kriterlere Uygun Ürün Bulunamadı!',
+                    content: responses.message,
                     buttons:{
                         prev: {
                             text: 'Tamam',
@@ -4173,6 +4288,78 @@
         });
 
     })
+
+    function details_notes(){
+        let talep_id = $('#talep_id').val();
+        $.confirm({
+            theme: 'modern',
+            closeIcon: true,
+            title: 'Notlar',
+            icon: 'fa fa-bell',
+            type: 'green',
+            animation: 'scale',
+            useBootstrap: true,
+            columnClass: "medium",
+            containerFluid: !0,
+            smoothContent: true,
+            draggable: false,
+            content: function () {
+                let self = this;
+                let html = ''; // Yönlendirilmiş ve Tek Yapılan randevu 1,3
+                let responses;
+                html+='<form action="" class="formName">' +
+                    '<div class="form-group table_history">'+
+                    '</div>' +
+                    '</form>';
+
+                let data = {
+                    crsf_token: crsf_hash,
+                }
+
+                let table_report='';
+                $.post(baseurl + 'employee/projeler',data,(response) => {
+                    self.$content.find('#person-list').empty().append(html);
+                    let responses = jQuery.parseJSON(response);
+                    table_report =`
+                        <table id="notes_report"  class="table" style="width:100%;">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>İşlem Tarihi</th>
+                            <th>Açıklama</th>
+                            <th>Personel</th>
+
+                        </tr>
+                        </thead>
+
+                    </table>`;
+                    $('.table_history').empty().html(table_report);
+                    draw_data_notes_report(talep_id);
+                });
+
+
+
+                self.$content.find('#person-list').empty().append(html);
+                return $('#person-container').html();
+            },
+            buttons: {
+                cancel:{
+                    text: 'Kapat',
+                    btnClass: "btn btn-danger btn-sm",
+                }
+            },
+            onContentReady: function () {
+                // bind to events
+                var jc = this;
+                this.$content.find('form').on('submit', function (e) {
+                    // if the user submits the form by pressing enter in the field.
+                    e.preventDefault();
+                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                });
+            }
+        });
+    }
+
     $(document).on('click','.talep_notes',function (e){
 
         let talep_id = $(this).attr('talep_id');

@@ -551,6 +551,9 @@
                     <a href="<?= base_url(); ?>personelavanstalep/all_list" class="dropdown-item"><i class="fas fa-list"></i>Personel Avans Talepleri</a>
                     <a href="<?= base_url(); ?>disablepersonel" class="dropdown-item"><i class="fas fa-list"></i>Pasif Personeller</a>
                     <a href="<?= base_url(); ?>personelaction/personel_task" class="dropdown-item"><i class="fas fa-list"></i>Görevlendirme</a>
+                    <a href="<?= base_url(); ?>attendance" class="dropdown-item"><i class="fas fa-list"></i>Personel Çizelge Girişleri</a>
+                    <a href="<?= base_url(); ?>attendance/report" class="dropdown-item"><i class="fas fa-list"></i>Personel Çizelge Raporu</a>
+                    <a href="<?= base_url(); ?>attendance/signature" class="dropdown-item"><i class="fas fa-list"></i>Personel İmza</a>
 <!--                    <a href="--><?//= base_url(); ?><!--employee/payroll_list" class="dropdown-item"><i class="fas fa-list"></i>Bordrolar</a>-->
 <!--                    <a href="--><?//= base_url(); ?><!--controller/personel_takip" class="dropdown-item"><i class="fas fa-list"></i>Personel Takip</a>-->
                     <a href="<?= base_url(); ?>prim" class="dropdown-item"><i class="fas fa-list"></i>Personel Prim/Cezalar</a>
@@ -822,6 +825,9 @@
                         <li class="nav-item"><a href="<?= base_url(); ?>prim" class="nav-link"><i class="fas fa-list"></i>Personel Prim/Cezalar</a></li>
                         <li class="nav-item"><a href="<?= base_url(); ?>salary" class="nav-link"><i class="fas fa-list"></i>Bordro İşlemleri</a></li>
                         <li class="nav-item"><a href="<?= base_url(); ?>salary/allbordro" class="nav-link"><i class="fas fa-list"></i>Tüm Bordrolar</a></li>
+                        <a href="<?= base_url(); ?>attendance" class="dropdown-item"><i class="fas fa-list"></i>Personel Çizelge Girişleri</a>
+                        <a href="<?= base_url(); ?>attendance/report" class="dropdown-item"><i class="fas fa-list"></i>Personel Çizelge Raporu</a>
+                        <a href="<?= base_url(); ?>attendance/signature" class="dropdown-item"><i class="fas fa-list"></i>Personel İmza</a>
                         <?php
                         if ($this->aauth->premission(76)->write) { ?>
                             <li class="nav-item"><a href="<?= base_url(); ?>personelpoint" class="nav-link"><i class="fas fa-list"></i>Personel Puanlama</a></li>
@@ -2939,6 +2945,11 @@ else {
         color: red;
     }
 
+    .is-invalid-select2 {
+        border: 1px solid #dc3545 !important;
+        border-radius: 0.25rem;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
 
 </style>
 </html>

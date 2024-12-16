@@ -52,59 +52,61 @@ class Personel_model extends CI_Model
 
     }
 
+
     private function _list()
-
     {
-
-        $this->db->select('geopos_employees.*,geopos_users.banned,geopos_users.picture,geopos_users.roleid ,geopos_users.loc,geopos_projects.name as proje_name,geopos_projects.code as proje_code,geopos_role.name as role_name');
+        $user =$this->aauth->get_user()->id;
+        $role_id = $this->aauth->get_user()->roleid;
+        $santiye_id = personel_salary_details_get($user)->proje_id;
+        $this->db->select('geopos_employees.*, geopos_users.banned, geopos_users.picture, geopos_users.roleid, geopos_users.loc, geopos_projects.name as proje_name, geopos_projects.code as proje_code, geopos_role.name as role_name');
         $this->db->from('geopos_employees');
         $this->db->join('geopos_users', 'geopos_employees.id = geopos_users.id');
-        $this->db->join('personel_salary', 'personel_salary.personel_id = geopos_users.id','left');
-        $this->db->join('geopos_projects', 'personel_salary.proje_id = geopos_projects.id','left');
-        $this->db->join('geopos_role', 'geopos_users.roleid = geopos_role.role_id','left');
+        $this->db->join('personel_salary', 'personel_salary.personel_id = geopos_users.id', 'left');
+        $this->db->join('geopos_projects', 'personel_salary.proje_id = geopos_projects.id', 'left');
+        $this->db->join('geopos_role', 'geopos_users.roleid = geopos_role.role_id', 'left');
         $this->db->where('geopos_users.banned', 0);
         $this->db->where('personel_salary.status', 1);
 
-        if($this->session->userdata('set_firma_id')){
-            $this->db->where('geopos_employees.loc =', $this->session->userdata('set_firma_id')); //2019-11-23 14:28:57
+        if (!$this->aauth->premission(95)->read) {
+            // Eğer kullanıcı tüm personelleri görme yetkisine sahip değilse
+            if (in_array($role_id, personel_yetkileri())) {
+                // Kullanıcının şantiyesine göre filtrele
+                $this->db->where('geopos_projects.id', $santiye_id);
+            } else {
+                // Yetkisi olmayan kullanıcılar için boş sonuç
+                $this->db->where('1', 0);
+            }
         }
+
+        if ($this->session->userdata('set_firma_id')) {
+            $this->db->where('geopos_employees.loc =', $this->session->userdata('set_firma_id'));
+        }
+
         $i = 0;
         foreach ($this->column_search as $item) // loop column
-
         {
-            if ($_POST['search']['value']) // if datatable send POST for search
-
-            {
-                if ($i === 0) // first loop
-
-                {
-                    $this->db->group_start(); // open bracket. query Where with OR clause better with bracket. because maybe can combine with other WHERE with AND.
-
+            if ($_POST['search']['value']) {
+                if ($i === 0) {
+                    $this->db->group_start();
                     $this->db->like($item, $_POST['search']['value']);
-
                 } else {
-
                     $this->db->or_like($item, $_POST['search']['value']);
-
                 }
 
-                if (count($this->column_search) - 1 == $i) //last loop
-
-                    $this->db->group_end(); //close bracke
+                if (count($this->column_search) - 1 == $i)
+                    $this->db->group_end();
             }
-
             $i++;
-
         }
+
         $search = $this->input->post('order');
         if ($search) {
             $this->db->order_by($this->column_order[$search['0']['column']], $search['0']['dir']);
         } else {
-            $this->db->order_by('`geopos_employees`.`id` DESC');
+            $this->db->order_by('geopos_employees.id', 'DESC');
         }
-
-
     }
+
 
 
     public function count_filtered()

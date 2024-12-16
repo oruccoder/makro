@@ -18,104 +18,148 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-xl-2 col-sm-6 col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <a class="text-black" href="/salary/allbordro">
-                                                <div class="d-flex justify-content-between px-md-1">
-                                                    <div class="align-self-center">
-                                                        <i class="fas fa-users text-info fa-5x"></i>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <p class="mb-0">Bordrolar</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-sm-6 col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <a class="text-black" href="/invoices">
-                                                <div class="d-flex justify-content-between px-md-1">
-                                                    <div class="align-self-center">
-                                                        <i class="fas fa-file text-success fa-5x"></i>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <p class="mb-0">Faturalar</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-sm-6 col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <a class="text-black" href="/accounts">
-                                                <div class="d-flex justify-content-between px-md-1">
-                                                    <div class="align-self-center">
-                                                        <i class="fab fa-first-order text-danger fa-5x"></i>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <p class="mb-0">Kasalar</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-sm-6 col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <a class="text-black" href="/projects">
-                                                <div class="d-flex justify-content-between px-md-1">
-                                                    <div class="align-self-center">
-                                                        <i class="fas fa-people-carry text-danger fa-5x"></i>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <p class="mb-0">Projeler</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-sm-6 col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <a class="text-black" href="/reports/onaylananlar">
-                                                <div class="d-flex justify-content-between px-md-1">
-                                                    <div class="align-self-center">
-                                                        <i class="fas fa-search-location text-warning fa-5x"></i>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <p class="mb-0">Ödeme Emri Verilenler</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-2 col-sm-6 col-12 mb-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <a class="text-black" href="/form/bekleyen_talepler">
-                                                <div class="d-flex justify-content-between px-md-1">
-                                                    <div class="align-self-center">
-                                                        <i class="fas fa-user-check text-info fa-5x"></i>
-                                                    </div>
-                                                    <div class="text-end">
-                                                        <p class="mb-0">Bekleyen Talepler</p>
-                                                    </div>
-                                                </div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="col-md-12 row">
+                                <?php $active_users = aktif_personel_listesi(); ?>
 
+                                <div class="<?php echo !empty($active_users) ? 'col-md-6 col-lg-6 col-sm-6' : 'col-md-12'; ?>">
+                                    <div class="row">
+                                        <div class="<?php echo !empty($active_users) ? 'col-xl-6' : 'col-xl-2'; ?> col-sm-6 col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <a class="text-black" href="/salary/allbordro">
+                                                        <div class="d-flex justify-content-between px-md-1">
+                                                            <div class="align-self-center">
+                                                                <i class="fas fa-users text-info fa-5x"></i>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <p class="mb-0">Bordrolar</p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="<?php echo !empty($active_users) ? 'col-xl-6' : 'col-xl-2'; ?> col-sm-6 col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <a class="text-black" href="/invoices">
+                                                        <div class="d-flex justify-content-between px-md-1">
+                                                            <div class="align-self-center">
+                                                                <i class="fas fa-file text-success fa-5x"></i>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <p class="mb-0">Faturalar</p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="<?php echo !empty($active_users) ? 'col-xl-6' : 'col-xl-2'; ?> col-sm-6 col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <a class="text-black" href="/accounts">
+                                                        <div class="d-flex justify-content-between px-md-1">
+                                                            <div class="align-self-center">
+                                                                <i class="fab fa-first-order text-danger fa-5x"></i>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <p class="mb-0">Kasalar</p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="<?php echo !empty($active_users) ? 'col-xl-6' : 'col-xl-2'; ?> col-sm-6 col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <a class="text-black" href="/projects">
+                                                        <div class="d-flex justify-content-between px-md-1">
+                                                            <div class="align-self-center">
+                                                                <i class="fas fa-people-carry text-danger fa-5x"></i>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <p class="mb-0">Projeler</p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="<?php echo !empty($active_users) ? 'col-xl-6' : 'col-xl-2'; ?> col-sm-6 col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <a class="text-black" href="/reports/onaylananlar">
+                                                        <div class="d-flex justify-content-between px-md-1">
+                                                            <div class="align-self-center">
+                                                                <i class="fas fa-search-location text-warning fa-5x"></i>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <p class="mb-0">Ödeme Emri Verilenler</p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="<?php echo !empty($active_users) ? 'col-xl-6' : 'col-xl-2'; ?> col-sm-6 col-12 mb-4">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <a class="text-black" href="/form/bekleyen_talepler">
+                                                        <div class="d-flex justify-content-between px-md-1">
+                                                            <div class="align-self-center">
+                                                                <i class="fas fa-user-check text-info fa-5x"></i>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <p class="mb-0">Bekleyen Talepler</p>
+                                                            </div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <?php if (!empty($active_users)): ?>
+                                    <div class="col-md-6 col-lg-6 col-sm-6">
+                                        <div class="row mt-1">
+                                            <div class="col-xl-12 col-sm-12 col-12">
+                                                <table class="table-bordered table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>Proje</th>
+                                                        <th>Aktif Personel Sayısı</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <?php foreach ($active_users as $active_user): ?>
+                                                        <?php
+                                                        // Çalışan sayısına göre sınıf belirle
+                                                        if ($active_user->user_count <= 15) {
+                                                            $row_class = 'low-staff'; // Az çalışan
+                                                            $animation_class = 'animate-low';
+                                                        } elseif ($active_user->user_count <= 40) {
+                                                            $row_class = 'medium-staff'; // İyi çalışan
+                                                            $animation_class = 'animate-medium';
+                                                        } else {
+                                                            $row_class = 'high-staff'; // Yüksek çalışan
+                                                            $animation_class = 'animate-high';
+                                                        }
+                                                        ?>
+                                                        <tr class="<?php echo $row_class . ' ' . $animation_class; ?>">
+                                                            <td><?php echo $active_user->project_name.' ('.$active_user->user_type.')'; ?></td>
+                                                            <td><?php echo $active_user->user_count; ?></td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -146,75 +190,7 @@
                 </div>
                 <?php } ?>
 
-                <?php if(vorker_list_run()['status']) { ?>
-                <div class="card mobile_hidden">
-                    <div class="card-body">
-                        <div class="container-fluid">
-                            <section>
-                                <div class="row">
-                                    <div class="col-xl-12 col-sm-12 col-12 col-xs-12 mb-4">
-                                        <h3 class="text-warning" style="text-decoration: underline;text-align:center">Aktif Fehle Listesi</h3>
-                                        <table class="table table-bordered">
-                                            <thead>
-                                            <tr>
-                                                <th>İş Kodu</th>
-                                                <th>Adı</th>
-                                                <th>Proje</th>
-                                                <th>Oluşturan Personel</th>
-                                                <th>Çalışma Bilgileri</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <?php
-                                            foreach (vorker_list_run()['details'] as $worker_items) { ?>
-                                                <tr>
-                                                    <td><?php echo $worker_items->code;?></td>
-                                                    <td><?php echo worker_details($worker_items->pers_id)->name;?></td>
-                                                    <td><?php echo proje_code($worker_items->proje_id)?></td>
-                                                    <td><?php echo personel_detailsa($worker_items->aauth_id)['name']?></td>
-                                                    <td>
-                                                        <table class="table">
-                                                            <thead>
-                                                            <tr>
-                                                                <td>Çalışma Tipi</td>
-                                                                <td>Çalışma Miktarı</td>
-                                                                <td>Birim Fiyatı</td>
-                                                                <td>Toplam Fiyat</td>
-                                                                <td>Çalıştığı Gün</td>
-                                                                <td>Şantiye Giriş Saati</td>
-                                                                <td>Şantiye Çıkış Saati</td>
-                                                                <td>Durum</td>
-                                                            </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                            <tr>
-                                                                <th><?php if($worker_items->tip==1) {echo "Günlük";} else { echo "Saatlik";}?></th>
-                                                                <th><?php  echo amountFormat_s($worker_items->miktar).' '.units_($worker_items->birim)['name']?></th>
-                                                                <th><?php  echo amountFormat($worker_items->birim_fiyati)?></th>
-                                                                <th><?php  $total = floatval($worker_items->birim_fiyati) * floatval($worker_items->miktar); echo amountFormat($total)?></th>
-                                                                <th><?php  echo $worker_items->calisma_gunu?></th>
-                                                                <th><?php  echo $worker_items->giris_saati?></th>
-                                                                <th><?php  echo $worker_items->cikis_saati?></th>
-                                                                <th><?php  echo work_item_status($worker_items->id,$worker_items->status)?></th>
-                                                            </tr>
-                                                            </tbody>
-                                                        </table>
-                                                    </td>
-                                                </tr>
-                                            <?php  } ?>
-                                            </tbody>
-                                        </table>
 
-                                    </div>
-
-
-                                </div>
-                            </section>
-                        </div>
-                    </div>
-                </div>
-
-                <?php } ?>
 
                 <div class="card mobile_hidden">
                     <div class="card-body">
@@ -394,7 +370,7 @@
                                         </div>
                                     </div>
                                     <div class="col-xl-6 col-sm-6 col-12 col-xs-12 mb-4">
-                                        <h5 class="text-info" style="text-align:center">Personel Maaş Avans Talepleri</h5>
+                                        <h5 class="text-info" style="text-align:center">Personel Maaş Talepleri</h5>
                                         <div class="table-responsive">
                                             <table id="personel_maas_talep" class="table responsive" style="width:100%">
                                                 <thead>
@@ -1218,8 +1194,78 @@
                         </div>
                     </div>
                 </div>
-                <?php } ?>
 
+
+                <?php } ?>
+                <?php if(vorker_list_run()['status']) { ?>
+                    <div class="card mobile_hidden">
+                        <div class="card-body">
+                            <div class="container-fluid">
+                                <section>
+                                    <div class="row">
+                                        <div class="col-xl-12 col-sm-12 col-12 col-xs-12 mb-4">
+                                            <h3 class="text-warning" style="text-decoration: underline;text-align:center">Aktif Fehle Listesi</h3>
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                <tr>
+                                                    <th>İş Kodu</th>
+                                                    <th>Adı</th>
+                                                    <th>Proje</th>
+                                                    <th>Oluşturan Personel</th>
+                                                    <th>Çalışma Bilgileri</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <?php
+                                                foreach (vorker_list_run()['details'] as $worker_items) { ?>
+                                                    <tr>
+                                                        <td><?php echo $worker_items->code;?></td>
+                                                        <td><?php echo worker_details($worker_items->pers_id)->name;?></td>
+                                                        <td><?php echo proje_code($worker_items->proje_id)?></td>
+                                                        <td><?php echo personel_detailsa($worker_items->aauth_id)['name']?></td>
+                                                        <td>
+                                                            <table class="table">
+                                                                <thead>
+                                                                <tr>
+                                                                    <td>Çalışma Tipi</td>
+                                                                    <td>Çalışma Miktarı</td>
+                                                                    <td>Birim Fiyatı</td>
+                                                                    <td>Toplam Fiyat</td>
+                                                                    <td>Çalıştığı Gün</td>
+                                                                    <td>Şantiye Giriş Saati</td>
+                                                                    <td>Şantiye Çıkış Saati</td>
+                                                                    <td>Durum</td>
+                                                                </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                <tr>
+                                                                    <th><?php if($worker_items->tip==1) {echo "Günlük";} else { echo "Saatlik";}?></th>
+                                                                    <th><?php  echo amountFormat_s($worker_items->miktar).' '.units_($worker_items->birim)['name']?></th>
+                                                                    <th><?php  echo amountFormat($worker_items->birim_fiyati)?></th>
+                                                                    <th><?php  $total = floatval($worker_items->birim_fiyati) * floatval($worker_items->miktar); echo amountFormat($total)?></th>
+                                                                    <th><?php  echo $worker_items->calisma_gunu?></th>
+                                                                    <th><?php  echo $worker_items->giris_saati?></th>
+                                                                    <th><?php  echo $worker_items->cikis_saati?></th>
+                                                                    <th><?php  echo work_item_status($worker_items->id,$worker_items->status)?></th>
+                                                                </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                <?php  } ?>
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+
+
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+
+                <?php } ?>
                 <?php if ($this->aauth->premission(56)->read) { ?>
                     <div class="card mobile_hidden">
                         <?php
@@ -1234,7 +1280,82 @@
 
 </div>
 
-<style>
+<style>/* Renkler */
+    .low-staff {
+        background-color: #ffdddd; /* Kırmızımsı */
+        color: #d9534f;
+    }
+
+    .medium-staff {
+        background-color: #fff7cc; /* Sarımsı */
+        color: #f0ad4e;
+    }
+
+    .high-staff {
+        background-color: #ddffdd; /* Yeşilimsi */
+        color: #5cb85c;
+    }
+
+    /* Animasyonlar */
+    @keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .animate-low {
+        animation: blink 1.5s infinite;
+    }
+
+    .animate-medium {
+        animation: blink 2s infinite;
+    }
+
+    .animate-high {
+        animation: blink 2.5s infinite;
+    }
+
+    /* Renkler */
+    .low-staff {
+        background-color: #ffdddd; /* Kırmızımsı */
+        color: #d9534f;
+    }
+
+    .medium-staff {
+        background-color: #fff7cc; /* Sarımsı */
+        color: #f0ad4e;
+    }
+
+    .high-staff {
+        background-color: #ddffdd; /* Yeşilimsi */
+        color: #5cb85c;
+    }
+
+    /* Animasyonlar */
+    @keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .animate-low {
+        animation: blink 1.5s infinite;
+    }
+
+    .animate-medium {
+        animation: blink 2s infinite;
+    }
+
+    .animate-high {
+        animation: blink 2.5s infinite;
+    }
+
 
     /*.table th, .table td { max-width: 100px; min-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }*/
 

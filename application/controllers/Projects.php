@@ -27,7 +27,10 @@ class Projects Extends CI_Controller
         parent::__construct();
 
         $this->load->library("Aauth");
-
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         $this->load->model('projects_model', 'projects');
         $this->load->model('projebolumleri_model', 'bolum');
         $this->load->model('projeiskalemleri_model', 'iskalemleri');
@@ -671,308 +674,107 @@ class Projects Extends CI_Controller
 
 
     public function explore()
-
     {
-
-
+        // Yetki kontrolü
         if (!$this->aauth->premission(4)->read) {
-
-            exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
-
+            exit('<h3>Üzgünüm! Giriş Yetkiniz Bulunmamaktadır</h3>');
         }
-        $id = $this->input->get('id');
 
+        // Proje ID'sini al ve kontrol et
+        $id = $this->input->get('id', true);
+        if (empty($id) || !is_numeric($id)) {
+            exit('<h3>Geçersiz Proje ID\'si</h3>');
+        }
+
+        // Proje detaylarını al
+        $proje_details = proje_details($id);
+        if (empty($proje_details)) {
+            exit('<h3>Proje Bulunamadı</h3>');
+        }
+
+        // Proje sorumluları kontrolü
+        if (empty($proje_details->proje_sorumlusu_id) ||
+            empty($proje_details->proje_muduru_id) ||
+            empty($proje_details->genel_mudur_id) ||
+            empty($proje_details->muhasebe_muduru_id))
+        {
+            exit('<h3>Proje Sorumluları Ataması Yapılmadan İşlem Yapılamaz</h3>');
+        }
+
+        // Başlık ve kullanıcı bilgileri
         $head['usernm'] = $this->aauth->get_user()->username;
-
         $head['title'] = 'Proje Detayları';
 
+        // Verileri al
         $data['totalt'] = $this->iskalemleri->task_count_all($id);
-
         $explore = $this->projects->explore($id);
 
-        $data['thread_list'] = $this->projects->task_thread($id);
+        $data = array_merge($data, [
+            'thread_list' => $this->projects->task_thread($id),
+            'milestones' => $this->projects->milestones_list($id),
+            'personel' => $this->projects->list_project_employee($id),
+            'bolumler' => $this->projects->bolumler_list($id),
+            'activities' => $this->projects->activities($id),
+            'p_files' => $this->projects->p_files($id),
+            'comments_list' => $this->projects->comments_thread($id),
+            'new_maliyet' => $this->new_maliyet($id),
+            'emp' => $this->projects->list_project_employee($id),
+            'task_status' => $this->projects->task_status(),
+            'project' => $explore['project'],
+            'invoices' => $explore['invoices'],
+        ]);
 
-        $data['milestones'] = $this->projects->milestones_list($id);
-
-        $data['personel'] = $this->projects->list_project_employee($id);
-
-        $data['bolumler'] = $this->projects->bolumler_list($id);
-
-        $data['activities'] = $this->projects->activities($id);
-
-        $data['p_files'] = $this->projects->p_files($id);
-
-        $data['comments_list'] = $this->projects->comments_thread($id);
-        $data['new_maliyet'] = $this->new_maliyet($id);
-
-        $data['emp'] = $this->projects->list_project_employee($id);
-        $data['task_status'] = $this->projects->task_status();
-
-
-
-        $data['project'] = $explore['project'];
-
-        // $data['customer']=$explore['customer'];
-
-        $data['invoices'] = $explore['invoices'];
-
-
-
+        // Görünüm yükleme
         $this->load->view('fixed/header', $head);
-
         $this->load->view('projects/explore', $data);
-
         $this->load->view('fixed/footer');
-
-
-
     }
+
 
 
 
     public function addproject()
-
     {
+        // Kullanıcı ID'si 21 değilse işlem yapılmaz
+        if ($this->aauth->get_user()->id != 21) {
+            echo json_encode(array('status' => 410, 'message' => 'Yetkiniz Bulunmamaktadır'));
+            return;
+        }
 
-
-        if (!$this->aauth->premission(4)->update) {
-
-
-            echo json_encode(array('status' => 'Error', 'message' =>'Yetkiniz Bulunmamaktadır'));
-
+        $this->db->trans_start();
+        $result = $this->projects->addProject();
+        if($result['status']){
+            echo json_encode(array('status' => 200, 'message' =>$result['message']));
+            $this->db->trans_complete();
         }
         else {
-            if ($this->input->post()) {
-
-
-
-                $name = $this->input->post('name',true);
-
-                $status = $this->input->post('status',true);
-
-                $priority = $this->input->post('priority',true);
-
-                $progress = $this->input->post('progress',true);
-
-                $customer = $this->input->post('customer',true);
-
-                $sdate = $this->input->post('sdate',true);
-
-                $edate = $this->input->post('edate',true);
-
-                $tag = $this->input->post('tags',true);
-
-                $phase = $this->input->post('phase',true);
-
-                $content = $this->input->post('content');
-
-                $budget = $this->input->post('worth');
-                $sozlesme_tutari = $this->input->post('sozlesme_tutari');
-
-                $customerview = $this->input->post('customerview');
-
-                $customercomment = $this->input->post('customercomment');
-
-                $link_to_cal = $this->input->post('link_to_cal');
-
-                $color = $this->input->post('color');
-
-                $ptype = $this->input->post('ptype');
-
-                $employee = $this->input->post('employee');
-
-                $project_adresi = $this->input->post('project_adresi');
-                $project_sehir = $this->input->post('project_sehir');
-                $project_yetkili_adi = $this->input->post('project_yetkili_adi');
-                $project_yetkili_no = $this->input->post('project_yetkili_no');
-                $sozlesme_numarasi = $this->input->post('sozlesme_numarasi');
-                $proje_muduru = $this->input->post('proje_muduru');
-                $project_yetkili_email = $this->input->post('project_yetkili_email');
-                $sozlesme_date = $this->input->post('sozlesme_date');
-
-                $proje_muduru_id = $this->input->post('proje_muduru_id');
-                $proje_sorumlusu_id = $this->input->post('proje_sorumlusu_id');
-                $muhasebe_muduru_id = $this->input->post('muhasebe_muduru_id');
-                $genel_mudur_id = $this->input->post('genel_mudur_id');
-                $code = $this->input->post('code');
-
-                $sdate = datefordatabase($sdate);
-
-                $edate = datefordatabase($edate);
-
-                $sozlesme_date = datefordatabase($sozlesme_date);
-
-
-
-                if ($this->projects->addproject(
-                    $name,
-                    $status,
-                    $priority,
-                    $progress,
-                    $customer,
-                    $sdate,
-                    $edate,
-                    $tag,
-                    $phase,
-                    $content,
-                    $budget,
-                    $customerview,
-                    $customercomment,
-                    $link_to_cal,
-                    $color,
-                    $ptype,
-                    $employee,
-                    $project_adresi,
-                    $project_sehir,
-                    $project_yetkili_adi,
-                    $project_yetkili_no,
-                    $sozlesme_tutari,
-                    $sozlesme_numarasi,
-                    $proje_muduru,
-                    $project_yetkili_email,
-                    $sozlesme_date,
-                    $proje_sorumlusu_id,
-                    $proje_muduru_id,
-                    $muhasebe_muduru_id,
-                    $genel_mudur_id,
-                    $code,
-
-                )) {
-
-                    echo json_encode(array('status' => 'Success', 'message' => 'Proje ' . $this->lang->line('ADDED')));
-
-                } else {
-
-                    echo json_encode(array('status' => 'Error', 'message' => $this->lang->line('ERROR')));
-
-                }
-
-
-
-            }
-            else {
-
-                $this->load->model('employee_model', 'employee');
-
-                $head['usernm'] = $this->aauth->get_user()->username;
-
-                $data['emp'] = $this->employee->list_employee();
-
-                $data['project_status'] = $this->projects->project_status();
-
-                $data['project_derece'] = $this->projects->project_derece();
-
-                $head['title'] = 'Yeni Proje';
-
-                $this->load->view('fixed/header', $head);
-
-                $this->load->view('projects/addproject', $data);
-
-                $this->load->view('fixed/footer');
-
-            }
+            $this->db->trans_rollback();
+            echo json_encode(array('status' => 410, 'message' => $result['message']));
         }
-
-
-
-
-
-
     }
 
 
-
-    //edit project
-
-
-
-    public function update_proje(){
-
-        if($this->aauth->get_user()->id==21){
-            $pid = $this->input->post('p_id');
-
-            $name = $this->input->post('name',true);
-
-            $status = $this->input->post('status',true);
-
-            $priority = $this->input->post('priority');
-
-            $progress = $this->input->post('progress');
-
-            $customer = $this->input->post('customer');
-
-            $sdate = $this->input->post('sdate');
-
-            $edate = $this->input->post('edate');
-
-            $tag = $this->input->post('tags');
-
-            $phase = $this->input->post('phase');
-
-            $content = $this->input->post('content');
-
-            $budget = $this->input->post('worth');
-
-            $sozlesme_tutari = $this->input->post('sozlesme_tutari');
-
-            $customerview = $this->input->post('customerview');
-
-            $customercomment = $this->input->post('customercomment');
-
-            $link_to_cal = $this->input->post('link_to_cal');
-
-            $color = $this->input->post('color');
-
-            $ptype = $this->input->post('ptype');
-
-            $employee = $this->input->post('employee');
-            $project_adresi = $this->input->post('project_adresi');
-            $project_sehir = $this->input->post('project_sehir');
-            $project_yetkili_adi = $this->input->post('project_yetkili_adi');
-            $project_yetkili_no = $this->input->post('project_yetkili_no');
-            $sozlesme_numarasi = $this->input->post('sozlesme_numarasi');
-
-            $project_yetkili_email = $this->input->post('project_yetkili_email');
-            $sozlesme_date = $this->input->post('sozlesme_date');
-
-            $proje_muduru = $this->input->post('proje_muduru_id');
-            $proje_sorumlusu_id =$this->input->post('proje_sorumlusu_id');
-            $muhasebe_muduru_id= $this->input->post('muhasebe_muduru_id');
-            $genel_mudur_id= $this->input->post('genel_mudur_id');
-
-            $sdate = datefordatabase($sdate);
-
-            $edate = datefordatabase($edate);
-            $sozlesme_date = datefordatabase($sozlesme_date);
-
-            if ($this->projects->editproject($pid, $name, $status, $priority, $progress, $customer, $sdate, $edate, $tag, $phase, $content, $budget, $customerview, $customercomment, $link_to_cal, $color, $ptype, $employee,  $project_adresi,
-                $project_sehir,
-                $project_yetkili_adi,
-                $project_yetkili_no,$sozlesme_tutari,$sozlesme_numarasi,$proje_muduru,$project_yetkili_email,$sozlesme_date,
-                $proje_sorumlusu_id,$muhasebe_muduru_id,$genel_mudur_id
-            )) {
-
-                echo json_encode(array('status' => 'Success', 'message' => 'Proje Başarıyla Güncellendi'));
-
-            } else {
-
-                echo json_encode(array('status' => 'Error', 'message' => 'Hata Aldınız'));
-
-            }
+    public function updateProje()
+    {
+        // Kullanıcı ID'si 21 değilse işlem yapılmaz
+        if ($this->aauth->get_user()->id != 21) {
+            echo json_encode(array('status' => 403, 'message' => 'Yetkiniz Bulunmamaktadır'));
+            return;
         }
-        else{
-            echo json_encode(array('status' => 'Error', 'message' => 'Yetkiniz Yoktur'));
+        // İşlem başlatılır
+        $this->db->trans_start();
+        // Proje güncelleme işlemi
+        $result = $this->projects->updateProje();
+        if ($result['status']) {
+            // Başarılı ise işlemi tamamla
+            $this->db->trans_complete();
+            echo json_encode(array('status' => 200, 'message' => $result['message']));
+        } else {
+            // Başarısız ise işlemi geri al
+            $this->db->trans_rollback();
+            echo json_encode(array('status' => 410, 'message' => $result['message']));
         }
-
     }
-
-
-
-
-
-
-
-    //tasks section
 
 
 

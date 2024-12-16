@@ -1464,9 +1464,7 @@ WHERE geopos_invoice_items.tid=$tid ORDER BY `geopos_invoice_items`.`pid` ASC")-
             $this->db->set('bildirim_durumu', 1);
             $this->db->where('id', $talep_id);
             $this->db->update('geopos_invoices');
-
             $this->talep_history($talep_id,$this->aauth->get_user()->id,'Bildirim Başlatıldı',2);
-
             $this->aauth->applog("Forma 2 Bildirim Başlatıldı :  ID : ".$talep_id, $this->aauth->get_user()->username);
             $this->db->trans_complete();
 

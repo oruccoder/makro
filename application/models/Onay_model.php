@@ -203,7 +203,7 @@ class Onay_model extends CI_Model
             elseif($tip==9 || $tip==113){
 
 
-                if($auth_id==39){
+                if($auth_id==39 || $auth_id==1135 || $auth_id==174){
                     $this->db->where("talep_form.status",8);
 //                    $this->db->where("geopos_projects.muhasebe_muduru_id",$auth_id);
                 }
@@ -1636,15 +1636,15 @@ class Onay_model extends CI_Model
             $say=$count->sayi;
         }
 
-        $this->db->from('talep_form_nakliye_products');
-        $this->db->join('talep_form_nakliye','talep_form_nakliye.id=talep_form_nakliye_products.form_id');
-        $this->db->join('araclar','talep_form_nakliye_products.arac_id=araclar.id','LEFT');
-        $this->db->join('geopos_employees','talep_form_nakliye.talep_eden_user_id=geopos_employees.id');
-        $this->db->join('geopos_customers','talep_form_nakliye_products.cari_id=geopos_customers.id');
-        $this->db->join('geopos_projects','talep_form_nakliye.proje_id=geopos_projects.id');
-        $this->db->join('talep_form_status','talep_form_nakliye_products.status=talep_form_status.id');
-        $this->db->where('talep_form_nakliye_products.status',$status);
-        $this->db->where('talep_form_nakliye.status!=9',);
+//        $this->db->from('talep_form_nakliye_products');
+//        $this->db->join('talep_form_nakliye','talep_form_nakliye.id=talep_form_nakliye_products.form_id');
+//        $this->db->join('araclar','talep_form_nakliye_products.arac_id=araclar.id','LEFT');
+//        $this->db->join('geopos_employees','talep_form_nakliye.talep_eden_user_id=geopos_employees.id');
+//        $this->db->join('geopos_customers','talep_form_nakliye_products.cari_id=geopos_customers.id');
+//        $this->db->join('geopos_projects','talep_form_nakliye.proje_id=geopos_projects.id');
+//        $this->db->join('talep_form_status','talep_form_nakliye_products.status=talep_form_status.id');
+//        $this->db->where('talep_form_nakliye_products.status',$status);
+//        $this->db->where('talep_form_nakliye.status!=9',);
 
         return [
             'status'=>1,

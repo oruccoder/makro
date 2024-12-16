@@ -658,13 +658,23 @@ class Nakliye_model extends CI_Model
             ];
         }
     }
-    public function create_form_items(){
+    public function create_form_items() {
         $product_desc = $this->input->post('product_desc');
         $lokasyon = $this->input->post('lokasyon');
         $form_id = $this->input->post('form_id');
         $yukleme_yapacak_cari_id = $this->input->post('yukleme_yapacak_cari_id');
         $method = $this->input->post('method');
         $nakliye_item_tip = $this->input->post('nakliye_item_tip');
+        $cari_pers_type = $this->input->post('cari_pers_type');
+
+        // Zorunlu alanlar kontrolü
+        if (empty($lokasyon) || empty($yukleme_yapacak_cari_id) || empty($nakliye_item_tip) || empty($cari_pers_type)) {
+            return [
+                'status' => 0,
+                'message' => 'Lokasyon, Yükleme Yapacak Cari / Personel, Yükleme Tipi ve Talep Tipi alanları zorunludur.'
+            ];
+        }
+
         $data = array(
             'product_desc' => $product_desc,
             'code' => numaric(43),
@@ -674,29 +684,33 @@ class Nakliye_model extends CI_Model
             'yukleme_yapacak_cari_id' => $yukleme_yapacak_cari_id,
             'method' => $method,
             'form_id' => $form_id,
+            'cari_pers_type' => $cari_pers_type,
             'aauth' => $this->aauth->get_user()->id
         );
+
         if ($this->db->insert('talep_form_nakliye_products', $data)) {
             $talep_form_products_id = $this->db->insert_id();
             numaric_update(43);
 
-            $this->talep_history($form_id,$this->aauth->get_user()->id,'İtem Eklendi. ');
+            $this->talep_history($form_id, $this->aauth->get_user()->id, 'İtem Eklendi.');
             $last_id = $this->db->insert_id();
-            $this->aauth->applog("Nakliye Talebine Ürünler Eklendi  : Talep ID : ".$form_id, $this->aauth->get_user()->username);
+            $this->aauth->applog("Nakliye Talebine Ürünler Eklendi  : Talep ID : " . $form_id, $this->aauth->get_user()->username);
 
             return [
-                'status'=>1,
-                'id'=>$last_id,
-                'talep_form_products_id'=>$talep_form_products_id,
+                'status' => 1,
+                'id' => $last_id,
+                'message' => 'Başarıyla Ürünler Eklendi',
+                'talep_form_products_id' => $talep_form_products_id,
             ];
-        }
-        else {
+        } else {
             return [
-                'status'=>0,
-                'id'=>0
+                'status' => 0,
+                'message' => 'Ürünler Eklenirken Hata Aldınız',
+                'id' => 0
             ];
         }
     }
+
 
     public function talep_history($id,$user_id,$desc){
         date_default_timezone_set('Asia/Baku');
@@ -1143,9 +1157,7 @@ class Nakliye_model extends CI_Model
     }
 
     private function _get_datatables_query_details_talep_list_notes($id)
-
     {
-
 
         $this->db->select('talep_form_notes_nakliye.*,geopos_employees.name as pers_name');
         $this->db->from('talep_form_notes_nakliye');

@@ -76,6 +76,8 @@ class Personelavanstalep_model extends CI_Model
 
     {
         $aauth_id = $this->aauth->get_user()->id;
+        $role_id = $this->aauth->get_user()->roleid;
+        $santiye_id = personel_salary_details_get($aauth_id)->proje_id;
 
         $this->db->select('talep_form_personel.*,geopos_employees.name as pers_name,progress_status.name as progress_name,talep_form_status.color as color,geopos_projects.code as proje_name,talep_form_status.name as st_name');
         $this->db->from('talep_form_personel');
@@ -84,6 +86,20 @@ class Personelavanstalep_model extends CI_Model
         $this->db->join('geopos_projects','talep_form_personel.proje_id=geopos_projects.id','LEFT');
         $this->db->join('talep_form_status','talep_form_personel.status=talep_form_status.id');
         $i = 0;
+
+
+        if (!$this->aauth->premission(95)->read) {
+            // Eğer kullanıcı tüm personelleri görme yetkisine sahip değilse
+            if (in_array($role_id, personel_yetkileri())) {
+                // Kullanıcının şantiyesine göre filtrele
+                $this->db->where('talep_form_personel.proje_id', $santiye_id);
+            } else {
+                // Yetkisi olmayan kullanıcılar için boş sonuç
+                $this->db->where('1', 0);
+            }
+        }
+
+
         if($this->input->post('status_id')!=0){
             $this->db->where('talep_form_personel.status',$this->input->post('status_id'));
         }
@@ -200,145 +216,156 @@ class Personelavanstalep_model extends CI_Model
     }
 
     public function create_save(){
-        //$all_users = $this->input->post('all_users');
-        $progress_status_id = $this->input->post('progress_status_id');
         $talep_eden_user_id = $this->aauth->get_user()->id;
-        $proje_id  = $this->db->query("SELECT * FROM personel_salary Where personel_id=$talep_eden_user_id and status=1")->row()->proje_id;
+        $salary_details = personel_salary_details_get($talep_eden_user_id);
+        $proje_id = $salary_details->proje_id;
         $method = $this->input->post('method');
-        $personel_id = $this->aauth->get_user()->id;
-        $desc = $this->input->post('desc');
-        $fiyat = $this->input->post('fiyat');
-        $image_text = $this->input->post('image_text');
 
-        if($talep_eden_user_id==522){ // Hacıali
-            $talep_no = numaric(5);
-            $data = array(
-                'code' => $talep_no,
-                'progress_status_id' => $progress_status_id,
-                'talep_eden_user_id' => $talep_eden_user_id,
-                'personel_id' => $personel_id,
-                'method' => $method,
-                'proje_id' => $proje_id,
-                'desc' => $desc,
-                'tip' => 2,
-                'loc' =>  $this->session->userdata('set_firma_id'),
-                'aauth' => $this->aauth->get_user()->id
-            );
-            if ($this->db->insert('talep_form_personel', $data)) {
-                $last_id = $this->db->insert_id();
-                numaric_update(5);
+        if(check_bordro_payment_status($talep_eden_user_id,$method,1)){
+            $progress_status_id = $this->input->post('progress_status_id');
 
-                $data_images = array(
-                    'image_text' => $image_text,
-                    'form_id' => $last_id,
-                );
-                $this->db->insert('talep_form_personel_files', $data_images);
-                //all_user
+            $personel_id = $this->aauth->get_user()->id;
+            $desc = $this->input->post('desc');
+            $fiyat = $this->input->post('fiyat');
+            $image_text = $this->input->post('image_text');
 
-                //items ekleme
-
+            if($talep_eden_user_id==522){ // Hacıali
+                $talep_no = numaric(5);
                 $data = array(
-                    'cost_id' => 170,
-                    'progress_status_id' => 3,
-                    'product_desc' => "Avans Talebi",
-                    'product_kullanim_yeri' => "Maaş",
-                    'product_temin_date'=> date('Y-m-d'),
-                    'unit_id' => 9,
-                    'product_qty' => 1,
-                    'price' => $fiyat,
-                    'total' => floatval($fiyat)*floatval((1)),
-                    'form_id' => $last_id,
+                    'code' => $talep_no,
+                    'progress_status_id' => $progress_status_id,
+                    'talep_eden_user_id' => $talep_eden_user_id,
+                    'personel_id' => $personel_id,
+                    'method' => $method,
+                    'proje_id' => $proje_id,
+                    'desc' => $desc,
+                    'tip' => 2,
+                    'loc' =>  $this->session->userdata('set_firma_id'),
                     'aauth' => $this->aauth->get_user()->id
                 );
-                if ($this->db->insert('talep_form_personel_products', $data)) {
-                    $product_name= cost_details(170)->name;
-                    $unit_name = units_(9)['name'];
-                    $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                if ($this->db->insert('talep_form_personel', $data)) {
+                    $last_id = $this->db->insert_id();
+                    numaric_update(5);
+
+                    $data_images = array(
+                        'image_text' => $image_text,
+                        'form_id' => $last_id,
+                    );
+                    $this->db->insert('talep_form_personel_files', $data_images);
+                    //all_user
+
+                    //items ekleme
+
+                    $data = array(
+                        'cost_id' => 1026,
+                        'progress_status_id' => 3,
+                        'product_desc' => "Maaş Talebi",
+                        'product_kullanim_yeri' => "Maaş",
+                        'product_temin_date'=> date('Y-m-d'),
+                        'unit_id' => 9,
+                        'product_qty' => 1,
+                        'price' => $fiyat,
+                        'total' => floatval($fiyat)*floatval((1)),
+                        'form_id' => $last_id,
+                        'aauth' => $this->aauth->get_user()->id
+                    );
+                    if ($this->db->insert('talep_form_personel_products', $data)) {
+                        $product_name= cost_details(170)->name;
+                        $unit_name = units_(9)['name'];
+                        $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                    }
+                    //items ekleme
+
+                    $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
+
+                    return [
+                        'status'=>1,
+                        'id'=>$last_id,
+                        'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
+                    ];
                 }
-                //items ekleme
-
-                $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
-
-                return [
-                    'status'=>1,
-                    'id'=>$last_id,
-                    'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
-                ];
+                else {
+                    return [
+                        'status'=>0,
+                        'id'=>0,
+                        'mesaj'=>"Hata Aldınız.",
+                    ];
+                }
             }
             else {
-                return [
-                    'status'=>0,
-                    'id'=>0,
-                    'mesaj'=>"Hata Aldınız.",
-                ];
-            }
-        }
-        else {
-            $talep_kontrol = talep_avans_kontrol($personel_id);
-            if($talep_kontrol['status']){
-                $aylik_tutar_kontrol=aylik_kalan_tutar($personel_id);
-                $tutar = $aylik_tutar_kontrol['tutar'];
-                if($aylik_tutar_kontrol['status']){
-                    if($fiyat<=$tutar){
-                        $talep_no = numaric(5);
-                        $data = array(
-                            'code' => $talep_no,
-                            'progress_status_id' => $progress_status_id,
-                            'talep_eden_user_id' => $talep_eden_user_id,
-                            'personel_id' => $personel_id,
-                            'method' => $method,
-                            'proje_id' => $proje_id,
-                            'desc' => $desc,
-                            'tip' => 2,
-                            'loc' =>  $this->session->userdata('set_firma_id'),
-                            'aauth' => $this->aauth->get_user()->id
-                        );
-                        if ($this->db->insert('talep_form_personel', $data)) {
-                            $last_id = $this->db->insert_id();
-                            numaric_update(5);
-
-                            $data_images = array(
-                                'image_text' => $image_text,
-                                'form_id' => $last_id,
-                            );
-                            $this->db->insert('talep_form_personel_files', $data_images);
-                            //all_user
-
-                            //items ekleme
-
+                $talep_kontrol = talep_avans_kontrol($personel_id);
+                if($talep_kontrol['status']){
+                    $aylik_tutar_kontrol=aylik_kalan_tutar($personel_id);
+                    $tutar = $aylik_tutar_kontrol['tutar'];
+                    if($aylik_tutar_kontrol['status']){
+                        if($fiyat<=$tutar){
+                            $talep_no = numaric(5);
                             $data = array(
-                                'cost_id' => 170,
-                                'progress_status_id' => 3,
-                                'product_desc' => "Avans Talebi",
-                                'product_kullanim_yeri' => "Maaş",
-                                'product_temin_date'=> date('Y-m-d'),
-                                'unit_id' => 9,
-                                'product_qty' => 1,
-                                'price' => $fiyat,
-                                'total' => floatval($fiyat)*floatval((1)),
-                                'form_id' => $last_id,
+                                'code' => $talep_no,
+                                'progress_status_id' => $progress_status_id,
+                                'talep_eden_user_id' => $talep_eden_user_id,
+                                'personel_id' => $personel_id,
+                                'method' => $method,
+                                'proje_id' => $proje_id,
+                                'desc' => $desc,
+                                'tip' => 2,
+                                'loc' =>  $this->session->userdata('set_firma_id'),
                                 'aauth' => $this->aauth->get_user()->id
                             );
-                            if ($this->db->insert('talep_form_personel_products', $data)) {
-                                $product_name= cost_details(170)->name;
-                                $unit_name = units_(9)['name'];
-                                $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                            if ($this->db->insert('talep_form_personel', $data)) {
+                                $last_id = $this->db->insert_id();
+                                numaric_update(5);
+
+                                $data_images = array(
+                                    'image_text' => $image_text,
+                                    'form_id' => $last_id,
+                                );
+                                $this->db->insert('talep_form_personel_files', $data_images);
+                                //all_user
+
+                                //items ekleme
+
+                                $data = array(
+                                    'cost_id' => 1026,
+                                    'progress_status_id' => 3,
+                                    'product_desc' => "Maaş Talebi",
+                                    'product_kullanim_yeri' => "Maaş",
+                                    'product_temin_date'=> date('Y-m-d'),
+                                    'unit_id' => 9,
+                                    'product_qty' => 1,
+                                    'price' => $fiyat,
+                                    'total' => floatval($fiyat)*floatval((1)),
+                                    'form_id' => $last_id,
+                                    'aauth' => $this->aauth->get_user()->id
+                                );
+                                if ($this->db->insert('talep_form_personel_products', $data)) {
+                                    $product_name= cost_details(170)->name;
+                                    $unit_name = units_(9)['name'];
+                                    $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                                }
+                                //items ekleme
+
+                                $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
+
+                                return [
+                                    'status'=>1,
+                                    'id'=>$last_id,
+                                    'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
+                                ];
                             }
-                            //items ekleme
-
-                            $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
-
-                            return [
-                                'status'=>1,
-                                'id'=>$last_id,
-                                'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
-                            ];
+                            else {
+                                return [
+                                    'status'=>0,
+                                    'id'=>0,
+                                    'mesaj'=>"Hata Aldınız.",
+                                ];
+                            }
                         }
                         else {
                             return [
                                 'status'=>0,
                                 'id'=>0,
-                                'mesaj'=>"Hata Aldınız.",
+                                'mesaj'=>$aylik_tutar_kontrol['mesaj'].' : '.$aylik_tutar_kontrol['tutar']
                             ];
                         }
                     }
@@ -346,170 +373,178 @@ class Personelavanstalep_model extends CI_Model
                         return [
                             'status'=>0,
                             'id'=>0,
-                            'mesaj'=>$aylik_tutar_kontrol['mesaj'].' : '.$aylik_tutar_kontrol['tutar']
+                            'mesaj'=>'Artık Siz Talep Oluşturamazsınız! Sorumlu Personelizden İzin Talep Ediniz.Sonra IT Destek Alınız'
                         ];
                     }
+
                 }
                 else {
                     return [
                         'status'=>0,
                         'id'=>0,
-                        'mesaj'=>'Artık Siz Talep Oluşturamazsınız! Sorumlu Personelizden İzin Talep Ediniz.Sonra IT Destek Alınız'
+                        'mesaj'=>$talep_kontrol['message']
                     ];
                 }
-
             }
-            else {
-                return [
-                    'status'=>0,
-                    'id'=>0,
-                    'mesaj'=>$talep_kontrol['message']
-                ];
-            }
+        }
+        else {
+            return [
+                'status'=>0,
+                'mesaj'=>"Oluşmuş Bir Bordro Bulunamadı",
+            ];
         }
 
     }
 
     public function create_save_yetki(){
-        //$all_users = $this->input->post('all_users');
         $progress_status_id = $this->input->post('progress_status_id');
         $talep_eden_user_id = $this->input->post('cach_personel');
-        $proje_id  = $this->db->query("SELECT * FROM personel_salary Where personel_id=$talep_eden_user_id and status=1")->row()->proje_id;
         $method = $this->input->post('method');
-        $personel_id =$talep_eden_user_id;
-        $desc = $this->input->post('desc');
-        $fiyat = $this->input->post('fiyat');
-        $image_text = $this->input->post('image_text');
 
-        if($talep_eden_user_id==522){ // Hacıali
-            $talep_no = numaric(5);
-            $data = array(
-                'code' => $talep_no,
-                'progress_status_id' => $progress_status_id,
-                'talep_eden_user_id' => $talep_eden_user_id,
-                'personel_id' => $personel_id,
-                'method' => $method,
-                'proje_id' => $proje_id,
-                'desc' => $desc,
-                'tip' => 2,
-                'loc' =>  $this->session->userdata('set_firma_id'),
-                'aauth' => $this->aauth->get_user()->id
-            );
-            if ($this->db->insert('talep_form_personel', $data)) {
-                $last_id = $this->db->insert_id();
-                numaric_update(5);
+        if(check_bordro_payment_status($talep_eden_user_id,$method,1)){
+            $proje_id  = $this->db->query("SELECT * FROM personel_salary Where personel_id=$talep_eden_user_id and status=1")->row()->proje_id;
+            $personel_id =$talep_eden_user_id;
+            $desc = $this->input->post('desc');
+            $fiyat = $this->input->post('fiyat');
+            $image_text = $this->input->post('image_text');
 
-                $data_images = array(
-                    'image_text' => $image_text,
-                    'form_id' => $last_id,
-                );
-                $this->db->insert('talep_form_personel_files', $data_images);
-                //all_user
-
-                //items ekleme
-
+            if($talep_eden_user_id==522){ // Hacıali
+                $talep_no = numaric(5);
                 $data = array(
-                    'cost_id' => 170,
-                    'progress_status_id' => 3,
-                    'product_desc' => "Avans Talebi",
-                    'product_kullanim_yeri' => "Maaş",
-                    'product_temin_date'=> date('Y-m-d'),
-                    'unit_id' => 9,
-                    'product_qty' => 1,
-                    'price' => $fiyat,
-                    'total' => floatval($fiyat)*floatval((1)),
-                    'form_id' => $last_id,
+                    'code' => $talep_no,
+                    'progress_status_id' => $progress_status_id,
+                    'talep_eden_user_id' => $talep_eden_user_id,
+                    'personel_id' => $personel_id,
+                    'method' => $method,
+                    'proje_id' => $proje_id,
+                    'desc' => $desc,
+                    'tip' => 2,
+                    'loc' =>  $this->session->userdata('set_firma_id'),
                     'aauth' => $this->aauth->get_user()->id
                 );
-                if ($this->db->insert('talep_form_personel_products', $data)) {
-                    $product_name= cost_details(170)->name;
-                    $unit_name = units_(9)['name'];
-                    $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                if ($this->db->insert('talep_form_personel', $data)) {
+                    $last_id = $this->db->insert_id();
+                    numaric_update(5);
+
+                    $data_images = array(
+                        'image_text' => $image_text,
+                        'form_id' => $last_id,
+                    );
+                    $this->db->insert('talep_form_personel_files', $data_images);
+                    //all_user
+
+                    //items ekleme
+
+                    $data = array(
+                        'cost_id' => 1026,
+                        'progress_status_id' => 3,
+                        'product_desc' => "Maaş Talebi",
+                        'product_kullanim_yeri' => "Maaş",
+                        'product_temin_date'=> date('Y-m-d'),
+                        'unit_id' => 9,
+                        'product_qty' => 1,
+                        'price' => $fiyat,
+                        'total' => floatval($fiyat)*floatval((1)),
+                        'form_id' => $last_id,
+                        'aauth' => $this->aauth->get_user()->id
+                    );
+                    if ($this->db->insert('talep_form_personel_products', $data)) {
+                        $product_name= cost_details(170)->name;
+                        $unit_name = units_(9)['name'];
+                        $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                    }
+                    //items ekleme
+
+                    $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
+
+                    return [
+                        'status'=>1,
+                        'id'=>$last_id,
+                        'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
+                    ];
                 }
-                //items ekleme
-
-                $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
-
-                return [
-                    'status'=>1,
-                    'id'=>$last_id,
-                    'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
-                ];
+                else {
+                    return [
+                        'status'=>0,
+                        'id'=>0,
+                        'mesaj'=>"Hata Aldınız.",
+                    ];
+                }
             }
             else {
-                return [
-                    'status'=>0,
-                    'id'=>0,
-                    'mesaj'=>"Hata Aldınız.",
-                ];
-            }
-        }
-        else {
-            $talep_kontrol = talep_avans_kontrol($personel_id);
-            if($talep_kontrol['status']){
-                $aylik_tutar_kontrol=aylik_kalan_tutar($personel_id);
-                $tutar = $aylik_tutar_kontrol['tutar'];
-                if($aylik_tutar_kontrol['status']){
-                    if($fiyat<=$tutar){
-                        $talep_no = numaric(5);
-                        $data = array(
-                            'code' => $talep_no,
-                            'progress_status_id' => $progress_status_id,
-                            'talep_eden_user_id' => $talep_eden_user_id,
-                            'personel_id' => $personel_id,
-                            'method' => $method,
-                            'proje_id' => $proje_id,
-                            'desc' => $desc,
-                            'tip' => 2,
-                            'loc' =>  $this->session->userdata('set_firma_id'),
-                            'aauth' => $this->aauth->get_user()->id
-                        );
-                        if ($this->db->insert('talep_form_personel', $data)) {
-                            $last_id = $this->db->insert_id();
-                            numaric_update(5);
-
-                            $data_images = array(
-                                'image_text' => $image_text,
-                                'form_id' => $last_id,
-                            );
-                            $this->db->insert('talep_form_personel_files', $data_images);
-                            //all_user
-
-                            //items ekleme
-
+                $talep_kontrol = talep_avans_kontrol($personel_id);
+                if($talep_kontrol['status']){
+                    $aylik_tutar_kontrol=aylik_kalan_tutar($personel_id);
+                    $tutar = $aylik_tutar_kontrol['tutar'];
+                    if($aylik_tutar_kontrol['status']){
+                        if($fiyat<=$tutar){
+                            $talep_no = numaric(5);
                             $data = array(
-                                'cost_id' => 170,
-                                'progress_status_id' => 3,
-                                'product_desc' => "Avans Talebi",
-                                'product_kullanim_yeri' => "Maaş",
-                                'product_temin_date'=> date('Y-m-d'),
-                                'unit_id' => 9,
-                                'product_qty' => 1,
-                                'price' => $fiyat,
-                                'total' => floatval($fiyat)*floatval((1)),
-                                'form_id' => $last_id,
+                                'code' => $talep_no,
+                                'progress_status_id' => $progress_status_id,
+                                'talep_eden_user_id' => $talep_eden_user_id,
+                                'personel_id' => $personel_id,
+                                'method' => $method,
+                                'proje_id' => $proje_id,
+                                'desc' => $desc,
+                                'tip' => 2,
+                                'loc' =>  $this->session->userdata('set_firma_id'),
                                 'aauth' => $this->aauth->get_user()->id
                             );
-                            if ($this->db->insert('talep_form_personel_products', $data)) {
-                                $product_name= cost_details(170)->name;
-                                $unit_name = units_(9)['name'];
-                                $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                            if ($this->db->insert('talep_form_personel', $data)) {
+                                $last_id = $this->db->insert_id();
+                                numaric_update(5);
+
+                                $data_images = array(
+                                    'image_text' => $image_text,
+                                    'form_id' => $last_id,
+                                );
+                                $this->db->insert('talep_form_personel_files', $data_images);
+                                //all_user
+
+                                //items ekleme
+
+                                $data = array(
+                                    'cost_id' => 1026,
+                                    'progress_status_id' => 3,
+                                    'product_desc' => "Maaş Talebi",
+                                    'product_kullanim_yeri' => "Maaş",
+                                    'product_temin_date'=> date('Y-m-d'),
+                                    'unit_id' => 9,
+                                    'product_qty' => 1,
+                                    'price' => $fiyat,
+                                    'total' => floatval($fiyat)*floatval((1)),
+                                    'form_id' => $last_id,
+                                    'aauth' => $this->aauth->get_user()->id
+                                );
+                                if ($this->db->insert('talep_form_personel_products', $data)) {
+                                    $product_name= cost_details(170)->name;
+                                    $unit_name = units_(9)['name'];
+                                    $this->talep_history($last_id,$this->aauth->get_user()->id,'Gider Eklendi : '.$product_name.' | 1 '.$unit_name);
+                                }
+                                //items ekleme
+
+                                $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
+
+                                return [
+                                    'status'=>1,
+                                    'id'=>$last_id,
+                                    'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
+                                ];
                             }
-                            //items ekleme
-
-                            $this->aauth->applog("Gider Talebi Oluşturuldu  : Talep No : ".$talep_no, $this->aauth->get_user()->username);
-
-                            return [
-                                'status'=>1,
-                                'id'=>$last_id,
-                                'mesaj'=>"Başarılı Bir Şekilde Talep Oluşturuldu",
-                            ];
+                            else {
+                                return [
+                                    'status'=>0,
+                                    'id'=>0,
+                                    'mesaj'=>"Hata Aldınız.",
+                                ];
+                            }
                         }
                         else {
                             return [
                                 'status'=>0,
                                 'id'=>0,
-                                'mesaj'=>"Hata Aldınız.",
+                                'mesaj'=>$aylik_tutar_kontrol['mesaj'].' : '.$aylik_tutar_kontrol['tutar']
                             ];
                         }
                     }
@@ -517,27 +552,28 @@ class Personelavanstalep_model extends CI_Model
                         return [
                             'status'=>0,
                             'id'=>0,
-                            'mesaj'=>$aylik_tutar_kontrol['mesaj'].' : '.$aylik_tutar_kontrol['tutar']
+                            'mesaj'=>'Artık Siz Talep Oluşturamazsınız! Sorumlu Personelizden İzin Talep Ediniz.Sonra IT Destek Alınız'
                         ];
                     }
+
                 }
                 else {
                     return [
                         'status'=>0,
                         'id'=>0,
-                        'mesaj'=>'Artık Siz Talep Oluşturamazsınız! Sorumlu Personelizden İzin Talep Ediniz.Sonra IT Destek Alınız'
+                        'mesaj'=>$talep_kontrol['message']
                     ];
                 }
-
-            }
-            else {
-                return [
-                    'status'=>0,
-                    'id'=>0,
-                    'mesaj'=>$talep_kontrol['message']
-                ];
             }
         }
+        else {
+            return [
+                'status'=>0,
+                'mesaj'=>"Oluşmuş Bir Bordro Bulunamadı",
+            ];
+        }
+
+
 
     }
 

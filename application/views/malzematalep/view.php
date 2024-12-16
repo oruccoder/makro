@@ -224,7 +224,6 @@
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
-
                                                                                     <td class="vert-align-mid"><span class="font-sm txt-color-darken no-padding dgt_relatedPersons">Qaimeler </span></td>
                                                                                     <td class="vert-align-mid">
                                                                                     <span class="font-md-2 txt-color-darken no-padding dgt_relatedPersons no-margin">
@@ -239,7 +238,6 @@
                                                                                     </span>
                                                                                     </td>
                                                                                 </tr>
-
                                                                                 <tr>
 
                                                                                     <td class="vert-align-mid"><span class="font-sm txt-color-darken no-padding dgt_relatedPersons">İhale Hakkında </span></td>
@@ -309,10 +307,8 @@
                                                                                     <td class="vert-align-mid"><span class=" txt-color-darken no-padding">Bağlı Olduğu Grup: </span></td>
                                                                                     <td class="vert-align-mid" colspan="2">
                                                                                         <span class=" txt-color-darken no-padding no-margin">
-
                                                                                             <?php
                                                                                             if($details->id < 3193){
-
                                                                                             }
                                                                                             else {
                                                                                                 echo  who_demirbas($details->demirbas_id)->name;
@@ -531,7 +527,7 @@
                                                                     <a class="nav-item nav-link  <?php echo $warehouse_status; ?> <?php  if($details->status==11 || $details->status==18 || $details->status==19 || $details->status==20 || $details->status==12){ echo "active"; } ?>" <?php  if($iptal_status==11) { echo $nav_style; } ?>id="nav-on_odeme" <?php  if($details->status >= 5){ echo 'data-toggle="tab"'; } ?>  href="#on_odeme" role="tab" aria-controls="nav-contact" aria-selected="false">Ön Ödeme</a><span class="chevron" <?php  if($iptal_status==11) { echo $chevron_stye; } ?>></span>
                                                                     <a class="nav-item nav-link <?php echo $warehouse_status; ?> <?php  if($details->status==6){ echo "active"; } ?> "  <?php  if($iptal_status==6) { echo $nav_style; } ?> id="nav-senedler" <?php  if($details->status >= 6){ echo 'data-toggle="tab"'; } ?>  href="#senedler" role="tab" aria-controls="nav-contact" aria-selected="false">Senedler</a><span class="chevron" <?php  if($iptal_status==6) { echo $chevron_stye; } ?>></span>
                                                                     <a class="nav-item nav-link <?php  if($details->status==7){ echo "active"; } ?> " id="nav-teslimat" <?php  if($details->status >= 6){ echo 'data-toggle="tab"'; } ?>  <?php  if($iptal_status==7) { echo $nav_style; } ?> href="#teslimat" role="tab" aria-controls="nav-contact" aria-selected="false">Çatdırılma (Ambar) Durumu</a><span class="chevron" <?php  if($iptal_status==7) { echo $chevron_stye; } ?>></span>
-                                                                    <a class="nav-item nav-link <?php echo $warehouse_status; ?> <?php  if($details->status==8){ echo "active"; } ?> "  <?php  if($iptal_status==8) { echo $nav_style; } ?> id="nav-qaime" <?php  if($details->status >= 8){ echo 'data-toggle="tab"'; } ?>  href="#qaime" role="tab" aria-controls="nav-contact" aria-selected="false">Qaime</a>
+                                                                    <a class="nav-item nav-link <?php echo $warehouse_status; ?> <?php  if($details->status==8 ){ echo "active"; } ?> "  <?php  if($iptal_status==8) { echo $nav_style; } ?> id="nav-qaime" <?php  if($details->status >= 7){ echo 'data-toggle="tab"'; } ?>  href="#qaime" role="tab" aria-controls="nav-contact" aria-selected="false">Qaime</a>
                                                                 </div>
                                                             </nav>
                                                             <div class="tab-content px-1 pt-1">
@@ -1778,7 +1774,7 @@
                                                                         foreach (tehvil_products($details->id) as $product_items){
 
                                                                             $image=product_full_details_parent($product_items->product_stock_code_id,$product_items->product_id)['image'];
-                                                                            $kalan_miktar = tehvil_kalan_miktar($product_items->id);
+                                                                            $kalan_miktar = tehvil_kalan_miktar($product_items->id);  //22200
                                                                             $teslim_alinmis = teslim_alinmis_miktar($product_items->id);
                                                                             ?>
                                                                             <tr>
@@ -2025,7 +2021,7 @@
                                                                     </tbody>
                                                                 </table>
                                                             </div>
-                                                            <?php  if($details->status==8) { ?>
+                                                            <?php  if($details->status==8 || $details->status==7) { ?>
                                                                 <div class="col-md-12 pt-4 pb-2">
                                                                     <button class="btn btn-success qaime_create"><i class="fa fa-check"></i> Qaime Oluştur</button>
                                                                     <button class="btn btn-info confirm_asama_update"><i class="fa fa-file"></i> Talebi Tamamla</button>
@@ -2323,7 +2319,7 @@
                                                                 }
                                                                 if($items->staff==1 && $items->status==0){
                                                                     $durum='Gözləmedə';
-                                                                    $button='<button   class="btn btn-info onayla_stok_kontrol" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
+                                                                    $button='<button   class="btn btn-info onayla_stok_kontrol" sort ="'.$items->sort.'" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
                                                                 }
                                                                 ?>
                                                                 <tr>
@@ -2381,7 +2377,7 @@
                                                                             }
                                                                             if($items->staff==1 && $items->status==0){
                                                                                 $durum='Gözləmedə';
-                                                                                $button='<button sort="'.$items->sort.'" class="btn btn-info onayla" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
+                                                                                $button='<button sort="'.$items->sort.'"  sort ="'.$items->sort.'" class="btn btn-info onayla" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
                                                                             }
                                                                             ?>
                                                                             <tr>
@@ -2407,7 +2403,7 @@
                                                                         }
                                                                         if($items->staff==1 && $items->status==0){
                                                                             $durum='Gözləmedə';
-                                                                            $button='<button  disabled class="btn btn-info" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Detayları İnceleyin</button>'.$button_dikkat;
+                                                                            $button='<button  disabled class="btn btn-info" sort ="'.$items->sort.'" aauth_id="'.$this->aauth->get_user()->id.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Detayları İnceleyin</button>'.$button_dikkat;
                                                                         }
                                                                         ?>
                                                                         <tr>
@@ -2578,275 +2574,252 @@
     let cari_item_id=[];
     var url = '<?php echo base_url() ?>arac/file_handling';
 
-    $(document).on('click','.add_product',function (){
-        let file_id =$(this).attr('file_id');
+    $(document).on('click', '.add_product', function () {
+        let file_id = $(this).attr('file_id');
+        let talep_type = $(this).attr('talep_type');
+        let firma_demirbas_id = $(this).attr('firma_demirbas_id');
+        let demirbas_id = $(this).attr('demirbas_id');
 
-        let talep_type =$(this).attr('talep_type');
-        let firma_demirbas_id =$(this).attr('firma_demirbas_id');
-        let demirbas_id =$(this).attr('demirbas_id');
-        if(talep_type==3){
-            $.confirm({
-                theme: 'modern',
-                closeIcon: true,
-                title: 'Gider Kalemi Ekleyin',
-                icon: 'fa fa-plus',
-                type: 'green',
-                animation: 'scale',
-                useBootstrap: true,
-                columnClass: "col-md-12 mx-auto",
-                containerFluid: !0,
-                smoothContent: true,
-                draggable: false,
-                content:`<form action="" class="formName" id='data_form'>
-
-                                        <div class="form-group col-md-12 one_group">
-                                          <label for="name">Gider Kalemi Grubu</label>
-                                           <select class="form-control select-box group_id" types='ones' id="group_id" name="group_id[]">
-                                            <?php
-                if(demirbas_group_list_who(2,$details->demirbas_id)){
-                echo "<option value='0'>Seçiniz</option>";
-                foreach (demirbas_group_list_who(2,$details->demirbas_id) as $emp){
-                $emp_id=$emp->id;
-                $name=$emp->name;
-                ?>
-                                                <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                                            <?php }
-                }
-                else {
-                ?>
-                                                <option value="0">Grup Bulunamadı</option>
-                                                <?php
-                }
-
-                ?>
-                                        </select>
-                                        </div>
-                                         <div class="row">
-                                           <div class="col col-xs-12 col-sm-12 col-md-12">
-
-                                                <table class="table table_products">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Açıklama</th>
-                                                            <th>Birim</th>
-                                                            <th>Miktar</th>
-                                                            <th>İşlem</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    <tr>
-
-                                                            <td><input type='text' class='form-control' name='product_desc'></td>
-                                                          <td><select class="form-control select-box unit_id" name='unit_id'>
-                                                                 <?php foreach (units() as $blm)
-                {
-                    $id=$blm['id'];
-                    $name=$blm['name'];
-                    echo "<option value='$id'>$name</option>";
-                } ?>
-                                                                </select>
-                                                            </td>
-                                                            <td><input type='numaric' class='form-control' name='product_qty'></td>                                                            <td><button type='button' class='btn btn-success form_add_products'><i class='fa fa-plus'></td>
-
-                                                            <input type='hidden' value='<?php echo $details->id?>' name='form_id'>
-                                                            <input type='hidden' value='`+firma_demirbas_id+`' name='firma_demirbas_id'>
-                                                            <input type='hidden' value='`+demirbas_id+`' name='demirbas_id'>
-                                                            </td>
-
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                        </div>
-                                    </div>
-
-
-                                        </form>`,
-                buttons: {
-                    cancel:{
-                        text: 'Vazgeç',
-                        btnClass: "btn btn-danger btn-sm",
-                        action:function(){
-                            location.reload();
-                        }
-                    }
-                },
-                onContentReady: function () {
-                    $('.select-box').select2({
-                        dropdownParent: $(".jconfirm-box-container")
-                    })
-                    // bind to events
-                    var jc = this;
-                    this.$content.find('form').on('submit', function (e) {
-                        // if the user submits the form by pressing enter in the field.
-                        e.preventDefault();
-                        jc.$$formSubmit.trigger('click'); // reference the button and click it
-                    });
-                }
-            });
+        if (talep_type == 3) {
+            openExpenseForm(firma_demirbas_id, demirbas_id);
+        } else {
+            openMaterialAssignmentForm();
         }
-        else {
+    });
 
-            $.confirm({
-                theme: 'modern',
-                closeIcon: false,
-                title: 'Talebe Malzeme Atama',
-                icon: 'fa fa-plus',
-                type: 'green',
-                animation: 'scale',
-                useBootstrap: true,
-                columnClass: "col-md-12 mx-auto",
-                containerFluid: !0,
-                smoothContent: true,
-                draggable: false,
-                content:`<div class="content-body">
-    <div class="card">
-        <div class="card-content">
-            <div class="card-body">
-                <div class="row">
-                    <div class="col col-xs-12 col-sm-8 col-md-8">
-                        <div class="jarviswidget">
-                            <header><h4>Malzeme Listesi Arama Alanı</h4></header>
-                            <div class="borderedccc">
-                                <div class="widget-body">
-                                    <div class="col col-xs-12 col-sm-12 col-md-12">
-                                        <fieldset>
-                                            <div class="row mb-2">
-                                                <section class="col col-sm-6 col-md-6">
-                                                    <label class="label">Kategori Bazlı Ara</label>
-                                                    <select class="form-control select-box" id="category_id">
-                                                    <option value='0'>Seçiniz</option>
-                                                            <?php
-                if($details->talep_type==1){
-                    foreach (category_list_() as $item) :
-
-                        $id = $item['id'];
-                        $title = $item['title'];
-                        $new_title = _ust_kategori_kontrol($id).$title;
-                        echo "<option value='$id'>$new_title</option>";
-
-                    endforeach;
-                }
-                elseif($details->talep_type==2){
-                    foreach (category_list_() as $item) :
-
-                        $id = $item['id'];
-                        $title = $item['title'];
-                        $new_title = _ust_kategori_kontrol($id).$title;
-                        echo "<option value='$id'>$new_title</option>";
-
-                    endforeach;
-                }
-                elseif($details->talep_type==3){
-                    foreach (demirbas_group_list() as $row) {
-                        $cid = $row->id;
-                        $title = $row->name;
-                        echo "<option value='$cid'>$title</option>";
+    function openExpenseForm(firma_demirbas_id, demirbas_id) {
+        $.confirm({
+            theme: 'modern',
+            closeIcon: true,
+            title: 'Gider Kalemi Ekleyin',
+            icon: 'fa fa-plus',
+            type: 'green',
+            animation: 'scale',
+            columnClass: "col-md-12 mx-auto",
+            content: getExpenseFormHtml(firma_demirbas_id, demirbas_id),
+            buttons: {
+                cancel: {
+                    text: 'Vazgeç',
+                    btnClass: "btn btn-danger btn-sm",
+                    action: function () {
+                        location.reload();
                     }
                 }
+            },
+            onContentReady: function () {
+                initializeSelect2(this);
+            }
+        });
+    }
 
-                ?>
-                                                    </select>
-                                                </section>
-                                                <section class="col col-sm-6 col-md-6">
-                                                    <label class="label">Malzeme Adı</label>
-                                                    <input type="texy" placeholder="Min 3 karakter veya Kategori Seçini" class="form-control" id="search_name">
-                                                </section>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <section class="col col-sm-12 col-md-12">
-                                                    <button class="btn btn-info" id="search_button"><i class="fa fa-search"></i>&nbsp;Ara</button>
-                                                </section>
+    function getExpenseFormHtml(firma_demirbas_id, demirbas_id) {
+        return `
+        <form id="data_form">
+            <div class="form-group col-md-12">
+                <label for="name">Gider Kalemi Grubu</label>
+                <select class="form-control select-box group_id" id="group_id" name="group_id[]">
+                    ${getExpenseGroups(demirbas_id)}
+                </select>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table_products">
+                        <thead>
+                            <tr>
+                                <th>Açıklama</th>
+                                <th>Birim</th>
+                                <th>Miktar</th>
+                                <th>İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="text" class="form-control" name="product_desc"></td>
+                                <td>
+                                    <select class="form-control select-box unit_id" name="unit_id">
+                                        ${getUnitOptions()}
+                                    </select>
+                                </td>
+                                <td><input type="number" class="form-control" name="product_qty"></td>
+                                <td>
+                                    <button type="button" class="btn btn-success form_add_products">
+                                        <i class="fa fa-plus"></i>
+                                    </button>
+                                </td>
+                                <input type="hidden" name="firma_demirbas_id" value="${firma_demirbas_id}">
+                                <input type="hidden" name="demirbas_id" value="${demirbas_id}">
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>`;
+    }
 
-                                            </div>
+    function openMaterialAssignmentForm() {
+        $.confirm({
+            theme: 'modern',
+            closeIcon: false,
+            title: 'Talebe Malzeme Atama',
+            icon: 'fa fa-plus',
+            type: 'green',
+            animation: 'scale',
+            useBootstrap: true,
+            columnClass: "col-md-12 mx-auto",
+            containerFluid: !0,
+            smoothContent: true,
+            draggable: false,
+            content: getMaterialAssignmentHtml(),
+            buttons: {
+                cancel: {
+                    text: 'Kapat',
+                    btnClass: "btn btn-danger btn-sm",
+                    action: function () {
+                        location.reload();
+                    }
+                }
+            },
+            onContentReady: function () {
+                initializeSelect2(this);
+            }
+        });
+    }
 
-                                            <?php   if($details->talep_type==1){  ?>
-                                              <div class="row mb-2">
-                                                    <section class="col col-sm-12 col-md-12">
-                                                    <button class="btn btn-success" id="talep_list_get"><i class="fa fa-list"></i>&nbsp;Talep Listemi Getir</button>
-                                                </section>
-                                            </div>
-                                            <?php } ?>
-
-                                        </fieldset>
-                                    </div>
-                                </div>
+    function getMaterialAssignmentHtml() {
+        return `
+        <div class="content-body">
+            <div class="card">
+                <div class="card-content">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                ${getMaterialSearchArea()}
+                            </div>
+                            <div class="col-md-4">
+                                ${getAssignedMaterialTable()}
                             </div>
                         </div>
-
-                    </div>
-                    <div class="col col-xs-12 col-sm-4 col-md-4">
-                        <div class="jarviswidget">
-                            <header><h4>Atanan Malzemeler (<?php echo proje_code($details->proje_id)?>)</h4></header>
-                            <table class="table table_create_products">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Malzeme</th>
-                                        <th>Miktar</th>
-                                        <th>İşlem</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col col-xs-12 col-sm-12 col-md-12">
-                        <div class="jarviswidget">
-                            <header><h4>Malzemeler</h4></header>
-                            <table class="table table_products">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Resim</th>
-                                        <th>Malzeme</th>
-                                        <th>Varyant</th>
-                                        <th>Tanım</th>
-                                        <th>Kullanım Yeri</th>
-                                        <th>Temin Tarihi  &nbsp;<button class="temin_all btn-sm btn btn-info"><i class="fa fa-check-double"></i></th>
-                                        <th>Aciliyet Durumu &nbsp;<button class="aciliyet_all btn-sm btn btn-info"><i class="fa fa-check-double"></i></th>
-                                        <th>Birim &nbsp;<button class="birim_all btn-sm btn btn-info"><i class="fa fa-check-double"></i></th>
-                                        <th>Miktar</th>
-                                        <th>İşlem &nbsp;<button class="add_all btn-sm btn btn-info"><i class="fa fa-check-double"></i></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
+                        <div class="row">
+                            <div class="col-md-12">
+                                ${getMaterialTable()}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>`,
-                buttons: {
-                    cancel:{
-                        text: 'Kapat',
-                        btnClass: "btn btn-danger btn-sm",
-                        action:function (){
-                            location.reload();
-                        }
-                    }
-                },
-                onContentReady: function () {
-                    $('.select-box').select2({
-                        dropdownParent: $(".jconfirm-box-container")
-                    })
-                    // bind to events
-                    var jc = this;
-                    this.$content.find('form').on('submit', function (e) {
-                        // if the user submits the form by pressing enter in the field.
-                        e.preventDefault();
-                        jc.$$formSubmit.trigger('click'); // reference the button and click it
-                    });
-                }
-            });
-        }
+        </div>`;
+    }
 
-    })
+    function getMaterialSearchArea() {
+        return `
+        <div class="jarviswidget">
+            <header><h4>Malzeme Listesi Arama Alanı</h4></header>
+            <div class="borderedccc">
+                <div class="widget-body">
+                    <fieldset>
+                        <div class="row mb-2">
+                            <section class="col-md-6">
+                                <label>Kategori Bazlı Ara</label>
+                                <select class="form-control select-box" id="category_id">
+                                    ${getCategoryOptions()}
+                                </select>
+                            </section>
+                            <section class="col-md-6">
+                                <label>Malzeme Adı</label>
+                                <input type="text" class="form-control" placeholder="Min 3 karakter veya Kategori Seçiniz" id="search_name">
+                            </section>
+                        </div>
+                        <div class="row mb-2">
+                            <section class="col-md-12">
+                                <button class="btn btn-info" id="search_button">
+                                    <i class="fa fa-search"></i>&nbsp;Ara
+                                </button>
+                            </section>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function getAssignedMaterialTable() {
+        return `
+        <div class="jarviswidget">
+            <header><h4>Atanan Malzemeler</h4></header>
+            <table class="table table_create_products">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Malzeme</th>
+                        <th>Miktar</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>`;
+    }
+
+    function getMaterialTable() {
+        return `
+        <div class="jarviswidget">
+            <header><h4>Malzemeler</h4></header>
+            <table class="table table_products">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Resim</th>
+                        <th>Malzeme</th>
+                        <th>Varyant</th>
+                        <th>Tanım</th>
+                        <th>Kullanım Yeri</th>
+                        <th>Temin Tarihi</th>
+                        <th>Aciliyet Durumu</th>
+                        <th>Birim</th>
+                        <th>Miktar</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>`;
+    }
+
+    function initializeSelect2(jc) {
+        $('.select-box').select2({
+            dropdownParent: jc.$content
+        });
+    }
+
+    function getExpenseGroups(demirbas_id) {
+        // PHP'de demirbas_group_list_who işlevini çağırarak döndürülen seçenekler
+        return `
+        <option value="0">Seçiniz</option>
+        <?php foreach (demirbas_group_list_who(2, $details->demirbas_id) as $group) : ?>
+            <option value="<?= $group->id ?>"><?= $group->name ?></option>
+        <?php endforeach; ?>
+    `;
+    }
+
+    function getUnitOptions() {
+        // PHP'de units işlevini çağırarak döndürülen birim seçenekleri
+        return `
+        <?php foreach (units() as $unit) : ?>
+            <option value="<?= $unit['id'] ?>"><?= $unit['name'] ?></option>
+        <?php endforeach; ?>
+    `;
+    }
+
+    function getCategoryOptions() {
+        // PHP'de category_list_ işlevini çağırarak döndürülen kategori seçenekleri
+        return `
+        <option value="0" selected>Seçiniz</option>
+        <?php foreach (category_list_() as $category) : ?>
+            <option value="<?= $category['id'] ?>"><?= $category['title'] ?></option>
+        <?php endforeach; ?>
+    `;
+    }
+
 
     $(document).on('click','.temin_all',function (){
         let temin_date = $('.product_temin_date').eq(0).val();
@@ -3445,6 +3418,7 @@
         let talep_id = $('#talep_id').val();
         let aauth_id  = $(this).attr('aauth_id');
         let user_id  = $(this).attr('user_id');
+        let sort  = $(this).attr('sort');
         if(aauth_id!=user_id){
             $.alert({
                 theme: 'material',
@@ -3515,6 +3489,7 @@
                             let data = {
                                 talep_id:talep_id,
                                 progress_status_id:1,
+                                sort:sort,
                                 product_details:product_details,
                                 type:3,
                                 crsf_token: crsf_hash,
@@ -4846,7 +4821,7 @@
                                             table+=`<tr>
                                                     <td>`+no+`</td>
                                                     <td width="100px"><img src="<?php echo site_url() ?>`+item.images+`" alt="" style="max-width:100%" height="auto" class="img-fluid"></td>
-                                                              <input type="hidden" class="product_stock_code_id" value="`+item.product_stock_code_id+`">
+                                                      <input type="hidden" class="product_stock_code_id" value="`+item.product_stock_code_id+`">
                                                     <td><input type="hidden" class="product_id" value="`+item.product_id+`">
                                                     `+item.product_name+`</td>
                                                   <td>`+item.option_html+`</td>

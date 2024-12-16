@@ -18,6 +18,11 @@ class Personelgidertalep Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
+
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
@@ -179,44 +184,57 @@ class Personelgidertalep Extends CI_Controller
 
     public function view($id)
     {
-        if (!$this->aauth->premission(48)->read) {
-
-            exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
-
+        if (!$this->aauth->premission(48)->read || !$this->aauth->premission(7)->read) {
+            exit('<h3>Üzgünüm! Giriş Yetkiniz Bulunmamaktadır</h3>');
         }
-
-        $odeme_total = $this->model->odeme_total($id);
-        $form_total = $this->model->form_total($id);
-        $data['kalan']=floatval($form_total)-floatval($odeme_total);
-        $head['usernm'] = $this->aauth->get_user()->username;
-        $head['title'] = 'Gider Talep Görüntüleme';
-        $data['items']= $this->model->product_details($id);
-        $data['file_details']= $this->model->file_details($id);
+        $user = $this->aauth->get_user()->id; // Giriş yapan kullanıcı ID'si
+        $role_id = $this->aauth->get_user()->roleid; // Kullanıcı rolü
+        $santiye_id = personel_salary_details_get($user)->proje_id; // Kullanıcının şantiyesi
+        $status = true;
         $data['details']= $this->model->details($id);
         $personel_id = $data['details']->personel_id;
-        $data['note_list']=new_list_note(6,$id);
-
-
-        $toplam_tutar=0;
-        foreach ($data['items'] as $details){
-            $toplam_tutar+=$details->total;
+        if (!$this->aauth->premission(95)->read) {
+            if (in_array($role_id,personel_yetkileri())) {
+                // Proje Müdürü veya Şantiye Muhasebecisi ise, şantiye kontrolü yap
+                $santiye_id_personel = personel_salary_details_get($personel_id)->proje_id; // Görüntülenmek istenen personelin şantiyesi
+                if ($santiye_id != $santiye_id_personel) {
+                    $status = false; // Eğer personel başka bir şantiyede ise yetkisiz
+                }
+            } else {
+                // Diğer rollerde kullanıcı yetkisiz
+                $status = false;
+            }
+        }
+        if($status){
+            $odeme_total = $this->model->odeme_total($id);
+            $form_total = $this->model->form_total($id);
+            $data['kalan']=floatval($form_total)-floatval($odeme_total);
+            $head['usernm'] = $this->aauth->get_user()->username;
+            $head['title'] = 'Gider Talep Görüntüleme';
+            $data['items']= $this->model->product_details($id);
+            $data['file_details']= $this->model->file_details($id);
+            $data['note_list']=new_list_note(6,$id);
+            $toplam_tutar=0;
+            foreach ($data['items'] as $details){
+                $toplam_tutar+=$details->total;
+            }
+            $data['odeme_details']=[
+                'toplam_tutar'=>amountFormat($toplam_tutar),
+                'toplam_tutar_float'=>$toplam_tutar,
+                'cari'=>personel_details_full($data['details']->personel_id)['name'],
+            ];
+            $odeme_total = $this->model->odeme_total($id);
+            $form_total = $this->model->form_total($id);
+            $data['kalan']=floatval($form_total)-floatval($odeme_total);
+            $this->load->view('fixed/header', $head);
+            $this->load->view('personelgidertalep/view',$data);
+            $this->load->view('fixed/footer');
+        }
+        else {
+            exit('<h3>Üzgünüm! Bu Talebi Görme Yetkiniz Yok</h3>');
         }
 
 
-
-        $data['odeme_details']=[
-            'toplam_tutar'=>amountFormat($toplam_tutar),
-            'toplam_tutar_float'=>$toplam_tutar,
-            'cari'=>personel_details_full($data['details']->personel_id)['name'],
-        ];
-
-        $odeme_total = $this->model->odeme_total($id);
-        $form_total = $this->model->form_total($id);
-        $data['kalan']=floatval($form_total)-floatval($odeme_total);
-        $this->load->view('fixed/header', $head);
-
-        $this->load->view('personelgidertalep/view',$data);
-        $this->load->view('fixed/footer');
     }
 
     public function upload_file(){
@@ -298,49 +316,70 @@ class Personelgidertalep Extends CI_Controller
         $this->db->trans_start();
         $result = $this->model->create_form_items();
         if($result['status']){
-            echo json_encode(array('status' => 'Success', 'message' =>"Başarılı Bir Şekilde Kayıt Edildi",'product_name'=>$result['product_name'],'qyt_birim'=>$result['qyt_birim'],'id'=>$result['id'],'talep_form_products_id'=>$result['talep_form_products_id']));
+            echo json_encode(array('status' => 'Success', 'message' =>$result['message'],'product_name'=>$result['product_name'],'qyt_birim'=>$result['qyt_birim'],'id'=>$result['id'],'talep_form_products_id'=>$result['talep_form_products_id']));
             $this->db->trans_complete();
         }
         else {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun.".' Hata '));
+            echo json_encode(array('status' => 'Error', 'message' =>$result['message']));
         }
     }
 
 
-    public function delete_item_form(){
+    public function delete_item_form()
+    {
         $this->db->trans_start();
         $id = $this->input->post('item_id');
-        $details = $this->db->query("SELECT * FROM talep_form_personel_products Where id=$id")->row();
         $type = $this->input->post('type');
-        $product_name = who_demirbas($details->cost_id)->name;
+        $user_id = $this->aauth->get_user()->id;
 
-        $details_form = $this->model->details($details->form_id);
-        $user_id  = $this->aauth->get_user()->id;
-        $yetkili_kontrol  = $this->db->query("SELECT * FROM `geopos_projects` where id = $details_form->proje_id and (  proje_sorumlusu_id=$user_id or proje_muduru_id=$user_id or muhasebe_muduru_id=$user_id or genel_mudur_id=$user_id)")->num_rows();
+        // Ürün detaylarını al
+        $details = $this->db->where('id', $id)->get('talep_form_personel_products')->row();
 
-        if($yetkili_kontrol) {
-            if($type==1){
-                $this->model->talep_history($details->form_id,$this->aauth->get_user()->id,$product_name.' Ürünü Kaldırıldı');
-            }
-
-            if($this->db->delete('talep_form_personel_products', array('id' => $id))){
-
-                $this->aauth->applog("Cari Gider Talebinden Ürün Silindi  :  ID : ".$id, $this->aauth->get_user()->username);
-                $this->db->trans_complete();
-                echo json_encode(array('status' => 'Success','message'=>'Başarıyla Silindi'));
-            }
-            else {
-                $this->db->trans_rollback();
-                echo json_encode(array('status' => 'Error', 'message' =>"Hata Aldınız.Lütfen Yöneyiciye Başvurun.".' Hata '));
-            }
-        }
-        else {
+        if (!$details) {
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
+            echo json_encode(array('status' => 'Error', 'message' => "Ürün bulunamadı."));
+            return;
         }
 
+        // Ürün adı ve form detaylarını al
+        $product_name = who_demirbas($details->cost_id)->name;
+        $details_form = $this->model->details($details->form_id);
+
+        if ($details_form->bildirim_durumu) {
+            // Kullanıcının yetkisini kontrol et
+            $yetkili_kontrol = $this->db->where('id', $details_form->proje_id)
+                ->group_start()
+                ->where('proje_sorumlusu_id', $user_id)
+                ->or_where('proje_muduru_id', $user_id)
+                ->or_where('muhasebe_muduru_id', $user_id)
+                ->or_where('genel_mudur_id', $user_id)
+                ->group_end()
+                ->count_all_results('geopos_projects');
+
+            if (!$yetkili_kontrol) {
+                $this->db->trans_rollback();
+                echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz bulunmamaktadır."));
+                return;
+            }
+        }
+
+        // Ürünü silme işlemi
+        if ($this->db->delete('talep_form_personel_products', array('id' => $id))) {
+            if ($type == 1) {
+                $this->model->talep_history($details->form_id, $user_id, $product_name . ' ürünü kaldırıldı');
+            }
+
+            $this->aauth->applog("Cari Gider Talebinden Ürün Silindi: ID: " . $id, $this->aauth->get_user()->username);
+            $this->db->trans_complete();
+
+            echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla silindi.'));
+        } else {
+            $this->db->trans_rollback();
+            echo json_encode(array('status' => 'Error', 'message' => "Ürün silinirken bir hata oluştu. Lütfen yöneticinize başvurun."));
+        }
     }
+
 
     public function update_item_form(){
         $this->db->trans_start();

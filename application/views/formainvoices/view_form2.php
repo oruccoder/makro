@@ -305,106 +305,131 @@ $carpim=$kur_degeri;
 
                                                 <br>
                                                 <div class="row">
-                                                <div class="col-md-6">
-                                                    <table  style="" class="party">
-                                                        <thead>
-                                                        <tr>
-                                                            <td>Sifarişçi: </td>
-                                                            <td><strong>
-                                                                    <?php if($invoice['invoice_type_id']==29){ ?>
-                                                                    <?php $loc=location($this->aauth->get_user()->loc);  echo $loc['cname']; ?></strong>
-                                                                <br>
-                                                                <?php
-                                                                }
-                                                                else
-                                                                {
-                                                                    if($invoice['csd']!=0)
-                                                                    {
-                                                                        echo customer_details($invoice['csd'])['company'];
+                                                    <div class="col-md-6">
+                                                        <table  style="" class="party">
+                                                            <thead>
+                                                            <tr>
+                                                                <td>Sifarişçi: </td>
+                                                                <td><strong>
+                                                                        <?php if($invoice['invoice_type_id']==29){ ?>
+                                                                        <?php $loc=location($this->aauth->get_user()->loc);  echo $loc['cname']; ?></strong>
+                                                                    <br>
+                                                                    <?php
                                                                     }
-                                                                }
-                                                                ?>
-
-                                                            </td>
-                                                        </tr>
-                                                        </thead>
-                                                        <tbody>
-
-                                                        <tr>
-                                                            <td>Podratçı : </td>
-                                                            <td>
-                                                                <strong>
-                                                                    <?php if($invoice['invoice_type_id']==30)
-                                                                    { ?>
-                                                                    <?php $loc=location($this->aauth->get_user()->loc);  echo $loc['cname']; ?></strong>
-                                                                </br>
-                                                                <?php
-                                                                }
-                                                                else
-                                                                {
-                                                                    if($invoice['csd']!=0)
+                                                                    else
                                                                     {
-                                                                        $csd = $invoice['csd'];
-                                                                        echo '<a target="_blank" href="/customers/view?id='.$csd.'">Fiziki Şexs'.' '.customer_details($invoice['csd'])['company'].customer_details($invoice['csd'])['taxid'].'</a>';
+                                                                        if($invoice['csd']!=0)
+                                                                        {
+                                                                            echo customer_details($invoice['csd'])['company'];
+                                                                        }
                                                                     }
-                                                                }
-                                                                ?>
+                                                                    ?>
 
-                                                            </td>
-                                                        </tr>
+                                                                </td>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+
+                                                            <tr>
+                                                                <td>Podratçı : </td>
+                                                                <td>
+                                                                    <strong>
+                                                                        <?php if($invoice['invoice_type_id']==30)
+                                                                        { ?>
+                                                                        <?php $loc=location($this->aauth->get_user()->loc);  echo $loc['cname']; ?></strong>
+                                                                    </br>
+                                                                    <?php
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        if($invoice['csd']!=0)
+                                                                        {
+                                                                            $csd = $invoice['csd'];
+                                                                            echo '<a target="_blank" href="/customers/view?id='.$csd.'">'.' '.customer_details($invoice['csd'])['company'].customer_details($invoice['csd'])['taxid'].'</a>';
+                                                                        }
+                                                                    }
+                                                                    ?>
+
+                                                                </td>
+                                                            </tr>
 
 
-                                                        <tr>
-                                                            <td>Forma2 No:</td>
-                                                            <td><?php echo $invoice['invoice_no'];?></td>
+                                                            <tr>
+                                                                <td>Forma2 No:</td>
+                                                                <td><?php echo $invoice['invoice_no'];?></td>
 
-                                                        </tr>
+                                                            </tr>
 
-                                                        <tr>
-                                                            <td>Muqavele No:</td>
-                                                            <td><?php echo $invoice['muqavele_no'];?></td>
-                                                        </tr>
+                                                            <tr>
+                                                                <td>Muqavele No:</td>
+                                                                <td><?php echo $invoice['muqavele_no'];?></td>
+                                                            </tr>
 
-                                                        <tr>
-                                                            <td>Proje Adı:</td>
-                                                            <td><?php echo proje_name($invoice['proje_id']);?></td>
+                                                            <tr>
+                                                                <td>Proje Adı:</td>
+                                                                <td><?php echo proje_name($invoice['proje_id']);?></td>
 
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Tarih:</td>
-                                                            <td><?php echo  dateformat($invoice['invoicedate'])?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Tarih:</td>
+                                                                <td><?php echo  dateformat($invoice['invoicedate'])?></td>
 
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Durum:</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Durum:</td>
+                                                                <?php
+                                                                $pers_name='';
+                                                                if($invoice['updated_user_id']) {
+                                                                    $pers_name = personel_details($invoice['updated_user_id']);
+                                                                } ?>
+                                                                <td><?php echo invoice_status($invoice['status']).'  '.$invoice['pers_notes'].' '.$pers_name;?></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td>Forma2 Notu:</td>
+                                                                <td><?php echo $invoice['notes']?></td>
+                                                            </tr>
+
+                                                            <tr>
+                                                                <td>Modül</td>
+                                                                <td>
+                                                                    <?php if($fehle_status){
+                                                                        echo '<span style="color: red">Fehle Modülünden Gelmiştir</span>';
+                                                                    }
+                                                                    else {
+
+                                                                        echo 'Forma2 Modülünden Gelmiştir.';
+                                                                    }?>
+                                                                </td>
+                                                            </tr>
+                                                            <?php if(hizmet_kontrol($_GET['id'])['status']) {?>
+                                                            <tr>
+                                                                <td>Hizmet Talebi</td>
+                                                                <td> <?=hizmet_kontrol($_GET['id'])['hizmet_url']?></td>
+                                                            </tr>
+                                                            <?php } ?>
+
+
+
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                        <?php
+                                                        if(hizmet_kontrol($_GET['id'])['status']){
+
+                                                            ?>
+
+                                                            <div class="col-md-6">
+                                                                <div class="table-responsive">
+                                                                    <?php echo demirbas_html(hizmet_kontrol($_GET['id'])['demirbas_id'],hizmet_kontrol($_GET['id'])['firma_demirbas_id']); ?>
+                                                                </div>
+
+
+                                                            </div>
+
                                                             <?php
-                                                            $pers_name='';
-                                                            if($invoice['updated_user_id']) {
-                                                                $pers_name = personel_details($invoice['updated_user_id']);
-                                                            } ?>
-                                                            <td><?php echo invoice_status($invoice['status']).'  '.$invoice['pers_notes'].' '.$pers_name;?></td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td>Forma2 Notu:</td>
-                                                            <td><?php echo $invoice['notes']?></td>
-                                                        </tr>
+                                                        }
 
-                                                        <tr>
-                                                            <td>Modül</td>
-                                                            <td>
-                                                                <?php if($fehle_status){
-                                                                    echo '<span style="color: red">Fehle Modülünden Gelmiştir</span>';
-                                                                }
-                                                                else {
-
-                                                                    echo 'Forma2 Modülünden Gelmiştir.';
-                                                                }?>
-                                                            </td>
-                                                        </tr>
-
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                        ?>
                                                 </div>
 
                                                 </br>
@@ -858,51 +883,58 @@ $carpim=$kur_degeri;
                                         <table class="table">
 
                                             <?php
-                                            if(talep_onay_new_invoices(2,$_GET['id'])){
-                                                $button_dikkat='';
-                                                if($note_list){
-                                                    $button_dikkat="<i class='fas fa-exclamation-triangle button_view_notes' onmouseover='details_notes()' style='
-
-    padding: 0px;
-    margin-left: 11px;
-    color: red;
-    font-size: 34px;
-    position: relative;
-    top: 7px;
-    animation-name: flash;
-    -webkit-animation-duration: 2s;
-    -webkit-animation-timing-function: linear;
-    -webkit-animation-iteration-count: infinite;
-
-'></i>";
+                                            if(!iptal_talep_kontrol(1,$_GET['id'])){
+                                                if(talep_onay_new_invoices(2,$_GET['id'])){
+                                                    $button_dikkat='';
+                                                    if($note_list){
+                                                        $button_dikkat="<i class='fas fa-exclamation-triangle button_view_notes' onmouseover='details_notes()' style='
+                                                        padding: 0px;
+                                                        margin-left: 11px;
+                                                        color: red;
+                                                        font-size: 34px;
+                                                        position: relative;
+                                                        top: 7px;
+                                                        animation-name: flash;
+                                                        -webkit-animation-duration: 2s;
+                                                        -webkit-animation-timing-function: linear;
+                                                        -webkit-animation-iteration-count: infinite;
+                                                    
+                                                    '></i>";
+                                                    }
+                                                    foreach (talep_onay_new_invoices(2,$_GET['id']) as $items) {
+                                                        $durum='-';
+                                                        $button='<button class="btn btn-warning"><i class="fa fa-question"></i>&nbsp;Sıra Gelmedi</button>';
+                                                        if($items->status==1){
+                                                            $durum='Onaylandı';
+                                                            $button='<button class="btn btn-success"><i class="fa fa-check"></i>&nbsp;Təsdiqlendi</button>';
+                                                        }
+                                                        if($items->staff==1 && $items->status==0){
+                                                            $durum='Gözləmedə';
+                                                            $button='<button class="btn btn-info onayla" aauth_id="'.$this->aauth->get_user()->id.'" sort="'.$items->sort.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
+                                                        }
+                                                        ?>
+                                                        <tr>
+                                                            <!--?php echo roles(role_id($items->user_id))?-->
+                                                            <th>(Forma 2 Onayı)</th>
+                                                            <th><?php echo personel_details($items->user_id)?></th>
+                                                            <th><?php echo $durum;?></th>
+                                                            <th><?php echo $button;?></th>
+                                                        </tr>
+                                                        <?php
+                                                    }
                                                 }
-                                                foreach (talep_onay_new_invoices(2,$_GET['id']) as $items) {
-                                                    $durum='-';
-                                                    $button='<button class="btn btn-warning"><i class="fa fa-question"></i>&nbsp;Sıra Gelmedi</button>';
-                                                    if($items->status==1){
-                                                        $durum='Onaylandı';
-                                                        $button='<button class="btn btn-success"><i class="fa fa-check"></i>&nbsp;Təsdiqlendi</button>';
-                                                    }
-                                                    if($items->staff==1 && $items->status==0){
-                                                        $durum='Gözləmedə';
-                                                        $button='<button class="btn btn-info onayla" aauth_id="'.$this->aauth->get_user()->id.'" sort="'.$items->sort.'" user_id="'.$items->user_id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>'.$button_dikkat;
-                                                    }
+                                                else {
                                                     ?>
-                                                    <tr>
-                                                        <!--?php echo roles(role_id($items->user_id))?-->
-                                                        <th>(Forma 2 Onayı)</th>
-                                                        <th><?php echo personel_details($items->user_id)?></th>
-                                                        <th><?php echo $durum;?></th>
-                                                        <th><?php echo $button;?></th>
-                                                    </tr>
+                                                    <tr><td style="text-align: center"><b>Bildirim Başlatılmamış</b></td></tr>
                                                     <?php
                                                 }
                                             }
                                             else {
                                                 ?>
-                                                <tr><td style="text-align: center"><b>Bildirim Başlatılmamış</b></td></tr>
+                                                <tr><td style="text-align: center"><b>İptal Talebi Oluşturulmuştur.Muhasebe Kontrolündedir.</b></td></tr>
                                                 <?php
                                             }
+
                                             ?>
                                         </table>
                                     </div>

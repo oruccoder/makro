@@ -109,7 +109,7 @@
                             <ul class=" mb-2 mt-lg-2" style="list-style: none;">
                                 <li>Toplam Tutar : <span class="font-weight-semibold"><?php echo amountFormat($invoice['total'],$invoice['para_birimi']) ?></span></li>
                                 <li><?php echo invoice_type_desc($invoice['invoice_type_id'])?> Tarihi: <span class="font-weight-semibold"><?php echo dateformat($invoice['invoicedate']) ?></span></li>
-                                <li><?php echo invoice_type_desc($invoice['invoice_type_id'])?> Durumu: <span class="font-weight-semibold"><?php echo invoice_status($invoice['status']); ?></span></li>
+                                <li><?php echo invoice_type_desc($invoice['invoice_type_id'])?> Durumu: <span class="font-weight-semibold"><?php echo ($invoice['status']?invoice_status($invoice['status']):'Bekliyor') ?></span></li>
                               </ul>
                             <ul class="mb-2 mt-lg-2" style="list-style: none;">
                                 <?php

@@ -284,6 +284,27 @@ function salary_type($id=0)
 
 }
 
+function role_name_user($user_id)
+{
+    $ci =& get_instance();
+    $role_id = $ci->db->query("SELECT * FROM geopos_users Where id=$user_id")->row()->roleid;
+    $query = $ci->db->query("SELECT * FROM geopos_role Where role_id=$role_id");
+    $row = $query->row();
+    return $row->name;
+
+
+}
+
+function role_name_user_p($user_id)
+{
+    $ci =& get_instance();
+    $role_id = $ci->db->query("SELECT * FROM geopos_users_p Where id=$user_id")->row()->roleid;
+    $query = $ci->db->query("SELECT * FROM geopos_role Where role_id=$role_id");
+    $row = $query->row();
+    return $row->name;
+
+}
+
 function role_name($id=0)
 {
 
@@ -3802,11 +3823,11 @@ function stock_qty_new_mt($id,$product_stock_id=0,$form_id,$warehouse_id)
 
             if($product_stock_id){
 
-                $query_giren = $ci->db->query("SELECT SUM(qty) as total_giren,warehouse_id,unit FROM stock INNER JOIN stock_to_options ON stock.id =stock_to_options.stock_id WHERE  stock_to_options.product_stock_code_id=$product_stock_id and stock.product_id=$id and stock.types=1 and stock.warehouse_id=$warehouse_items->warehouse_id");
+                $query_giren = $ci->db->query("SELECT SUM(qty) as total_giren,warehouse_id,unit FROM stock INNER JOIN stock_to_options ON stock.id =stock_to_options.stock_id WHERE  stock_to_options.product_stock_code_id=$product_stock_id and stock.product_id=$id and stock.types=1 and mt_id=$form_id and stock.warehouse_id=$warehouse_items->warehouse_id");
                 if($query_giren->num_rows()){
                     $query_giren_qty = $query_giren->row()->total_giren;
                 }
-                $query_cikan = $ci->db->query("SELECT SUM(qty) as total_cikan,warehouse_id,unit FROM stock INNER JOIN stock_to_options ON stock.id =stock_to_options.stock_id WHERE  stock_to_options.product_stock_code_id=$product_stock_id and stock.product_id=$id and stock.types=0 and stock.warehouse_id=$warehouse_items->warehouse_id");
+                $query_cikan = $ci->db->query("SELECT SUM(qty) as total_cikan,warehouse_id,unit FROM stock INNER JOIN stock_to_options ON stock.id =stock_to_options.stock_id WHERE  stock_to_options.product_stock_code_id=$product_stock_id and stock.product_id=$id and stock.types=0 and mt_id=$form_id and stock.warehouse_id=$warehouse_items->warehouse_id");
                 if($query_cikan->num_rows()){
                     $query_cikan_qty = $query_cikan->row()->total_cikan;
                 }
@@ -5064,61 +5085,51 @@ function parent_podradci_kontrol_list($asama_id)
 {
     $ci =& get_instance();
     $ci->load->database();
-    $name='';
-    $name_10='';
-    $name_9='';
-    $name_8='';
-    $name_7='';
-    $name_6='';
-    $name_5='';
-    $name_4='';
-    $name_3='';
-    $name_2='';
-    $result = $ci->db->query("SELECT * FROM podradci_parent Where podradci_id = $asama_id");
-    if($result->num_rows()){
-        if($result->row()->parent_id){
-            $parent_id=$result->row()->parent_id;
 
-            $query2 = $ci->db->query("Select company as name,parent_id From podradci LEFT JOIN podradci_parent ON podradci.id=podradci_parent.podradci_id Where  podradci.id=$parent_id")->row();
-            $name_2 = $query2->name.' -> ';
-            if($query2->parent_id){
-                $parent_id2 = $query2->parent_id;
-                $query3 = $ci->db->query("Select company as name,parent_id From podradci LEFT JOIN podradci_parent ON podradci.id=podradci_parent.podradci_id Where  podradci.id=$parent_id2")->row();
-                $name_3 = $query3->name.' -> ';
-                if($query3->parent_id){
-                    $parent_id3 = $query3->parent_id;
-                    $query4 = $ci->db->query("Select company as name,parent_id From podradci LEFT JOIN podradci_parent ON podradci.id=podradci_parent.podradci_id Where  podradci.id=$parent_id3")->row();
-                    $name_4 = $query4->name.' -> ';
-                    if($query4->parent_id){
-                        $parent_id4 = $query4->parent_id;
-                        $query5 = $ci->db->query("Select company as name,parent_id From podradci LEFT JOIN podradci_parent ON podradci.id=podradci_parent.podradci_id Where  podradci.id=$parent_id4")->row();
-                        $name_5 = $query5->name.' -> ';
-                        if($query5->parent_id){
-                            $parent_id5 = $query5->parent_id;
-                            $query6 = $ci->db->query("Select company as name,parent_id From podradci LEFT JOIN podradci_parent ON podradci.id=podradci_parent.podradci_id Where  podradci.id=$parent_id5")->row();
-                            $name_6 = $query6->name.' -> ';
-                            if($query6->parent_id){
-                                $parent_id6 = $query6->parent_id;
-                                $query7 = $ci->db->query("Select company as name,parent_id From podradci LEFT JOIN podradci_parent ON podradci.id=podradci_parent.podradci_id Where  podradci.id=$parent_id6")->row();
-                                $name_7 = $query7->name.' -> ';
-                            }
-                        }
-                    }
+    $name = '';
+    $visited_ids = []; // Ziyaret edilen ID'leri takip et
+    $visited_names = []; // Ziyaret edilen isimleri takip et (tekrar eden isimleri engellemek için)
 
-                }
+    while ($asama_id) {
+        // Daha önce ziyaret edilen bir ID'ye tekrar girerse döngüyü sonlandır
+        if (in_array($asama_id, $visited_ids)) {
+            $name .= '[Döngü Tespit Edildi]'; // Döngü uyarısı ekleyebilirsiniz
+            break;
+        }
 
+        $query = $ci->db->query("
+            SELECT 
+                podradci.company AS name, 
+                podradci_parent.parent_id 
+            FROM podradci 
+            LEFT JOIN podradci_parent 
+            ON podradci.id = podradci_parent.podradci_id 
+            WHERE podradci.id = ?", [$asama_id]
+        )->row();
+
+        if ($query) {
+            // Aynı isim tekrar ediyorsa döngüyü sonlandır
+            if (in_array($query->name, $visited_names)) {
+                $name .= '[Tekrar Eden İsim Tespit Edildi]'; // Uyarı ekleyebilirsiniz
+                break;
             }
 
+            // Ziyaret edilen ID ve isimleri listeye ekle
+            $visited_ids[] = $asama_id;
+            $visited_names[] = $query->name;
+
+            $name = $query->name . ' -> ' . $name;
+            $asama_id = $query->parent_id; // Bir üst parent'a geçiyoruz
+        } else {
+            break; // Daha fazla parent yoksa döngüyü kır
         }
     }
-    else {
-        $name.'->';
-    }
-    $name = $name_10.$name_9.$name_8.$name_7.$name_6.$name_5.$name_4.$name_3.$name_2;
-    return $name;
 
-
+    return rtrim($name, ' -> '); // Son " -> " kısmını temizle
 }
+
+
+
 
 function parent_podradci_kontrol_list_cari($asama_id)
 {
@@ -5369,6 +5380,23 @@ function progress_status_details($id)
     $query2 = $ci->db->query("SELECT * FROM progress_status Where id=$id");
     $row = $query2->row();
     return $row;
+
+}
+
+function malzemetalepstatus($id=null)
+{
+    $ci =& get_instance();
+    $ci->load->database();
+
+    if ($id) {
+        // Tek bir kaydı getir
+        $query = $ci->db->get_where('malzemetalepform_status', ['id' => $id]);
+        return $query->row();
+    } else {
+        // Tüm kayıtları getir
+        $query = $ci->db->get('malzemetalepform_status');
+        return $query->result();
+    }
 
 }
 function bakimlar()
@@ -6654,28 +6682,22 @@ function purchase_status($id=0)
 
 
 }
-function invoice_status($id=0)
+function invoice_status($id = null)
 {
     $ci =& get_instance();
     $ci->load->database();
 
-    if($id!=0)
-    {
-        $query2 = $ci->db->query("SELECT * FROM `invoice_status` WHERE  id =$id")->row_array();
-        return $query2['name'];
+    if ($id) {
+        $result = $ci->db->select('name')
+            ->where('id', $id)
+            ->get('invoice_status')
+            ->row_array();
+        return $result['name'] ?? null; // Eğer sonuç yoksa null döner.
+    } else {
+        return $ci->db->get('invoice_status')->result_array();
     }
-
-
-
-    else
-    {
-        $query2 = $ci->db->query("SELECT * FROM `invoice_status`");
-        return $query2->result_array();
-    }
-
-
-
 }
+
 function invoice_status_ogren($id=0)
 {
     $ci =& get_instance();
@@ -11857,25 +11879,47 @@ function avans($customer_id,$tip){
         $data = [];
         $result = [];
 
-        $query=$ci->db->query("SELECT * FROM `geopos_invoice_transactions`  Where invoice_id = $id and tip IN (1,8)");
-        $query2=$ci->db->query("SELECT transaction_pay.*,geopos_employees.name, -1 as invoice_type_id  FROM `transaction_pay` INNER JOIN geopos_employees ON transaction_pay.aauth_id=geopos_employees.id WHERE transaction_pay.forma2_id=$id ORDER BY transaction_pay.id DESC");
+// Parametrelerin güvenliği için bind yöntemi kullanılıyor.
+        $query = $ci->db->query("SELECT * FROM `geopos_invoice_transactions` WHERE invoice_id = ? AND tip IN (1,8)", [$id]);
+        $query2 = $ci->db->query("
+    SELECT 
+        transaction_pay.*, 
+        geopos_employees.name, 
+        -1 AS invoice_type_id  
+    FROM `transaction_pay` 
+    INNER JOIN geopos_employees 
+        ON transaction_pay.aauth_id = geopos_employees.id 
+    WHERE transaction_pay.forma2_id = ? 
+    ORDER BY transaction_pay.id DESC", [$id]);
 
-        if($query->num_rows()>0){
-            foreach ($query->result() as $value){
-                $data[]=$ci->db->query("SELECT geopos_invoices.*,geopos_invoice_transactions.total as total_transaction FROM `geopos_invoices` INNER JOIN geopos_invoice_transactions ON geopos_invoices.id = geopos_invoice_transactions.transaction_id WHERE geopos_invoices.id = $value->transaction_id and geopos_invoice_transactions.invoice_id = $id ")->row();
+// İlk sorgudan gelen sonuçları işlemek
+        if ($query->num_rows() > 0) {
+            foreach ($query->result() as $value) {
+                $invoice_data = $ci->db->query("
+            SELECT 
+                geopos_invoices.*, 
+                geopos_invoice_transactions.total AS total_transaction 
+            FROM `geopos_invoices` 
+            INNER JOIN geopos_invoice_transactions 
+                ON geopos_invoices.id = geopos_invoice_transactions.transaction_id 
+            WHERE geopos_invoices.id = ? AND geopos_invoice_transactions.invoice_id = ?",
+                    [$value->transaction_id, $id]
+                )->row();
+
+                if ($invoice_data) {
+                    $data[] = $invoice_data;
+                }
             }
 
-            foreach ($data as $key){
-                $result[]=$key;
-            }
+            $result = array_merge($result, $data);
         }
 
-        if($query2->num_rows()>0){
-            foreach ($query2->result() as $key){
-                $result[]=$key;
+// İkinci sorgudan gelen sonuçları işlemek
+        if ($query2->num_rows() > 0) {
+            foreach ($query2->result() as $key) {
+                $result[] = $key;
             }
         }
-
 
         return $result;
 
@@ -12457,7 +12501,254 @@ function personel_bakiye_report_num($id){
 
 
 }
+function talep_onay_listesi($talep_id,$talep_status)
+{
+    $ci =& get_instance();
+    $ci->load->database();
 
+    // Talebe ait tüm onayları al
+    $onaylar = $ci->db->select('kullanici_id, onay_tipi, onay_sirasi, onay_durumu,is_staff,id')
+        ->from('malzemetalepform_onaylari')
+        ->where('talep_id', $talep_id)
+        ->where('onay_tipi', $talep_status)
+        ->order_by('onay_sirasi', 'ASC')
+        ->get()
+        ->result();
+
+    if (!$onaylar) {
+        return [
+            'status' => false,
+            'message' => 'Bu talep için onay listesi bulunamadı.'
+        ];
+    }
+
+    // Kullanıcı bilgilerini getirme
+    $user_ids = array_column($onaylar, 'kullanici_id');
+    $users = $ci->db->select('id, name')
+        ->from('geopos_employees')
+        ->where_in('id', $user_ids)
+        ->get()
+        ->result();
+
+    // Kullanıcı bilgilerini eşleştirme
+    $user_map = [];
+    foreach ($users as $user) {
+        $user_map[$user->id] = $user->name;
+    }
+
+    // Listeyi oluştur
+    $list = [];
+    $sira_kimde = null;
+    foreach ($onaylar as $onay) {
+        $active=false;
+        if ($onay->is_staff) {
+            $active=true;
+        }
+        $list[] = [
+            'id' => $onay->id,
+            'kullanici_id' => $onay->kullanici_id,
+            'kullanici_ad' => $user_map[$onay->kullanici_id] ?? 'Bilinmiyor',
+            'onay_tipi' => $onay->onay_tipi,
+            'onay_tipi_str' => malzemetalepstatus($onay->onay_tipi)->name,
+            'active' => $active,
+            'onay_sirasi' => $onay->onay_sirasi,
+            'onay_durumu' => $onay->onay_durumu
+        ];
+
+
+    }
+
+    return [
+        'status' => true,
+        'onay_listesi' => $list,
+        'sira_kimde' => $sira_kimde
+    ];
+}
+
+function onay_sort_new($type, $proje_id = 0, $talep_id = 0, $talep_status = 0)
+{
+    $ci =& get_instance();
+    $ci->load->database();
+    $loc = $ci->session->userdata('set_firma_id');
+
+    if (!$talep_id || !$type) {
+        return [
+            'status' => false,
+            'message' => 'Geçersiz talep ID veya onay tipi.'
+        ];
+    }
+
+    // Talep verisini kontrol et
+    $talep = $ci->db->select('proje_id')
+        ->from('malzemetalepform')
+        ->where('id', $talep_id)
+        ->get()
+        ->row();
+
+    if (!$talep) {
+        return [
+            'status' => false,
+            'message' => 'Talep bulunamadı.'
+        ];
+    }
+
+    $proje_id = $talep->proje_id;
+
+    // Kullanıcı listesi oluştur
+    $kullanici_listesi = [];
+    if ($proje_id == 124) {
+        if($type == 1 || $type==2 || $type==3){
+            $kullanici_listesi = [21, 39, 66];
+        }
+        elseif($type==4){ //Satınalma süreci
+            $kullanici_listesi = [21];
+        }
+    } else {
+        if($type == 1 || $type==2 || $type==3){
+            $kullanici_listesi = [
+                devr_kontrol(1147, $talep_id, 7),
+                devr_kontrol(741, $talep_id, 7),
+            ];
+        }
+        else if($type==4){
+            $kullanici_listesi = [
+                devr_kontrol(1147, $talep_id, 7),
+                devr_kontrol(741, $talep_id, 7),
+            ];
+        }
+    }
+
+    // Onay verilerini oluştur
+    $data = createApprovalData($kullanici_listesi, $talep_id, $talep_status);
+
+    if (!empty($data)) {
+        // Toplu ekleme işlemi
+        $ci->db->insert_batch('malzemetalepform_onaylari', $data);
+
+        return [
+            'status' => true,
+            'message' => 'Onay listesi başarıyla oluşturuldu.'
+        ];
+    }
+
+    return [
+        'status' => false,
+        'message' => 'Onay listesi oluşturulamadı, kullanıcı listesi boş.'
+    ];
+}
+function createApprovalData($kullanici_listesi, $talep_id, $talep_status)
+{
+    $data = [];
+    foreach ($kullanici_listesi as $index => $kullanici_id) {
+        if (empty($kullanici_id)) {
+            continue; // Geçersiz kullanıcı ID'sini atla
+        }
+
+        // İlk kullanıcı için 'is_staff' değeri 1, diğerleri için 0
+        $is_staff = ($index === 0) ? 1 : 0;
+
+        $data[] = [
+            'talep_id' => $talep_id,
+            'kullanici_id' => $kullanici_id,
+            'onay_tipi' => $talep_status,
+            'is_staff' => $is_staff,
+            'onay_sirasi' => $index + 1, // Sıralama 1'den başlar
+            'onay_durumu' => 'Bekliyor'
+        ];
+    }
+
+    return $data;
+}
+function generateApprovalFlow($approval_flow)
+{
+    $seen = [];
+    $data = [];
+    $order = 1; // Onay sırası başlangıcı
+
+    foreach ($approval_flow as $role => $user_id) {
+        // Eğer user_id 39 ise veya daha önce görülmemişse ekle
+        if ($user_id === 39 || !in_array($user_id, $seen)) {
+            $data[] = [
+                'user_id' => $user_id,
+                'sort' => $order,
+            ];
+            $seen[] = $user_id; // Kullanıcıyı işlenmiş olarak işaretle
+            $order++;
+        }
+    }
+
+    return $data;
+}
+
+function malzemetalep_item_satinalma($item_id)
+{
+    $ci =& get_instance();
+    $ci->load->database();
+    $result = $ci->db->query("SELECT * FROM malzemetalep_products_satinalma_atamalari WHERE item_id = ?", [$item_id]);
+
+    if ($result->num_rows() > 0) {
+        $row = $result->row(); // İlk satırı al
+
+        return [
+            'status' => true,
+            'personel_name' => personel_details($row->satinalma_user_id)
+        ];
+    } else {
+        return [
+            'status' => false
+        ];
+    }
+
+}
+function malzemetalep_item_cari_kontrol($item_id)
+{
+    $ci =& get_instance();
+    $ci->load->database();
+    $result = $ci->db->query("SELECT * FROM malzemetalep_products_cari_atamalari WHERE item_id = ?", [$item_id]);
+
+    if ($result->num_rows() > 0) {
+        $result = $result->result();
+
+        // HTML oluşturma
+        $html = '
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Cari</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+        foreach ($result as $values) {
+            $company = customer_details($values->cari_id)['company'] ?? 'Bilinmiyor';
+            $html .= '
+            <tr>
+                <td>' . htmlspecialchars($company) . '</td>
+                <td>
+                    <button class="btn btn-sm btn-primary cari-edit" data-id="' . $values->cari_id . '">
+                        <i class="fa fa-edit"></i> Düzenle
+                    </button>
+                    <button class="btn btn-sm btn-danger cari-delete" data-id="' . $values->cari_id . '">
+                        <i class="fa fa-trash"></i> Sil
+                    </button>
+                </td>
+            </tr>';
+        }
+
+        $html .= '</tbody></table>';
+
+        return [
+            'status' => true,
+            'html' => $html
+        ];
+    } else {
+        return [
+            'status' => false,
+        ];
+    }
+
+}
 
 function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
     $ci =& get_instance();
@@ -12629,7 +12920,7 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
         $talep_details = $ci->db->query("SELECT * FROM talep_form Where id = $talep_id")->row();
         $depo_sorumlusu=0;
 
-        $warehouse_details = $ci->db->query("SELECT * FROM geopos_warehouse Where id = $talep_details->warehouse_id")->row();
+        $warehouse_details = $ci->db->query("SELECT * FROM geopos_warehouse Where id = 7")->row();
         if($warehouse_details->pers_id){
             $depo_sorumlusu=$warehouse_details->pers_id;
         }
@@ -12659,6 +12950,7 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
         elseif($proje_id==124){ //yazılım projesi
             $data = [
                 ['sort'=>1,'user_id'=>21],
+                ['sort'=>2,'user_id'=>21],
             ];
             return $data;
         }
@@ -12670,10 +12962,11 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
             else {
                 $data = [
                     ['sort'=>1,'user_id'=>  devr_kontrol($proje_sorumlusu,$talep_id,1)],
-                    ['sort'=>2,'user_id'=>devr_kontrol($proje_muduru_id,$talep_id,1)],
-                    ['sort'=>3,'user_id'=>devr_kontrol(66,$talep_id,1)],
-                    ['sort'=>4,'user_id'=> devr_kontrol(1009,$talep_id,1)],
-                    ['sort'=>5,'user_id'=>devr_kontrol($genel_mudur_id,$talep_id,1)]
+                    ['sort'=>2,'user_id'=>  devr_kontrol($depo_sorumlusu,$talep_id,1)],
+                    ['sort'=>3,'user_id'=>devr_kontrol($proje_muduru_id,$talep_id,1)],
+                    ['sort'=>4,'user_id'=>devr_kontrol(66,$talep_id,1)],
+                    ['sort'=>5,'user_id'=> devr_kontrol(1009,$talep_id,1)],
+                    ['sort'=>6,'user_id'=>devr_kontrol($genel_mudur_id,$talep_id,1)]
                 ];
                 return $data;
             }
@@ -13090,27 +13383,49 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
         $sorumlu_pers_id = personel_details_full($personel_id)['sorumlu_pers_id'];
         $proje_id_ = $ci->db->query("SELECT * FROM personel_salary  Where personel_id=$personel_id and status=1")->row()->proje_id;
         $proje_muduru = $ci->db->query("SELECT * FROM  geopos_projects Where id=$proje_id_")->row()->proje_muduru_id;
+        $santiye_muhasib = $ci->db->query("SELECT * FROM  geopos_projects Where id=$proje_id_")->row()->muhasebe_muduru_id;
+        $proje_sorumlusu_id = $ci->db->query("SELECT * FROM  geopos_projects Where id=$proje_id_")->row()->proje_sorumlusu_id;
         $data=[];
         $loc = $ci->session->userdata('set_firma_id');
-        if($loc==5){
-            if($proje_id_==46){
-                $data = [
-                    ['sort'=>1,'user_id'=>devr_kontrol(1007,0,0)],
-                    ['sort'=>2,'user_id'=>devr_kontrol($sorumlu_pers_id,0,0)],
-                    ['sort'=>3,'user_id'=>devr_kontrol(62,0,0)]
+        if ($loc == 5) {
+            $data_rehberlik = [21, 39, 1009, 66, 75, 1149, 603, 84, 1116, 1008];
 
-                ];
+            if ($proje_id_ == 35) {
+                // Proje ID 35 için rehberlik kontrolü
+                $approval_flow = in_array($personel_id, $data_rehberlik)
+                    ? [
+                        'sorumlu' => $sorumlu_pers_id,
+                        'ofis_menejeri' => 62,
+                        'genel_mudur' => 61,
+                        'muhasebe_muduru' => 39,
+                    ]
+                    : [
+                        'sorumlu' => $sorumlu_pers_id,
+                        'ofis_menejeri' => 62,
+                        'muhasebe_muduru' => 39,
+                    ];
+            } else {
+                // Diğer projeler için rehberlik kontrolü
+                $approval_flow = in_array($personel_id, $data_rehberlik)
+                    ? [
+                        'sorumlu' => $sorumlu_pers_id,
+                        'ofis_menejeri' => 62,
+                        'santiye_muduru' => $proje_muduru,
+                        'genel_mudur' => 61,
+                        'muhasebe_muduru' => 39,
+                    ]
+                    : [
+                        'santiye_muhasebe' => $santiye_muhasib,
+                        'santiye_muduru' => $proje_sorumlusu_id,
+                        'genel_proje_muduru' => 66,
+                        'muhasebe_muduru' => 39,
+                    ];
             }
-            else {
-                $data = [
-                    ['sort'=>1,'user_id'=>devr_kontrol(1007,0,0)],
-                    ['sort'=>2,'user_id'=>devr_kontrol($sorumlu_pers_id,0,0)],
-                    ['sort'=>3,'user_id'=>devr_kontrol($proje_muduru,0,0)],
-                    ['sort'=>4,'user_id'=>devr_kontrol(62,0,0)]
 
-                ];
-            }
+            // Onay sıralamasını oluştur
+            $data = generateApprovalFlow($approval_flow);
 
+            // $data artık onay sıralaması içeriyor
         }
         else {
             $data = [
@@ -14120,13 +14435,29 @@ function siparis_list_kontrol($id){
     $ci =& get_instance();
     $ci->load->database();
     if($id){
-        $details =  $ci->db->query("SELECT * FROM `siparis_list_form` Where talep_id=$id and deleted_at is Null");
-        if($details->num_rows()){
-            return $details->result();
+
+        $arr = [];
+        $products = $ci->db->query("SELECT * FROM talep_form_products Where form_id = $id");
+        if($products->num_rows()){
+            foreach ($products->result() as $itme){
+                $arr[]=$itme->id;
+            }
+            $str = implode(",",$arr);
+            $details =  $ci->db->query("SELECT * FROM `siparis_list_form` Where talep_id=$id and deleted_at is Null and talep_form_product_id IN ($str)");
+            if($details->num_rows()){
+                return $details->result();
+            }
+            else {
+                return false;
+            }
         }
         else {
             return false;
         }
+
+
+
+
     }
     else {
         return false;

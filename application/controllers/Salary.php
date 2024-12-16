@@ -18,8 +18,11 @@ class Salary Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         $this->load->helper('cookie');
-        $this->load->database('default');
         $this->load->model('salary_model', 'model');
         $this->load->library("Common");
         if (!$this->aauth->is_loggedin()) {
@@ -214,19 +217,40 @@ class Salary Extends CI_Controller
         echo json_encode($output);
     }
 
-    public function create_save(){
-        $this->db->trans_start();
-        $result = $this->model->create_save();
-        if($result['status']){
-            echo json_encode(array('status' => 200, 'message' =>$result['messages'],'link'=>'/salary/view/'.$result['id']));
-            $this->db->trans_complete();
-        }
-        else {
-            $this->db->trans_rollback();
-            echo json_encode(array('status' => 410, 'message' =>$result['messages']));
+    public function create_save()
+    {
+        // Yetki kontrolü
+        if (!$this->aauth->premission(93)->read) {
+            echo json_encode([
+                'status' => 410,
+                'message' => 'Yetkiniz Yoktur'
+            ]);
+            return;
         }
 
+        $this->db->trans_start();
+
+        // Modeldeki kaydetme işlemi çağrılıyor
+        $result = $this->model->create_save();
+
+        if ($result['status']) {
+            // İşlem başarılı, veritabanı işlemini tamamla
+            $this->db->trans_complete();
+            echo json_encode([
+                'status' => 200,
+                'message' => $result['messages'],
+                'link' => '/salary/view/' . $result['id']
+            ]);
+        } else {
+            // İşlem başarısız, veritabanı işlemini geri al
+            $this->db->trans_rollback();
+            echo json_encode([
+                'status' => 410,
+                'message' => $result['messages']
+            ]);
+        }
     }
+
     public function view($id){
         $details = $this->model->details($id);
         $details_items = $this->model->details_items($id);
@@ -865,9 +889,15 @@ class Salary Extends CI_Controller
             $banka_odeme_emri='';
             if($list_tipi=='muhasebe' || $list_tipi=='list'){
                 if($prd->banka_hakedis_durumu){
+                    $bordro_item = $this->db->get_where('new_bordro_item', ['id' => $prd->id])->row();
+                    $banka_odenilecek = $bordro_item->bankadan_odenilecek;
+                    $odenilecek_meblaq = $bordro_item->odenilecek_meblaq;
+
                     $alacak_banka_durum='Banka Hakedişi Verildi';
                 }
                 if($prd->nakit_hakedis_durumu){
+                    $bordro_item = $this->db->get_where('new_bordro_item', ['id' => $prd->id])->row();
+                    $nakit_odenilecek = $bordro_item->nakit_odenilecek;
                     $alacak_nakit_durum='Nakit Hakedişi Verildi';
                 }
 
@@ -883,6 +913,7 @@ class Salary Extends CI_Controller
                         $banka_odeme_emri.= personel_details($pay_details->row()->pay_set_id).' Banka Ödeme E. Verildi';
                     }
                 }
+
             }
 
 

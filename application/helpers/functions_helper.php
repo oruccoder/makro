@@ -72,6 +72,21 @@ function new_list_note($id,$islem_id)
 
 
 }
+function nakliye_not_list($id)
+{
+
+    $ci = &get_instance();
+    $ci->load->database();
+    $ci->db->select('talep_form_notes_nakliye.*,geopos_employees.name as pers_name');
+    $ci->db->from('talep_form_notes_nakliye');
+    $ci->db->join('geopos_employees','talep_form_notes_nakliye.aaut_id=geopos_employees.id');
+    $ci->db->where('talep_form_notes_nakliye.talep_id',$id);
+    $query = $ci->db->get();
+    if($query->num_rows())
+    {
+        return $query->result();
+    }
+}
 function _ust_kategori_kontrol($id) //7
 {
 
@@ -1710,4 +1725,34 @@ function work_item_status($id,$status)
         return 'Tamamlandı';
     }
 
+}
+
+function hizmet_kontrol($forma_2_id)
+{
+    $ci = &get_instance();
+    $ci->load->database();
+    $kontrol = $ci->db->query("SELECT * FROM forma_2_to_ht Where forma_2_id=$forma_2_id");
+    if($kontrol->num_rows()){
+        $talep_id = $kontrol->row()->muqavele_id;
+        $hizmet_talebi = $ci->db->query("SELECT * FROM talep_form Where id=$talep_id");
+        if($hizmet_talebi->num_rows()){
+            return array(
+                'status'=>true,
+                'demirbas_id'=>$hizmet_talebi->row()->demirbas_id,
+                'firma_demirbas_id'=>$hizmet_talebi->row()->firma_demirbas_id,
+                'hizmet_url'=>"<a href='/hizmet/view/$talep_id' target='_blank' class='btn btn-info'>Hizmet Talebini Görüntüle</a>"
+            );
+        }
+        else {
+            return array(
+                'status'=>false
+            );
+        }
+    }
+    else {
+
+        return array(
+            'status'=>false
+        );
+    }
 }

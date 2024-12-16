@@ -592,12 +592,9 @@
         }
         $('.teslimat_tutar').keyup();
     })
-
-
     $('.item_qty, .item_price, .item_discount, .item_kdv').keyup(function (){
         item_hesap($(this).attr('eq'))
     })
-
     $('.teslimat_tutar').keyup(function (){
         let teslimat_tutar = parseFloat($('.teslimat_tutar').val());
         let item_kdv = parseFloat($('.kdv_oran_details').val());
@@ -608,20 +605,32 @@
         let cemi_total=0;
         if(edv_durum)
         {
-            edv_tutari = teslimat_tutar* (parseFloat(item_kdv)/100);
-            cemi = teslimat_tutar-parseFloat(edv_tutari)
-            cemi_total=cemi+edv_tutari;
+            if(parseFloat($('.item_kdv').eq(0).val())>0){
+                edv_tutari_tes = teslimat_tutar* (parseFloat(item_kdv)/100);
+                cemi = edv_tutari_tes-parseFloat(edv_tutari)
+                cemi_total=cemi+edv_tutari;
+            }
+            else {
+                edv_tutari_tes = 0;
+            }
         }
         else
         {
-            edv_tutari = teslimat_tutar* (parseFloat(item_kdv)/100);
-            cemi = teslimat_tutar-parseFloat(edv_tutari)
+            let  one_itemkdv = parseFloat($('.item_kdv').eq(0).val());
+            if(one_itemkdv > 0){
+                edv_tutari_tes = teslimat_tutar* (parseFloat(one_itemkdv)/100);
+
+            }
+            else {
+                edv_tutari_tes=0;
+            }
+            cemi = edv_tutari_tes-parseFloat(edv_tutari)
             cemi_total=teslimat_tutar;
         }
 
 
         $('.teslimat_cemi_hidden').val(teslimat_tutar);
-        $('.teslimat_edv_total_hidden').val(0);
+        $('.teslimat_edv_total_hidden').val(edv_tutari_tes);
         $('.teslimat_total_hidden').val(teslimat_tutar);
         let count = $('.item_qty').length;
         for (let i=0; i<count; i++){
@@ -764,7 +773,7 @@
         $('.alt_edv_total_val').val(edv_tutari_total.toFixed(4));
 
         let teslimat_tutar = parseFloat($('.teslimat_tutar').val());
-        let alt_total = net_cemi_total+edv_tutari_total+teslimat_tutar;
+        let alt_total = net_cemi_total+edv_tutari_total;
         $('#alt_total').empty().text(alt_total.toFixed(2)+' '+para_birimi)
         $('.alt_total_val').val(alt_total.toFixed(4));
         $('#avans_price').attr('max',alt_total.toFixed(4));

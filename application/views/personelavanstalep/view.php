@@ -1,7 +1,7 @@
 <div class="page-header">
     <div class="page-header-content header-elements-lg-inline">
         <div class="page-title d-flex">
-            <h4><span class="font-weight-semibold">Avans Talebi Görüntüle</span></h4>
+            <h4><span class="font-weight-semibold">Maaş Talebi Görüntüle</span></h4>
             <a href="#" class="header-elements-toggle text-body d-lg-none"><i class="icon-more"></i></a>
         </div>
 

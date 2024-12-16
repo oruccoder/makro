@@ -1444,7 +1444,7 @@
     }
 
 
-    $(document).on('click','#new_create',function (){
+    $(document).on('click', '#new_create', function () {
         $.confirm({
             theme: 'modern',
             closeIcon: true,
@@ -1457,43 +1457,51 @@
             containerFluid: !0,
             smoothContent: true,
             draggable: false,
-            content:'Fatura Oluşturulacak Emin Misiniz?',
+            content: 'Fatura Oluşturulacak Emin Misiniz?',
             buttons: {
                 formSubmit: {
                     text: 'Evet',
                     btnClass: 'btn-blue',
                     action: function () {
-                        // let name_say = $('.required').length;
-                        // let req = 0 ;
-                        // for (let i = 0; i < name_say;i++){
-                        //     let name = $('.required').eq(i).val();
-                        //     if(!parseInt(name) || name==''){
-                        //         req++;
-                        //     }
-                        // }
-                        // if(req > 0){
-                        //     $.alert({
-                        //         theme: 'material',
-                        //         icon: 'fa fa-exclamation',
-                        //         type: 'red',
-                        //         animation: 'scale',
-                        //         useBootstrap: true,
-                        //         columnClass: "col-md-4 mx-auto",
-                        //         title: 'Dikkat!',
-                        //         content: 'Yıldızlı Alanlar Zorunludur',
-                        //         buttons:{
-                        //             prev: {
-                        //                 text: 'Tamam',
-                        //                 btnClass: "btn btn-link text-dark",
-                        //             }
-                        //         }
-                        //     });
-                        //     return false;
-                        // }
+                        // Zorunlu alan kontrolü
+                        let valid = true;
+                        let requiredFields = ['customer_id', 'invoice_type', 'invoice_no', 'invoicedate', 'notes']; // Zorunlu alanların "name" değerlerini belirtin
+                        requiredFields.forEach((name) => {
+                            let field = $(`[name="${name}"]`);
+                            if (!field.val().trim()) {
+                                valid = false;
+                                field.addClass('is-invalid'); // Hata durumunda kırmızı border
+                                field.focus();
+                            } else {
+                                field.removeClass('is-invalid');
+                            }
+                        });
+
+                        if (!valid) {
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                animation: 'scale',
+                                useBootstrap: true,
+                                columnClass: "col-md-4 mx-auto",
+                                title: 'Hata!',
+                                content: 'Lütfen tüm zorunlu alanları doldurunuz.',
+                                buttons: {
+                                    ok: {
+                                        text: 'Tamam',
+                                        btnClass: "btn btn-danger btn-sm",
+                                    }
+                                }
+                            });
+                            return false;
+                        }
+
+                        // Eğer tüm kontroller geçerliyse devam et
                         $('#loading-box').removeClass('d-none');
-                        $.post(baseurl + 'invoices/action',$('#data_form').serialize(),(response)=>{
+                        $.post(baseurl + 'invoices/action', $('#data_form').serialize(), (response) => {
                             let data = jQuery.parseJSON(response);
-                            if(data.status==200){
+                            if (data.status == 200) {
                                 $('#loading-box').addClass('d-none');
                                 $.alert({
                                     theme: 'modern',
@@ -1504,18 +1512,17 @@
                                     columnClass: "col-md-4 mx-auto",
                                     title: 'Başarılı',
                                     content: data.message,
-                                    buttons:{
+                                    buttons: {
                                         prev: {
                                             text: 'Tamam',
                                             btnClass: "btn btn-link text-dark",
-                                            action:function (){
-                                                location.href = '/invoices/view?id='+data.id;
+                                            action: function () {
+                                                location.href = '/invoices/view?id=' + data.id;
                                             }
                                         }
                                     }
                                 });
-                            }
-                            else if(data.status==410) {
+                            } else if (data.status == 410) {
                                 $('#loading-box').addClass('d-none');
                                 $.alert({
                                     theme: 'modern',
@@ -1526,7 +1533,7 @@
                                     columnClass: "col-md-4 mx-auto",
                                     title: 'Dikkat!',
                                     content: data.message,
-                                    buttons:{
+                                    buttons: {
                                         prev: {
                                             text: 'Tamam',
                                             btnClass: "btn btn-link text-dark",
@@ -1534,27 +1541,22 @@
                                     }
                                 });
                             }
-
-
-                        })
-
+                        });
                     }
                 },
-                cancel:{
+                cancel: {
                     text: 'Vazgeç',
                     btnClass: "btn btn-danger btn-sm",
                 }
-
             },
             onContentReady: function () {
-         
                 var jc = this;
                 this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
                     e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    jc.$$formSubmit.trigger('click');
                 });
             }
         });
-    })
+    });
+
 </script>

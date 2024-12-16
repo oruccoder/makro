@@ -18,6 +18,11 @@ class Personelavanstalep Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
+
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
@@ -105,8 +110,8 @@ class Personelavanstalep Extends CI_Controller
     }
 
     public function create_save(){
-        if (!$this->aauth->premission(50)->write) {
-            echo json_encode(array('status' => 410, 'message' =>'Yetkiniz Bulunmamaktadır'));
+        if (!$this->aauth->premission(94)->write) {
+            echo json_encode(array('status' => 'Error', 'message' =>'Yetkiniz Bulunmamaktadır.Bölüm Müdürünüzden veya IT şubesinden destek alınız'));
         }
         else {
             $this->db->trans_start();
@@ -124,17 +129,23 @@ class Personelavanstalep Extends CI_Controller
     }
 
     public function create_save_yetki(){
-        $this->db->trans_start();
-        $result = $this->model->create_save_yetki();
-        if($result['status']){
-
-            echo json_encode(array('status' => 'Success', 'message' =>$result['mesaj'],'index'=>'/personelavanstalep/view/'.$result['id']));
-            $this->db->trans_complete();
+        if (!$this->aauth->premission(94)->write) {
+            echo json_encode(array('status' => 'Error', 'message' =>'Yetkiniz Bulunmamaktadır.Bölüm Müdürünüzden veya IT şubesinden destek alınız'));
         }
         else {
-            $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' =>$result['mesaj']));
+            $this->db->trans_start();
+            $result = $this->model->create_save_yetki();
+            if($result['status']){
+
+                echo json_encode(array('status' => 'Success', 'message' =>$result['mesaj'],'index'=>'/personelavanstalep/view/'.$result['id']));
+                $this->db->trans_complete();
+            }
+            else {
+                $this->db->trans_rollback();
+                echo json_encode(array('status' => 'Error', 'message' =>$result['mesaj']));
+            }
         }
+
     }
 
     public function status_upda(){
@@ -220,128 +231,59 @@ class Personelavanstalep Extends CI_Controller
 
     public function view($id)
     {
+        if (!$this->aauth->premission(7)->read) {
+            exit('<h3>Üzgünüm! Giriş Yetkiniz Bulunmamaktadır</h3>');
+        }
+
+        $user = $this->aauth->get_user()->id; // Giriş yapan kullanıcı ID'si
+        $role_id = $this->aauth->get_user()->roleid; // Kullanıcı rolü
+        $santiye_id = personel_salary_details_get($user)->proje_id; // Kullanıcının şantiyesi
+        $status = true;
+
         $data['details']= $this->model->details($id);
         $personel_id = $data['details']->personel_id;
 
-        $head['usernm'] = $this->aauth->get_user()->username;
-        $head['title'] = 'Personel Talep Görüntüleme';
-        $data['items']= $this->model->product_details($id);
-        $sorumlu_pers_id =  personel_details_full($personel_id)['sorumlu_pers_id'];
 
-        if($this->aauth->premission(68)->read){
-            $data['file_details']= $this->model->file_details($id);
-            $toplam_tutar=0;
-            foreach ($data['items'] as $details){
-                $toplam_tutar+=$details->total;
+        // Kullanıcı tüm personelleri görme yetkisine sahip değilse
+        if (!$this->aauth->premission(95)->read) {
+            if (in_array($role_id, [10, 40, 48,6,19,30])) {
+                // Proje Müdürü veya Şantiye Muhasebecisi ise, şantiye kontrolü yap
+                $santiye_id_personel = personel_salary_details_get($personel_id)->proje_id; // Görüntülenmek istenen personelin şantiyesi
+                if ($santiye_id != $santiye_id_personel) {
+                    $status = false; // Eğer personel başka bir şantiyede ise yetkisiz
+                }
+            } else {
+                // Diğer rollerde kullanıcı yetkisiz
+                $status = false;
             }
+        }
 
-            $data['note_list']=new_list_note(5,$id);
-
-
-            $data['odeme_details']=[
-                'toplam_tutar'=>amountFormat($toplam_tutar),
-                'toplam_tutar_float'=>$toplam_tutar,
-                'cari'=>personel_details_full($data['details']->personel_id)['name'],
+        if ($status) {
+            $head['usernm'] = $this->aauth->get_user()->username;
+            $head['title'] = 'Personel Talep Görüntüleme';
+            $data['items'] = $this->model->product_details($id);
+            $sorumlu_pers_id = personel_details_full($personel_id)['sorumlu_pers_id'];
+            $data['file_details'] = $this->model->file_details($id);
+            $toplam_tutar = 0;
+            foreach ($data['items'] as $details) {
+                $toplam_tutar += $details->total;
+            }
+            $data['note_list'] = new_list_note(5, $id);
+            $data['odeme_details'] = [
+                'toplam_tutar' => amountFormat($toplam_tutar),
+                'toplam_tutar_float' => $toplam_tutar,
+                'cari' => personel_details_full($data['details']->personel_id)['name'],
             ];
-
-
-
             $odeme_total = $this->model->odeme_total($id);
             $form_total = $this->model->form_total($id);
-            $data['kalan']=floatval($form_total)-floatval($odeme_total);
-
-
+            $data['kalan'] = floatval($form_total) - floatval($odeme_total);
             $this->load->view('fixed/header', $head);
-
-            $this->load->view('personelavanstalep/view',$data);
+            $this->load->view('personelavanstalep/view', $data);
             $this->load->view('fixed/footer');
         }
-        elseif($this->aauth->premission(50)->read){
-
-
-            $proje_id_ = $this->db->query("SELECT * FROM personel_salary  Where personel_id=$personel_id and status=1")->row()->proje_id;
-
-            $proje_details = $this->db->query("SELECT * FROM geopos_projects Where id=$proje_id_")->row();
-            $proje_sorumlusu  = $proje_details->proje_sorumlusu_id;
-            $proje_muduru_id  = $proje_details->proje_muduru_id;
-            $genel_mudur_id  = $proje_details->genel_mudur_id;
-            $muhasebe_muduru_id  = $proje_details->muhasebe_muduru_id;
-
-
-            if($this->aauth->get_user()->id==$sorumlu_pers_id || $this->aauth->get_user()->id==$personel_id
-                || $this->aauth->get_user()->id==$proje_sorumlusu
-                || $this->aauth->get_user()->id==$personel_id
-                || $this->aauth->get_user()->id==$proje_muduru_id
-                || $this->aauth->get_user()->id==$genel_mudur_id
-                || $this->aauth->get_user()->id==$muhasebe_muduru_id
-            ){
-                $data['file_details']= $this->model->file_details($id);
-                $toplam_tutar=0;
-                foreach ($data['items'] as $details){
-                    $toplam_tutar+=$details->total;
-                }
-
-                $data['note_list']=new_list_note(5,$id);
-
-
-                $data['odeme_details']=[
-                    'toplam_tutar'=>amountFormat($toplam_tutar),
-                    'toplam_tutar_float'=>$toplam_tutar,
-                    'cari'=>personel_details_full($data['details']->personel_id)['name'],
-                ];
-
-
-
-                $odeme_total = $this->model->odeme_total($id);
-                $form_total = $this->model->form_total($id);
-                $data['kalan']=floatval($form_total)-floatval($odeme_total);
-
-
-                $this->load->view('fixed/header', $head);
-
-                $this->load->view('personelavanstalep/view',$data);
-                $this->load->view('fixed/footer');
-            }
-            else {
-                exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
-            }
-
-        }
         else {
-            exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
+            exit('<h3>Üzgünüm! Bu Talebi Görme Yetkiniz Yoktur</h3>');
         }
-
-
-
-
-
-
-//        $data['file_details']= $this->model->file_details($id);
-//        $toplam_tutar=0;
-//        foreach ($data['items'] as $details){
-//            $toplam_tutar+=$details->total;
-//        }
-//
-//        $data['note_list']=new_list_note(5,$id);
-//
-//
-//        $data['odeme_details']=[
-//            'toplam_tutar'=>amountFormat($toplam_tutar),
-//            'toplam_tutar_float'=>$toplam_tutar,
-//            'cari'=>personel_details_full($data['details']->personel_id)['name'],
-//        ];
-//
-//
-//
-//        $odeme_total = $this->model->odeme_total($id);
-//        $form_total = $this->model->form_total($id);
-//        $data['kalan']=floatval($form_total)-floatval($odeme_total);
-//
-//
-//        $this->load->view('fixed/header', $head);
-//
-//        $this->load->view('personelavanstalep/view',$data);
-//        $this->load->view('fixed/footer');
     }
 
     public function upload_file(){
@@ -567,46 +509,79 @@ class Personelavanstalep Extends CI_Controller
     }
 
 
-    public function update_form_payment(){
+    public function update_form_payment()
+    {
         $this->db->trans_start();
+
         $id = $this->input->post('talep_id');
         $personel_id = $this->input->post('personel_id');
+        $user_id = $this->aauth->get_user()->id;
 
+        // Talep detaylarını al
         $details_form = $this->model->details($id);
-        $user_id  = $this->aauth->get_user()->id;
-        $yetkili_kontrol  = $this->db->query("SELECT * FROM `geopos_projects` where id = $details_form->proje_id and (  muhasebe_muduru_id=$user_id or genel_mudur_id=$user_id)")->num_rows();
-        if($yetkili_kontrol) {
 
-            $personel_name = personel_details_full($personel_id)['name'];
-            $this->model->talep_history($id, $this->aauth->get_user()->id, ' Talep Güncellendi. Ödeme Emri Verildi : ' . $personel_name);
-            $data_talep_updata=
-                [
-                    'payment_personel_id'=>$personel_id,
-                    'status'=>12,
-                ];
-            $this->db->where('id',$id);
-            $this->db->set($data_talep_updata);
+        // Yetkili kontrolü
+        $yetkili_kontrol = $this->db->where('id', $details_form->proje_id)
+            ->group_start()
+            ->where('muhasebe_muduru_id', $user_id)
+            ->or_where('genel_mudur_id', $user_id)
+            ->group_end()
+            ->count_all_results('geopos_projects');
 
+        if ($yetkili_kontrol) {
+            // Personel adı alınır
+            $personel_details = personel_details_full($personel_id);
+            $personel_name = $personel_details['name'];
 
-            if ($this->db->update('talep_form_personel', $data_talep_updata)) {
+            // Talep güncelleme işlemi
+            $data_talep_update = [
+                'payment_personel_id' => $personel_id,
+                'status' => 12,
+            ];
 
-                $mesaj=$details_form->code.' Numaralı Avans Talep Formuna Ödeme Emri Verilmiştir';
-               // $this->model->send_mail($personel_id,'Avans Talep Onayı',$mesaj);
+            $this->db->where('id', $id);
+            if ($this->db->update('talep_form_personel', $data_talep_update)) {
+                // Talep geçmişi güncellemesi
+                $this->model->talep_history(
+                    $id,
+                    $user_id,
+                    'Talep Güncellendi. Ödeme Emri Verildi : ' . $personel_name
+                );
 
-                $this->aauth->applog("Personel Avans Talebinden Güncellendi  :  ID : " . $id, $this->aauth->get_user()->username);
+                // Bildirim gönderimi
+                $mesaj = $details_form->code . ' Numaralı Avans Talep Formuna Ödeme Emri Verilmiştir';
+                // $this->model->send_mail($personel_id, 'Avans Talep Onayı', $mesaj);
+
+                // Log kaydı
+                $this->aauth->applog(
+                    "Personel Avans Talebinden Güncellendi : ID : " . $id,
+                    $this->aauth->get_user()->username
+                );
+
+                // İşlem başarıyla tamamlandı
                 $this->db->trans_complete();
-                echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
+                echo json_encode([
+                    'status' => 'Success',
+                    'message' => 'Başarıyla Güncellendi',
+                ]);
             } else {
+                // Hata durumunda işlem geri alınıyor
                 $this->db->trans_rollback();
-                echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
+                echo json_encode([
+                    'status' => 'Error',
+                    'message' => "Hata Aldınız. Lütfen Yöneyiciye Başvurun.",
+                ]);
             }
-        }
-        else {
+        } else {
+            // Yetki kontrolü başarısız
             $this->db->trans_rollback();
-            echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
+            echo json_encode([
+                'status' => 'Error',
+                'message' => "Yetkiniz Bulunmamaktadır",
+            ]);
         }
-
     }
+
 
     public function form_bildirim_olustur(){
         $this->db->trans_start();
@@ -732,105 +707,119 @@ class Personelavanstalep Extends CI_Controller
             echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
         }
     }
-    public function customer_payment_update(){
+    public function customer_payment_update()
+    {
         $this->db->trans_start();
+
         $id = $this->input->post('talep_id');
         $account_id = $this->input->post('account_id');
         $alacak_tutar = $this->input->post('alacak_tutar');
         $tip = $this->input->post('tip');
-
-        $details_form = $this->model->details($id);
-        $not = $this->input->post('not').' '.$details_form->code.' İstinaden Ödeme';
-        $invoice_type_id = 14; //Personel Maaş Avansı
-
-        $user_id  = $this->aauth->get_user()->id;
+        $not = $this->input->post('not');
+        $user_id = $this->aauth->get_user()->id;
         $role_id = $this->aauth->get_user()->roleid;
-        if($tip=='muhasebe') {
+
+        // Talep detaylarını al
+        $details_form = $this->model->details($id);
+        $not .= ' ' . $details_form->code . ' İstinaden Ödeme';
+        $invoice_type_id = 14; // Personel Maaş Avansı
+
+        // Ödeme işlemleri için genel veri seti
+        $data = [
+            'csd' => $details_form->personel_id,
+            'payer' => personel_details_full($details_form->personel_id)['name'],
+            'acid' => $account_id,
+            'account' => account_details($account_id)->holder,
+            'total' => $alacak_tutar,
+            'invoice_type_id' => $invoice_type_id,
+            'invoice_type_desc' => invoice_type_desc($invoice_type_id),
+            'method' => $details_form->method,
+            'eid' => $user_id,
+            'notes' => $not,
+            'proje_id' => $details_form->proje_id,
+        ];
+
+        // Muhasebe işlemi için kontrol
+        if ($tip === 'muhasebe') {
             if ($role_id == 1 || $role_id == 48) {
-                $data = array(
-                    'csd' => $details_form->personel_id,
-                    'payer' => personel_details_full($details_form->personel_id)['name'],
-                    'acid' => $account_id, //hesapID ekleneck
-                    'account' => account_details($account_id)->holder,
-                    'total' => $alacak_tutar,
-                    'invoice_type_id'=>$invoice_type_id,
-                    'invoice_type_desc'=>invoice_type_desc($invoice_type_id),
-                    'method' => $details_form->method,
-                    'eid' => $this->aauth->get_user()->id, //user_id
-                    'notes' => $not,
-                    'proje_id' => $details_form->proje_id,
-                );
-                if($this->db->insert('geopos_invoices', $data)){
-                    $data_talep_updata=
-                        [
-                            'odeme_durum'=>1,
-                            'status'=>9,
-                        ];
-                    $this->db->where('id',$id);
-                    $this->db->set($data_talep_updata);
-                    if ($this->db->update('talep_form_personel', $data_talep_updata)) {
-                        $this->model->talep_history($id, $this->aauth->get_user()->id, ' Ödeme Yapıldı : '.amountFormat($alacak_tutar));
-                        $this->db->trans_complete();
-                        echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
-                    }
-                    else {
-                        $this->db->trans_rollback();
-                        echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
-                    }
-                }
-                else {
-                    $this->db->trans_rollback();
-                    echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
-                }
-            }
-        }
-        else {
-            if($user_id==$details_form->payment_personel_id) {
-                $data = array(
-                    'csd' => $details_form->personel_id,
-                    'payer' => personel_details_full($details_form->personel_id)['name'],
-                    'acid' => $account_id, //hesapID ekleneck
-                    'account' => account_details($account_id)->holder,
-                    'total' => $alacak_tutar,
-                    'invoice_type_id'=>$invoice_type_id,
-                    'invoice_type_desc'=>invoice_type_desc($invoice_type_id),
-                    'method' => $details_form->method,
-                    'eid' => $this->aauth->get_user()->id, //user_id
-                    'notes' => $not,
-                    'proje_id' => $details_form->proje_id,
-                );
-                if($this->db->insert('geopos_invoices', $data)){
-                    $data_talep_updata=
-                        [
-                            'odeme_durum'=>1,
-                            'status'=>9,
-                        ];
-                    $this->db->where('id',$id);
-                    $this->db->set($data_talep_updata);
-                    if ($this->db->update('talep_form_personel', $data_talep_updata)) {
-                        $this->model->talep_history($id, $this->aauth->get_user()->id, ' Ödeme Yapıldı : '.amountFormat($alacak_tutar));
-                        $this->db->trans_complete();
-                        echo json_encode(array('status' => 'Success', 'message' => 'Başarıyla Güncellendi'));
-                    }
-                    else {
-                        $this->db->trans_rollback();
-                        echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
-                    }
-                }
-                else {
-                    $this->db->trans_rollback();
-                    echo json_encode(array('status' => 'Error', 'message' => "Hata Aldınız.Lütfen Yöneyiciye Başvurun." . ' Hata '));
-                }
-            }
-            else {
+                $this->process_payment($id, $data, $alacak_tutar, $details_form, $tip, $details_form->personel_id);
+            } else {
                 $this->db->trans_rollback();
-                echo json_encode(array('status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"));
+                echo json_encode(['status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"]);
+            }
+        } else {
+            // Yetkili kullanıcı kontrolü
+            if ($user_id == $details_form->payment_personel_id) {
+                $this->process_payment($id, $data, $alacak_tutar, $details_form, $tip, $details_form->personel_id);
+            } else {
+                $this->db->trans_rollback();
+                echo json_encode(['status' => 'Error', 'message' => "Yetkiniz Bulunmamaktadır"]);
             }
         }
-
-
-
     }
+
+    private function process_payment($id, $data, $alacak_tutar, $details_form, $tip, $pers_id)
+    {
+        // Ödemeyi `geopos_invoices` tablosuna ekleme işlemi
+        if ($this->db->insert('geopos_invoices', $data)) {
+
+            // Talep durumu güncelleme
+            if ($tip === 'odeme') {
+                $data_talep_update = [
+                    'odeme_durum' => 1,
+                    'status' => 9,
+                ];
+                $this->db->where('id', $id);
+                if (!$this->db->update('talep_form_personel', $data_talep_update)) {
+                    $this->rollback_with_error("Talep formu güncellenirken bir hata oluştu. Lütfen yöneticinizle iletişime geçin.");
+                    return;
+                }
+            }
+
+            // Bordro güncelleme
+            $bordro_details = check_bordro_payment_status($pers_id, $details_form->method, 2);
+
+            // Hakediş türüne göre bordro güncelleme
+            $data_bordro_update = [];
+            if ($details_form->method == 1) { // Nakit ödemeler
+                $data_bordro_update = [
+                    'nakit_odenilecek' => $bordro_details->nakit_odenilecek - $alacak_tutar,
+                ];
+            } elseif ($details_form->method == 3) { // Banka ödemeleri
+                $data_bordro_update = [
+                    'bankadan_odenilecek' => $bordro_details->bankadan_odenilecek - $alacak_tutar,
+                    'odenilecek_meblaq' => $bordro_details->odenilecek_meblaq - $alacak_tutar,
+                ];
+            }
+
+            // Bordro güncelleme işlemi
+            $this->db->where('id', $bordro_details->id);
+            if (!$this->db->update('new_bordro_item', $data_bordro_update)) {
+                $this->rollback_with_error("Bordro güncellenirken bir hata oluştu. Lütfen yöneticinizle iletişime geçin.");
+                return;
+            }
+
+            // İşlem başarılı olduğunda tarihçe kaydı ekle
+            $this->model->talep_history($id, $this->aauth->get_user()->id, 'Ödeme Yapıldı: ' . amountFormat($alacak_tutar));
+
+            // İşlemi başarıyla tamamla
+            $this->db->trans_complete();
+            echo json_encode(['status' => 'Success', 'message' => 'Başarıyla Güncellendi']);
+        } else {
+            // Ödeme eklenemezse hata mesajı döndür
+            $this->rollback_with_error("Talep eklenirken bir hata oluştu. Lütfen yöneticinizle iletişime geçin.");
+        }
+    }
+
+
+
+
+    private function rollback_with_error($message)
+    {
+        $this->db->trans_rollback();
+        echo json_encode(['status' => 'Error', 'message' => $message]);
+    }
+
 
 
     public function knt_aylik_kalan_tutar($personel_id)

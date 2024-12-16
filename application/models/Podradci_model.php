@@ -226,13 +226,14 @@ class Podradci_model extends CI_Model
     {
         $id = $this->input->post('id');
         $info=$this->db->query("SELECT * FROM podradci Where id=$id")->row();
+        $name=$info->company;
         $kontrol2 = $this->db->query("SELECT * FROM podradci_parent Where parent_id=$id")->num_rows();
         if(!$kontrol2){
             $kontrol = $this->db->query("SELECT * FROM geopos_employees_p Where podradci_id=$id")->num_rows();
 
             if(!$kontrol){
                 if ($this->db->delete('podradci', array('id' => $id))) {
-                    $this->aauth->applog("Proje Aşaması Silindi ".$info->name,$this->aauth->get_user()->username);
+                    $this->aauth->applog("Podradçi Silindi ".$name,$this->aauth->get_user()->username);
                     return [
                         'status'=>1,
                         'message'=>'Başarıyla Silindi'

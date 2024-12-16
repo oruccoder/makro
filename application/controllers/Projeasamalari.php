@@ -25,6 +25,10 @@ class Projeasamalari Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         $this->load->model('projeasamalari_model', 'asama');
         $this->load->model('tools_model', 'tools');
         if (!$this->aauth->is_loggedin()) {
@@ -32,6 +36,16 @@ class Projeasamalari Extends CI_Controller
             redirect('/user/', 'refresh');
 
         }
+
+    }
+
+    public function get_parent_options()
+    {
+        $bolum_id = $this->input->post('bolum_id');
+        $proje_id=$this->input->post('proje_id');
+        $invoice_list=$this->db->query("SELECT * FROM geopos_milestones WHERE pid=$proje_id and bolum_id=$bolum_id")->result();
+        echo json_encode($invoice_list);
+
 
     }
 

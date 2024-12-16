@@ -3366,68 +3366,85 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                             containerFluid: !0,
                             smoothContent: true,
                             draggable: false,
-                            content: `<form>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="name">Belge Adı</label>
-      <input type="text" class="form-control" id="name" placeholder="Açık Pickup">
-    </div>
-     <div class="form-group col-md-6">
-      <label for="firma_id">Belge Tipi Adı</label>
-     <select class="form-control select-box" id="file_type_id">
-                                        <option value="0">Seçiniz</option>
-                                        <?php foreach (customer_file_type() as $emp){
-                            $emp_id = $emp->id;
-                            $name = $emp->name;
-                            ?>
-                                            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                                        <?php } ?>
-                                    </select>
-
-    </div>
-</div>
-
-  <div class="form-row">
-    <div class="form-group col-md-3">
-      <label for="baslangic_date">Başlangıç Tarihi</label>
-      <input type="date" class="form-control" id="baslangic_date">
-    </div>
-  <div class="form-group col-md-3">
-      <label for="bitis_date">Bitiş Tarihi</label>
-      <input type="date" class="form-control" id="bitis_date" ">
-    </div>
-    <div class="form-group col-md-6">
-      <label for="proje_id">Proje</label>
-       <select class="form-control select-box" id="proje_id">
-                                        <option value="0">Seçiniz</option>
-                                        <?php foreach (all_projects() as $emp){
-                            $emp_id = $emp->id;
-                            $name = $emp->code;
-                            ?>
-                                            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                                        <?php } ?>
-                                    </select>
-    </div>
-</div>
-    <div class="form-row">
-      <div class="form-group col-md-12">
-         <label for="resim">Dosya</label>
-           <div id="progress" class="progress">
-                <div class="progress-bar progress-bar-success"></div>
-           </div>
-            <table id="files" class="files"></table><br>
-            <span class="btn btn-success fileinput-button" style="width: 100%">
-            <i class="glyphicon glyphicon-plus"></i>
-            <span>Seçiniz...</span>
-            <input id="fileupload_" type="file" name="files[]">
-            <input type="hidden" class="image_text" name="image_text" id="image_text">
-      </div>
-</form>`,
+                            content: `<form id="document_form">
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="name">Belge Adı</label>
+                    <input type="text" class="form-control required" id="name" placeholder="Açık Pickup">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="firma_id">Belge Tipi Adı</label>
+                    <select class="form-control select-box required" id="file_type_id">
+                        <option value="0">Seçiniz</option>
+                        <?php foreach (customer_file_type() as $emp) {
+                                echo "<option value='{$emp->id}'>{$emp->name}</option>";
+                            } ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-3">
+                    <label for="baslangic_date">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control required" id="baslangic_date">
+                </div>
+                <div class="form-group col-md-3">
+                    <label for="bitis_date">Bitiş Tarihi</label>
+                    <input type="date" class="form-control required" id="bitis_date">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="proje_id">Proje</label>
+                    <select class="form-control select-box required" id="proje_id">
+                        <option value="0">Seçiniz</option>
+                        <?php foreach (all_projects() as $emp) {
+                                echo "<option value='{$emp->id}'>{$emp->code}</option>";
+                            } ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="resim">Dosya</label>
+                    <div id="progress" class="progress">
+                        <div class="progress-bar progress-bar-success"></div>
+                    </div>
+                    <table id="files" class="files"></table><br>
+                    <span class="btn btn-success fileinput-button" style="width: 100%">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Seçiniz...</span>
+                        <input id="fileupload_" type="file" name="files[]">
+                        <input type="hidden" class="image_text required" name="image_text" id="image_text">
+                    </span>
+                </div>
+            </div>
+        </form>`,
                             buttons: {
                                 formSubmit: {
                                     text: 'Ekle',
                                     btnClass: 'btn-blue',
                                     action: function () {
+                                        let valid = true;
+
+                                        // Tüm alanları kontrol et
+                                        $('#document_form .required').each(function () {
+                                            if (!$(this).val() || $(this).val() === "0") {
+                                                $(this).addClass('is-invalid');
+                                                valid = false;
+                                            } else {
+                                                $(this).removeClass('is-invalid');
+                                            }
+                                        });
+
+                                        if (!valid) {
+                                            $.alert({
+                                                theme: 'modern',
+                                                icon: 'fa fa-exclamation',
+                                                type: 'red',
+                                                title: 'Hata',
+                                                content: 'Lütfen tüm alanları doldurun!',
+                                            });
+                                            return false;
+                                        }
+
                                         $('#loading-box').removeClass('d-none');
 
                                         let data = {
@@ -3439,11 +3456,12 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                                             proje_id: $('#proje_id').val(),
                                             cari_id: "<?php echo $_GET['id'];?>",
                                             image_text: $('#image_text').val(),
-                                        }
+                                        };
+
                                         $.post(baseurl + 'customers/add_document', data, (response) => {
                                             let responses = jQuery.parseJSON(response);
                                             $('#loading-box').addClass('d-none');
-                                            if (responses.status == 'Success') {
+                                            if (responses.status === 'Success') {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-check',
@@ -3464,9 +3482,7 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                                                         }
                                                     }
                                                 });
-
-                                            } else if (responses.status == 'Error') {
-
+                                            } else if (responses.status === 'Error') {
                                                 $.alert({
                                                     theme: 'modern',
                                                     icon: 'fa fa-exclamation',
@@ -3484,71 +3500,80 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                                                     }
                                                 });
                                             }
-                                        })
-
+                                        });
                                     }
                                 },
                             },
                             onContentReady: function () {
                                 $('.select-box').select2({
                                     dropdownParent: $(".jconfirm-box-container")
-                                })
+                                });
 
                                 $('#fileupload_').fileupload({
                                     url: '<?php echo base_url() ?>customers/file_handling',
                                     dataType: 'json',
                                     formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
                                     done: function (e, data) {
-                                        var img = 'default.png';
+                                        let img = 'default.png';
                                         $.each(data.result.files, function (index, file) {
                                             img = file.name;
                                         });
-
                                         $('#image_text').val(img);
                                     },
                                     progressall: function (e, data) {
-                                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                                        $('#progress .progress-bar').css(
-                                            'width',
-                                            progress + '%'
-                                        );
+                                        const progress = parseInt(data.loaded / data.total * 100, 10);
+                                        $('#progress .progress-bar').css('width', progress + '%');
                                     }
                                 }).prop('disabled', !$.support.fileInput)
                                     .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                                // bind to events
+
                                 var jc = this;
                                 this.$content.find('form').on('submit', function (e) {
-                                    // if the user submits the form by pressing enter in the field.
                                     e.preventDefault();
-                                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                                    jc.$$formSubmit.trigger('click');
                                 });
                             }
                         });
                     }
+
                 }
             ]
 
         });
     }
 
-    $(document).on('click', ".talep_sil", function (e) {
+    $(document).on('click', ".talep_sil", function () {
         let edit_id = $(this).attr('talep_id');
+
+        if (!edit_id) {
+            $.alert({
+                theme: 'modern',
+                icon: 'fa fa-exclamation',
+                type: 'red',
+                title: 'Hata',
+                content: 'Geçerli bir talep ID bulunamadı!',
+            });
+            return;
+        }
+
         $.confirm({
-            theme: 'material',
+            theme: 'modern',
             closeIcon: true,
             title: 'Dikkat',
             icon: 'fa fa-exclamation',
-            type: 'dark',
+            type: 'red',
             animation: 'scale',
             useBootstrap: true,
-            columnClass: "col-md-6 mx-auto",
+            columnClass: "small",
             containerFluid: !0,
             smoothContent: true,
             draggable: false,
-            content: '<form action="" class="formName">' +
-                '<div class="form-group">' +
-                '<p>Dosyayı Silmek Üzeresiniz? Emin Misiniz?<p/>' +
-                '</form>',
+            content: `
+            <form class="formName">
+                <div class="form-group">
+                    <p>Dosyayı silmek üzeresiniz. Emin misiniz?</p>
+                </div>
+            </form>`,
             buttons: {
                 formSubmit: {
                     text: 'Sil',
@@ -3559,76 +3584,95 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                         let data = {
                             crsf_token: crsf_hash,
                             edit_id: edit_id,
-                        }
-                        $.post(baseurl + 'customers/remove_document', data, (response) => {
-                            let responses = jQuery.parseJSON(response);
+                        };
+
+                        $.post(baseurl + 'customers/remove_document', data, function (response) {
                             $('#loading-box').addClass('d-none');
-                            if (responses.status == 'Success') {
-                                $.alert({
-                                    theme: 'modern',
-                                    icon: 'fa fa-check',
-                                    type: 'green',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "small",
-                                    title: 'Başarılı',
-                                    content: responses.message,
-                                    buttons: {
-                                        formSubmit: {
-                                            text: 'Tamam',
-                                            btnClass: 'btn-blue',
-                                            action: function () {
-                                                $('#doctable').DataTable().destroy();
-                                                draw_data_belgeler();
+
+                            try {
+                                let responses = JSON.parse(response);
+
+                                if (responses.status === 'Success') {
+                                    $.alert({
+                                        theme: 'modern',
+                                        icon: 'fa fa-check',
+                                        type: 'green',
+                                        animation: 'scale',
+                                        useBootstrap: true,
+                                        columnClass: "small",
+                                        title: 'Başarılı',
+                                        content: responses.message,
+                                        buttons: {
+                                            formSubmit: {
+                                                text: 'Tamam',
+                                                btnClass: 'btn-blue',
+                                                action: function () {
+                                                    $('#doctable').DataTable().destroy();
+                                                    draw_data_belgeler();
+                                                }
                                             }
                                         }
-                                    }
-                                });
-
-                            } else if (responses.status == 'Error') {
-
+                                    });
+                                } else {
+                                    $.alert({
+                                        theme: 'modern',
+                                        icon: 'fa fa-exclamation',
+                                        type: 'red',
+                                        animation: 'scale',
+                                        useBootstrap: true,
+                                        columnClass: "col-md-4 mx-auto",
+                                        title: 'Dikkat!',
+                                        content: responses.message || 'Silme işlemi sırasında bir hata oluştu.',
+                                        buttons: {
+                                            prev: {
+                                                text: 'Tamam',
+                                                btnClass: "btn btn-link text-dark",
+                                            }
+                                        }
+                                    });
+                                }
+                            } catch (e) {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
                                     type: 'red',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "col-md-4 mx-auto",
-                                    title: 'Dikkat!',
-                                    content: responses.message,
-                                    buttons: {
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
+                                    title: 'Hata',
+                                    content: 'Sunucudan geçersiz bir yanıt alındı.',
                                 });
                             }
-                        })
+                        }).fail(function () {
+                            $('#loading-box').addClass('d-none');
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                title: 'Hata',
+                                content: 'Sunucuya erişim sağlanamadı. Lütfen tekrar deneyin.',
+                            });
+                        });
 
-
+                        return false;
                     }
                 },
                 cancel: {
                     text: 'Vazgeç',
-                    btnClass: "btn btn-warning btn-sm close",
+                    btnClass: "btn btn-warning btn-sm",
                 }
             },
             onContentReady: function () {
-                // bind to events
-                var jc = this;
+                let jc = this;
                 this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
                     e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    jc.$$formSubmit.trigger('click');
                 });
             }
         });
+    });
 
-    })
 
     $(document).on('click', '.edit', function () {
-        let edit_id = $(this).attr('talep_id')
+        let edit_id = $(this).attr('talep_id');
+
         $.confirm({
             theme: 'modern',
             closeIcon: true,
@@ -3638,100 +3682,110 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
             animation: 'scale',
             useBootstrap: true,
             columnClass: "col-md-6 mx-auto",
-            containerFluid: !0,
-            smoothContent: true,
+            containerFluid: true,
             draggable: false,
             content: function () {
                 let self = this;
-                let html = ''; // Yönlendirilmiş ve Tek Yapılan randevu 1,3
-                let responses;
-                html += `<form>
-  <div class="form-row">
-    <div class="form-group col-md-6">
-      <label for="name">Belge Adı</label>
-      <input type="text" class="form-control" id="name_update">
-    </div>
-     <div class="form-group col-md-6">
-      <label for="firma_id">Belge Tipi Adı</label>
-     <select class="form-control select-box" id="file_type_id">
-                                        <option value="0">Seçiniz</option>
-                                        <?php foreach (customer_file_type() as $emp){
-                $emp_id = $emp->id;
-                $name = $emp->name;
-                ?>
-                                            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                                        <?php } ?>
-                                    </select>
+                let html = `
+                <form id="editDocumentForm">
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="name_update">Belge Adı</label>
+                            <input type="text" class="form-control required" id="name_update" placeholder="Belge Adı">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="file_type_id">Belge Tipi Adı</label>
+                            <select class="form-control select-box required" id="file_type_id">
+                                <option value="0">Seçiniz</option>
+                                <?php foreach (customer_file_type() as $emp): ?>
+                                    <option value="<?php echo $emp->id; ?>"><?php echo $emp->name; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-3">
+                            <label for="baslangic_date">Başlangıç Tarihi</label>
+                            <input type="date" class="form-control required" id="baslangic_date">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label for="bitis_date">Bitiş Tarihi</label>
+                            <input type="date" class="form-control required" id="bitis_date">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="proje_id">Proje</label>
+                            <select class="form-control select-box required" id="proje_id">
+                                <option value="0">Seçiniz</option>
+                                <?php foreach (all_projects() as $emp): ?>
+                                    <option value="<?php echo $emp->id; ?>"><?php echo $emp->code; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label for="resim">Dosya</label>
+                            <div>
+                                <img class="myImg update_image" style="width: 100%; max-width: 300px;">
+                            </div>
+                            <div id="progress" class="progress">
+                                <div class="progress-bar progress-bar-success"></div>
+                            </div>
+                            <table id="files" class="files"></table>
+                            <br>
+                            <span class="btn btn-success fileinput-button" style="width: 100%">
+                                <i class="glyphicon glyphicon-plus"></i>
+                                <span>Seçiniz...</span>
+                                <input id="fileupload_" type="file" name="files[]">
+                                <input type="hidden" class="image_text required" name="image_text" id="image_text">
+                            </span>
+                        </div>
+                    </div>
+                </form>`;
 
-    </div>
-</div>
+                let data = { crsf_token: crsf_hash, edit_id: edit_id };
 
-  <div class="form-row">
-    <div class="form-group col-md-3">
-      <label for="baslangic_date">Başlangıç Tarihi</label>
-      <input type="date" class="form-control" id="baslangic_date">
-    </div>
-  <div class="form-group col-md-3">
-      <label for="bitis_date">Bitiş Tarihi</label>
-      <input type="date" class="form-control" id="bitis_date" ">
-    </div>
-    <div class="form-group col-md-6">
-      <label for="proje_id">Proje</label>
-       <select class="form-control select-box" id="proje_id">
-                                        <option value="0">Seçiniz</option>
-                                        <?php foreach (all_projects() as $emp){
-                $emp_id = $emp->id;
-                $name = $emp->code;
-                ?>
-                                            <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                                        <?php } ?>
-                                    </select>
-    </div>
-</div>
-    <div class="form-row">
-      <div class="form-group col-md-12">
-         <label for="resim">Dosya</label>
-               <div>
-               <img class="myImg update_image" style="width: 322px;">
-             </di>
-           <div id="progress" class="progress">
-                <div class="progress-bar progress-bar-success"></div>
-           </div>
-            <table id="files" class="files"></table><br>
-            <span class="btn btn-success fileinput-button" style="width: 100%">
-            <i class="glyphicon glyphicon-plus"></i>
-            <span>Seçiniz...</span>
-            <input id="fileupload_" type="file" name="files[]">
-            <input type="hidden" class="image_text" name="image_text" id="image_text">
-      </div>
-</form>`;
-
-                let data = {
-                    crsf_token: crsf_hash,
-                    edit_id: edit_id,
-                }
-
-                let table_report = '';
                 $.post(baseurl + 'customers/document_get_info', data, (response) => {
-                    self.$content.find('#person-list').empty().append(html);
                     let responses = jQuery.parseJSON(response);
-                    $('#name_update').val(responses.items.title)
-                    $('#baslangic_date').val(responses.items.baslangic_date)
-                    $('#bitis_date').val(responses.items.bitis_date)
+                    $('#name_update').val(responses.items.title);
+                    $('#baslangic_date').val(responses.items.baslangic_date);
+                    $('#bitis_date').val(responses.items.bitis_date);
                     $('#proje_id').val(responses.items.proje_id).select2().trigger('change');
                     $('#file_type_id').val(responses.items.file_type_id).select2().trigger('change');
                     $('#image_text').val(responses.items.filename);
-                    $('.update_image').attr('src', "https://muhasebe.makro2000.com.tr/userfiles/documents/" + responses.items.filename)
-
+                    $('.update_image').attr('src', baseurl + "userfiles/documents/" + responses.items.filename);
                 });
-                self.$content.find('#person-list').empty().append(html);
-                return $('#person-container').html();
+
+                return html;
             },
             buttons: {
                 formSubmit: {
                     text: 'Güncelle',
                     btnClass: 'btn-blue',
                     action: function () {
+                        let valid = true;
+
+                        // Tüm gerekli alanların dolu olup olmadığını kontrol et
+                        $('#editDocumentForm .required').each(function () {
+                            if (!$(this).val() || $(this).val() === '0') {
+                                $(this).addClass('is-invalid');
+                                valid = false;
+                            } else {
+                                $(this).removeClass('is-invalid');
+                            }
+                        });
+
+                        if (!valid) {
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                title: 'Hata',
+                                content: 'Lütfen tüm alanları doldurun!',
+                            });
+                            return false;
+                        }
+
                         $('#loading-box').removeClass('d-none');
 
                         let data = {
@@ -3744,7 +3798,8 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                             cari_id: "<?php echo $_GET['id'];?>",
                             file_type_id: $('#file_type_id').val(),
                             image_text: $('#image_text').val(),
-                        }
+                        };
+
                         $.post(baseurl + 'customers/update_document', data, (response) => {
                             let responses = jQuery.parseJSON(response);
                             $('#loading-box').addClass('d-none');
@@ -3753,9 +3808,6 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                                     theme: 'modern',
                                     icon: 'fa fa-check',
                                     type: 'green',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "small",
                                     title: 'Başarılı',
                                     content: responses.message,
                                     buttons: {
@@ -3769,68 +3821,42 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                                         }
                                     }
                                 });
-
-                            } else if (responses.status == 'Error') {
-
+                            } else {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
                                     type: 'red',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "col-md-4 mx-auto",
-                                    title: 'Dikkat!',
+                                    title: 'Hata',
                                     content: responses.message,
-                                    buttons: {
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
                                 });
                             }
-                        })
-
+                        });
                     }
-                },
+                }
             },
             onContentReady: function () {
-                $('.select-box').select2({
-                    dropdownParent: $(".jconfirm-box-container")
-                })
-
+                $('.select-box').select2({ dropdownParent: $(".jconfirm-box-container") });
 
                 $('#fileupload_').fileupload({
                     url: '<?php echo base_url() ?>customers/file_handling',
                     dataType: 'json',
-                    formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
+                    formData: { '<?=$this->security->get_csrf_token_name()?>': crsf_hash },
                     done: function (e, data) {
-                        var img = 'default.png';
+                        let img = 'default.png';
                         $.each(data.result.files, function (index, file) {
                             img = file.name;
                         });
-
                         $('#image_text').val(img);
                     },
                     progressall: function (e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
+                        let progress = parseInt(data.loaded / data.total * 100, 10);
+                        $('#progress .progress-bar').css('width', progress + '%');
                     }
-                }).prop('disabled', !$.support.fileInput)
-                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                // bind to events
-                var jc = this;
-                this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
-                    e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
                 });
             }
         });
-    })
+    });
+
 
     $('#search_hesap_ozeti').click(function () {
         var start_date = $('#start_date_hesap_ozeti').val();

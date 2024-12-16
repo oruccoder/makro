@@ -1027,211 +1027,163 @@
             containerFluid: !0,
             smoothContent: true,
             draggable: false,
-            content:`<form>
-  <div class="form-row">
-    <div class="form-group col-md-12">
-      <label for="name">Layihə / Proje</label>
-      <select class="form-control select-box proje_id proje_id_new required" id="proje_id">
-                <option value="0">Seçiniz</option>
-                <?php foreach (all_projects() as $emp){
-            $emp_id=$emp->id;
-            $name=$emp->code;
-            ?>
-                    <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                <?php } ?>
-            </select>
-    </div>
-</div>
-<div class="form-row">
- <div class="form-group col-md-6">
-      <label for="bolum_id">Cari</label>
-      <select class="form-control select-box cari_id" id="cari_id_news">
-            <option value="0">Seçiniz</option>
-             <?php foreach (all_customer() as $emp){
-            $emp_id=$emp->id;
-            $name=$emp->company;
-            ?>
-                    <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-                <?php } ?>
-    </select>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="asama_id">Ödeme Türü</label>
-        <select class="form-control select-box odeme_turu" id="odeme_turu">
-           <option value="0">Seçiniz</option>
-           <option value="1">Naqd</option>
-           <option value="3">Köçürme</option>
-        </select>
-
-    </div>
-</div>
-<div class="form-row">
- <div class="form-group col-md-6">
-      <label for="talep_eden_user_id">Talep Eden</label>
-      <select class="form-control select-box required" id="talep_eden_user_id">
-
-            <?php foreach (all_personel() as $emp){
-            $emp_id=$emp->id;
-            $name=$emp->name;
-            ?>
-                <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-            <?php } ?>
-    </select>
-    </div>
-    <div class="form-group col-md-6">
-      <label for="firma_id">Təcili</label>
-        <select class="form-control select-box" id="progress_status_id">
-
-            <?php foreach (progress_status() as $emp){
-            $emp_id=$emp->id;
-            $name=$emp->name;
-            ?>
-                <option value="<?php echo $emp_id; ?>"><?php echo $name; ?></option>
-            <?php } ?>
-        </select>
-
-    </div>
-</div>
-  <div class="form-row">
-    <div class="form-group col-md-12">
-      <label for="marka">Açıqlama / Qeyd</label>
-      <textarea class="form-control" id="desc"></textarea>
-    </div>
-</div>
-    <div class="form-row">
-      <div class="form-group col-md-12">
-         <label for="resim">Fayl</label>
-           <div id="progress" class="progress">
-                <div class="progress-bar progress-bar-success"></div>
-           </div>
-            <table id="files" class="files"></table><br>
-            <span class="btn btn-success fileinput-button" style="width: 100%">
-            <i class="glyphicon glyphicon-plus"></i>
-            <span>Seçiniz...</span>
-            <input id="fileupload_" type="file" name="files[]">
-            <input type="hidden" class="image_text" name="image_text" id="image_text">
-      </div>
-       </div>
-</form>`,
+            content: `
+        <form id="requestForm">
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="name">Layihə / Proje</label>
+                    <select class="form-control select-box proje_id required" id="proje_id">
+                        <option value="0">Seçiniz</option>
+                        <?php foreach (all_projects() as $emp): ?>
+                            <option value="<?php echo $emp->id; ?>"><?php echo $emp->code; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="cari_id">Cari</label>
+                    <select class="form-control select-box cari_id required" id="cari_id_news">
+                        <option value="0">Seçiniz</option>
+                        <?php foreach (all_customer() as $emp): ?>
+                            <option value="<?php echo $emp->id; ?>"><?php echo $emp->company; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="odeme_turu">Ödeme Türü</label>
+                    <select class="form-control select-box odeme_turu required" id="odeme_turu">
+                        <option value="0">Seçiniz</option>
+                        <option value="1">Naqd</option>
+                        <option value="3">Köçürme</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="talep_eden_user_id">Talep Eden</label>
+                    <select class="form-control select-box required" id="talep_eden_user_id">
+                        <?php foreach (all_personel() as $emp): ?>
+                            <option value="<?php echo $emp->id; ?>"><?php echo $emp->name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="progress_status_id">Təcili</label>
+                    <select class="form-control select-box required" id="progress_status_id">
+                        <?php foreach (progress_status() as $emp): ?>
+                            <option value="<?php echo $emp->id; ?>"><?php echo $emp->name; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="desc">Açıqlama / Qeyd</label>
+                    <textarea class="form-control required" id="desc"></textarea>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-12">
+                    <label for="resim">Fayl</label>
+                    <div id="progress" class="progress">
+                        <div class="progress-bar progress-bar-success"></div>
+                    </div>
+                    <table id="files" class="files"></table><br>
+                    <span class="btn btn-success fileinput-button" style="width: 100%">
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Seçiniz...</span>
+                        <input id="fileupload_" type="file" name="files[]">
+                        <input type="hidden" class="image_text" name="image_text" id="image_text">
+                    </span>
+                </div>
+            </div>
+        </form>`,
             buttons: {
                 formSubmit: {
                     text: 'Sorğunu Açın',
                     btnClass: 'btn-blue',
                     action: function () {
-                        // if(!parseInt(firma_demirbas_id)){
-                        //     $.alert({
-                        //         theme: 'material',
-                        //         icon: 'fa fa-exclamation',
-                        //         type: 'red',
-                        //         animation: 'scale',
-                        //         useBootstrap: true,
-                        //         columnClass: "col-md-4 mx-auto",
-                        //         title: 'Dikkat!',
-                        //         content: 'Grup İtemi Zorunludur',
-                        //         buttons:{
-                        //             prev: {
-                        //                 text: 'Tamam',
-                        //                 btnClass: "btn btn-link text-dark",
-                        //             }
-                        //         }
-                        //     });
-                        //     return false;
-                        // }
+                        // Form validasyonu
+                        let isValid = true;
+                        $('#requestForm .required').each(function () {
+                            if ($(this).val() === "" || $(this).val() === "0") {
+                                $(this).addClass('is-invalid'); // Hata stilini uygula
+                                isValid = false;
+                            } else {
+                                $(this).removeClass('is-invalid'); // Hata stilini kaldır
+                            }
+                        });
+
+                        if (!isValid) {
+                            $.alert({
+                                theme: 'modern',
+                                icon: 'fa fa-exclamation',
+                                type: 'red',
+                                animation: 'scale',
+                                title: 'Hata!',
+                                content: 'Lütfen tüm alanları doldurunuz!',
+                            });
+                            return false; // İşlemi durdur
+                        }
+
+                        // Tüm alanlar dolu ise devam et
                         $('#loading-box').removeClass('d-none');
                         let data = {
                             crsf_token: crsf_hash,
-                            progress_status_id:  $('#progress_status_id').val(),
-                            talep_eden_user_id:  $('#talep_eden_user_id').val(),
-                            proje_id:  $('#proje_id').val(),
-                            method:  $('#odeme_turu').val(),
-                            cari_id:  $('#cari_id_news').val(),
-                            desc:  $('#desc').val(),
-                            image_text:  $('#image_text').val(),
-                        }
-                        $.post(baseurl + 'carigidertalepnew/create_save_cart',data,(response) => {
+                            progress_status_id: $('#progress_status_id').val(),
+                            talep_eden_user_id: $('#talep_eden_user_id').val(),
+                            proje_id: $('#proje_id').val(),
+                            method: $('#odeme_turu').val(),
+                            cari_id: $('#cari_id_news').val(),
+                            desc: $('#desc').val(),
+                            image_text: $('#image_text').val(),
+                        };
+
+                        $.post(baseurl + 'carigidertalepnew/create_save_cart', data, (response) => {
                             let responses = jQuery.parseJSON(response);
                             $('#loading-box').addClass('d-none');
-                            if(responses.status==200){
+                            if (responses.status === 200) {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-check',
                                     type: 'green',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "small",
                                     title: 'Başarılı',
                                     content: responses.message,
-                                    buttons:{
+                                    buttons: {
                                         formSubmit: {
                                             text: 'Tamam',
                                             btnClass: 'btn-blue',
                                             action: function () {
-                                                location.href = responses.index
+                                                location.href = responses.index;
                                             }
                                         }
                                     }
                                 });
-
-                            }
-                            else if(responses.status==410){
-
+                            } else {
                                 $.alert({
                                     theme: 'modern',
                                     icon: 'fa fa-exclamation',
                                     type: 'red',
-                                    animation: 'scale',
-                                    useBootstrap: true,
-                                    columnClass: "col-md-4 mx-auto",
-                                    title: 'Dikkat!',
+                                    title: 'Hata!',
                                     content: responses.message,
-                                    buttons:{
-                                        prev: {
-                                            text: 'Tamam',
-                                            btnClass: "btn btn-link text-dark",
-                                        }
-                                    }
                                 });
                             }
-                        })
-
+                        });
                     }
                 },
+                cancel: {
+                    text: 'Vazgeç',
+                    btnClass: 'btn-danger',
+                }
             },
             onContentReady: function () {
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
-                })
-
-                $('#fileupload_').fileupload({
-                    url: url,
-                    dataType: 'json',
-                    formData: {'<?=$this->security->get_csrf_token_name()?>': crsf_hash},
-                    done: function (e, data) {
-                        var img='default.png';
-                        $.each(data.result.files, function (index, file) {
-                            img=file.name;
-                        });
-
-                        $('#image_text').val(img);
-                    },
-                    progressall: function (e, data) {
-                        var progress = parseInt(data.loaded / data.total * 100, 10);
-                        $('#progress .progress-bar').css(
-                            'width',
-                            progress + '%'
-                        );
-                    }
-                }).prop('disabled', !$.support.fileInput)
-                    .parent().addClass($.support.fileInput ? undefined : 'disabled');
-                // bind to events
-                var jc = this;
-                this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
-                    e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
                 });
             }
         });
+
     })
 </script>
 

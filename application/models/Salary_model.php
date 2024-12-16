@@ -49,11 +49,27 @@ class Salary_model extends CI_Model
         return $query->result();
     }
     public function _get_ajax_list_details(){
+        $user =$this->aauth->get_user()->id;
+        $role_id = $this->aauth->get_user()->roleid;
+        $santiye_id = personel_salary_details_get($user)->proje_id;
+
         $this->db->select('new_bordro.*,geopos_employees.name,geopos_projects.name');
         $this->db->from('new_bordro');
         $this->db->join('geopos_employees','new_bordro.aauth_id=geopos_employees.id');
         $this->db->join('geopos_projects','new_bordro.proje_id=geopos_projects.id');
         $this->db->where('new_bordro.loc =', $this->session->userdata('set_firma_id')); //2019-11-23 14:28:57
+
+        if (!$this->aauth->premission(95)->read) {
+            // Eğer kullanıcı tüm personelleri görme yetkisine sahip değilse
+            if (in_array($role_id, personel_yetkileri())) {
+                // Kullanıcının şantiyesine göre filtrele
+                $this->db->where('new_bordro.proje_id', $santiye_id);
+            } else {
+                // Yetkisi olmayan kullanıcılar için boş sonuç
+                $this->db->where('1', 0);
+            }
+        }
+
         $i = 0;
         foreach ($this->column_search_bordro as $item) // loop column
         {
@@ -219,107 +235,107 @@ class Salary_model extends CI_Model
 
 
 
-    public function create_save(){
-
+    public function create_save()
+    {
         $code = numaric(35);
-        $bordro_yili=$this->input->post('bordro_yili');
-        $bordro_ayi=$this->input->post('bordro_ayi');
-        $proje_id=$this->input->post('proje_id');
-        $pers_id=$this->input->post('pers_id');
-        $desc=$this->input->post('desc');
+        $bordro_yili = $this->input->post('bordro_yili');
+        $bordro_ayi = $this->input->post('bordro_ayi');
+        $proje_id = $this->input->post('proje_id');
+        $pers_id = $this->input->post('pers_id');
+        $desc = $this->input->post('desc');
 
-        $desc=$this->input->post('desc');
+        // Bordro kontrol
+        $bordro_exists = $this->db->query(
+            "SELECT * FROM new_bordro WHERE ay = ? AND yil = ? AND proje_id = ? AND status != 3",
+            [$bordro_ayi, $bordro_yili, $proje_id]
+        );
 
-        $bordro_kontrol = $this->db->query("SELECT * FROM new_bordro Where ay = $bordro_ayi and yil = $bordro_yili and proje_id=$proje_id and status !=3 ");
-        if(!$bordro_kontrol->num_rows()){
-            $data = [
-                'code'=>$code,
-                'ay'=>$bordro_ayi,
-                'yil'=>$bordro_yili,
-                'aauth_id'=>$this->aauth->get_user()->id,
-                'desc'=>$desc,
-                'proje_id'=>$proje_id,
-                'loc'=>$this->session->userdata('set_firma_id'),
-
-            ];
-
-            if( $this->db->insert('new_bordro', $data)){
-                $last_id = $this->db->insert_id();
-                numaric_update(35);
-                $sayi  = 0 ;
-                $data_pers=[];
-                if($pers_id[0]==0){
-                    $all_personel = $this->db->query("SELECT geopos_employees.* FROM `geopos_employees`
-        Inner JOIN personel_salary ON geopos_employees.id =personel_salary.personel_id
-        Inner JOIN geopos_users ON geopos_employees.id =geopos_users.id
-    Where geopos_users.banned=0 and  personel_salary.status = 1 and personel_salary.proje_id =$proje_id");
-                    if($all_personel->num_rows()){
-                        foreach ($all_personel->result() as $items){
-                            $data_pers[]=$items->id;
-                        }
-                    }
-                }
-                else {
-                    foreach ($pers_id as $items){
-                        $data_pers[]=$items;
-                    }
-                }
-
-                if($data_pers){
-                    $sayi=0;
-                    foreach ($data_pers as $id){
-                        $date_items =
-                            [
-                                'bordro_id'=>$last_id,
-                                'bordro_ayi'=>$bordro_ayi,
-                                'bordro_yili'=>$bordro_yili,
-                                'pers_id'=>$id,
-                                'proje_id'=>$proje_id,
-                                'loc'=>$this->session->userdata('set_firma_id'),
-
-                            ];
-                        if($this->db->insert('new_bordro_item', $date_items)){
-                            $sayi++;
-                        }
-                    }
-                    if($sayi){
-                        return [
-                            'status'=>1,
-                            'id'=>$last_id,
-                            'messages'=>'Başarıyla Kayıt Edildi.'.$sayi.' Adet Personel Bordrosu Hazırlandı',
-                        ];
-                    }
-                    else {
-                        return [
-                            'status'=>0,
-                            'messages'=>'Personel Kayıt Edilemedi',
-                        ];
-                    }
-                }
-                else {
-                    return [
-                        'status'=>0,
-                        'messages'=>'Personel Bulunamadı',
-                    ];
-                }
-            }
-            else {
-                return [
-                    'status'=>0,
-                    'messages'=>'Bordro Oluşturulamadı',
-                ];
-            }
-        }
-        else {
+        if ($bordro_exists->num_rows() > 0) {
             return [
-                'status'=>0,
-                'messages'=>'Bordro Oluşturulamadı.Aynı Bilgilere Ait Bordro Mevcut.Mevcut Bordroyu İptal Edip Tekrar Deneyiniz.',
+                'status' => 0,
+                'messages' => 'Bordro oluşturulamadı. Aynı bilgilere ait bordro mevcut. Mevcut bordroyu iptal edip tekrar deneyiniz.',
             ];
         }
 
+        // Bordro oluştur
+        $data = [
+            'code' => $code,
+            'ay' => $bordro_ayi,
+            'yil' => $bordro_yili,
+            'aauth_id' => $this->aauth->get_user()->id,
+            'desc' => $desc,
+            'proje_id' => $proje_id,
+            'loc' => $this->session->userdata('set_firma_id'),
+        ];
 
+        if (!$this->db->insert('new_bordro', $data)) {
+            return [
+                'status' => 0,
+                'messages' => 'Bordro oluşturulamadı.',
+            ];
+        }
 
+        $last_id = $this->db->insert_id();
+        numaric_update(35);
+
+        // Personel belirleme
+        $data_pers = [];
+        if ($pers_id[0] == 0) {
+            $all_personel = $this->db->query(
+                "SELECT geopos_employees.id FROM geopos_employees
+            INNER JOIN personel_salary ON geopos_employees.id = personel_salary.personel_id
+            INNER JOIN geopos_users ON geopos_employees.id = geopos_users.id
+            WHERE geopos_users.banned = 0 AND personel_salary.status = 1 AND personel_salary.proje_id = ?",
+                [$proje_id]
+            );
+
+            if ($all_personel->num_rows() > 0) {
+                foreach ($all_personel->result() as $items) {
+                    $data_pers[] = $items->id;
+                }
+            }
+        } else {
+            $data_pers = $pers_id;
+        }
+
+        // Personel bordro kayıt
+        if (empty($data_pers)) {
+            return [
+                'status' => 0,
+                'messages' => 'Personel bulunamadı.',
+            ];
+        }
+
+        $sayi = 0;
+        foreach ($data_pers as $id) {
+            $date_items = [
+                'bordro_id' => $last_id,
+                'bordro_ayi' => $bordro_ayi,
+                'bordro_yili' => $bordro_yili,
+                'pers_id' => $id,
+                'proje_id' => $proje_id,
+                'loc' => $this->session->userdata('set_firma_id'),
+            ];
+
+            if ($this->db->insert('new_bordro_item', $date_items)) {
+                $sayi++;
+            }
+        }
+
+        if ($sayi > 0) {
+            return [
+                'status' => 1,
+                'id' => $last_id,
+                'messages' => 'Başarıyla kayıt edildi. ' . $sayi . ' adet personel bordrosu hazırlandı.',
+            ];
+        }
+
+        return [
+            'status' => 0,
+            'messages' => 'Personel kayıt edilemedi.',
+        ];
     }
+
 
     public function details($id){
         $this->db->select('*');
@@ -357,26 +373,40 @@ class Salary_model extends CI_Model
         $id =  $this->input->post('bordro_id');
         $status_id =  $this->input->post('status');
         $desc =  $this->input->post('desc');
-        $this->db->set('status', $status_id);
-        $this->db->set('iptal_desc', $desc);
-        $this->db->where('id', $id);
-        if( $this->db->update('new_bordro')){
-
+        if($this->aauth->get_user()->id==21){
             $this->db->set('status', $status_id);
-            $this->db->where('bordro_id', $id);
-            $this->db->update('new_bordro_item');
+            $this->db->set('iptal_desc', $desc);
+            $this->db->where('id', $id);
+            if( $this->db->update('new_bordro')){
 
-            return [
-                'status'=>1,
-                'messages'=>'Başarıyla İptal Edildi',
-            ];
+                $this->db->set('status', $status_id);
+                $this->db->where('bordro_id', $id);
+                $this->db->update('new_bordro_item');
+
+                $this->talep_history($id,$this->aauth->get_user()->id, ' İptal Edildi',1);
+
+
+                return [
+                    'status'=>1,
+                    'messages'=>'Başarıyla İptal Edildi',
+                ];
+            }
+            else {
+                return [
+                    'status'=>0,
+                    'messages'=>'Hata Aldınız',
+                ];
+            }
         }
         else {
+            $this->talep_history($id,$this->aauth->get_user()->id, ' İptal Etmeye Çalıştı',1);
+
             return [
                 'status'=>0,
-                'messages'=>'Hata Aldınız',
+                'messages'=>'YEtkiniz Yok',
             ];
         }
+
 
     }
 
@@ -390,6 +420,10 @@ class Salary_model extends CI_Model
         return $query->result();
     }
     public function _get_ajax_list_details_items(){
+
+        $user =$this->aauth->get_user()->id;
+        $role_id = $this->aauth->get_user()->roleid;
+        $santiye_id = personel_salary_details_get($user)->proje_id;
 
         $list_tipi = $this->input->post('tip');
         $this->db->select('new_bordro_item.*,geopos_employees.name as pers_name');
@@ -410,6 +444,18 @@ class Salary_model extends CI_Model
         if($this->input->post('proje_id')){
             $this->db->where('new_bordro_item.proje_id =', $this->input->post('proje_id')); //2019-11-23 14:28:57
         }
+
+        if (!$this->aauth->premission(95)->read) {
+            // Eğer kullanıcı tüm personelleri görme yetkisine sahip değilse
+            if (in_array($role_id, personel_yetkileri())) {
+                // Kullanıcının şantiyesine göre filtrele
+                $this->db->where('new_bordro_item.proje_id', $santiye_id);
+            } else {
+                // Yetkisi olmayan kullanıcılar için boş sonuç
+                $this->db->where('1', 0);
+            }
+        }
+
 
         if($list_tipi=='onay'){
             $this->db->where('salary_onay_new.user_id =', $this->aauth->get_user()->id);

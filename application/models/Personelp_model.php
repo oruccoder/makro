@@ -29,7 +29,7 @@ class Personelp_model extends CI_Model
 
     var $column_search = array('geopos_employees_p.name', 'geopos_role.name', 'geopos_projects.name','geopos_projects.code');
 
-    var $column_order = array(null,'geopos_employees_p.id','geopos_employees_p.name', 'geopos_role.name', 'geopos_projects.name');
+    var $column_order = array(null,'geopos_employees_p.id',null,'geopos_employees_p.name', 'geopos_role.name', 'geopos_projects.name');
 
     var $order = array('geopos_employees_p.id' => 'DESC');
 
@@ -60,7 +60,14 @@ class Personelp_model extends CI_Model
 
     {
 
-        $this->db->select('geopos_employees_p.*,geopos_users_p.banned,geopos_users_p.picture,geopos_users_p.roleid ,geopos_users_p.loc,geopos_projects.name as proje_name,geopos_projects.code as proje_code,geopos_role.name as role_name');
+        $this->db->select('geopos_employees_p.*,
+        geopos_users_p.banned,
+        geopos_users_p.picture,
+        geopos_users_p.roleid ,
+        geopos_users_p.loc,
+        geopos_projects.name as proje_name,
+        geopos_projects.code as proje_code,
+        geopos_role.name as role_name');
         $this->db->from('geopos_employees_p');
         $this->db->join('geopos_users_p', 'geopos_employees_p.id = geopos_users_p.id');
         $this->db->join('personel_salary_p', 'personel_salary_p.personel_id = geopos_users_p.id','left');
@@ -68,6 +75,16 @@ class Personelp_model extends CI_Model
         $this->db->join('geopos_role', 'geopos_users_p.roleid = geopos_role.role_id','left');
         $this->db->where('geopos_users_p.banned', 0);
         $this->db->where('personel_salary_p.status', 1);
+
+        if($this->input->post('cari_id')){
+            $this->db->where('geopos_employees_p.ana_cari',$this->input->post('cari_id'));
+        }
+        if($this->input->post('parent_id')){
+            $this->db->where('geopos_employees_p.podradci_id',$this->input->post('parent_id'));
+        }
+        if($this->input->post('proje_id')){
+            $this->db->where('personel_salary_p.proje_id',$this->input->post('proje_id'));
+        }
 
         if($this->session->userdata('set_firma_id')){
             $this->db->where('geopos_employees_p.loc =', $this->session->userdata('set_firma_id')); //2019-11-23 14:28:57
@@ -287,32 +304,43 @@ class Personelp_model extends CI_Model
         return $query->row();
     }
 
-    public function update_personel($personel_id,$podradci_id,$ana_cari_id)
+    public function update_personel()
     {
 
-        $ana_cari=0;
-        if($podradci_id){
-            $ana_cari=$this->db->query("SELECT * FROM podradci Where id=$podradci_id")->row()->ana_cari;
+        $personel_id = $this->input->post('personel_id');
+        $podradci_id = $this->input->post('podradci_id');
+        $ana_cari_id = $this->input->post('ana_cari');
+        // Başlangıç değerini tanımla
+        $ana_cari = $ana_cari_id;
+        // Podradci ID varsa ana_cari değerini al
+        if ($podradci_id) {
+            $query = $this->db->query("SELECT ana_cari FROM podradci WHERE id = ?", [$podradci_id])->row();
+            if ($query) {
+                $ana_cari = $query->ana_cari;
+            }
         }
-        else {
-            $ana_cari = $ana_cari_id;
-        }
-        $data=
-            [
-                'podradci_id'=>$podradci_id,
-                'ana_cari'=>$ana_cari,
-            ];
 
-        $this->db->set($data);
+        // Güncellenecek veriler
+        $data = [
+            'podradci_id' => $podradci_id,
+            'ana_cari' => $ana_cari,
+        ];
+
+        // Veritabanında güncelleme işlemi
         $this->db->where('id', $personel_id);
         if ($this->db->update('geopos_employees_p', $data)) {
-            return 1;
-        }
-        else {
-
-            return 0;
+            return [
+                'status'=>1,
+                'message'=>'Başarılı Bir Şekilde güncellendi'
+            ];
+        } else {
+            return [
+                'status'=>0,
+                'message'=>'Güncelleme Gerçekleşmedi.Eksik veya Hatalı Bilgi Girişi Yapıldı'
+            ];
         }
     }
+
     public function update(){
 
         $personel_id = $this->input->post('personel_id');

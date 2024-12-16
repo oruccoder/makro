@@ -1,0 +1,10 @@
+# Sistem dosyaları
+.DS_Store
+.idea/
+
+# Log dosyaları
+*.log
+
+# Cache ve geçici dosyalar
+cache/
+tmp/

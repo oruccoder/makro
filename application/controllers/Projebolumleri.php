@@ -25,6 +25,10 @@ class Projebolumleri Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         $this->load->model('projebolumleri_model', 'bolum');
         $this->load->model('tools_model', 'tools');
         if (!$this->aauth->is_loggedin()) {

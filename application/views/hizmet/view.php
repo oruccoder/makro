@@ -329,7 +329,6 @@
                                                                     <div class="col col-xs-4 col-sm-4 col-md-4 no-padding">
                                                                         <div class="table-responsive">
                                                                             <?php echo demirbas_html($details->demirbas_id,$details->firma_demirbas_id); ?>
-
                                                                         </div>
                                                                     </div>
                                                                 </div>

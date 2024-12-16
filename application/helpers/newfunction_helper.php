@@ -15,6 +15,39 @@
 if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 
+
+function personel_yetkileri()
+{
+    return [10,40,48,6,19,1,2,7,9,30,57,56,946];
+}
+function aktif_personel_listesi()
+{
+    $ci = &get_instance();
+    $ci->load->database();
+    $ci->db->select("
+    p.name AS project_name, 
+    CASE 
+        WHEN a.tip = 1 THEN 'Personel'
+        WHEN a.tip = 2 THEN 'Podradçı Personel'
+        ELSE 'Diğer'
+    END AS user_type,
+    COUNT(a.id) AS user_count
+");
+    $ci->db->from('attendance a');
+    $ci->db->join('geopos_projects p', 'a.project_id = p.id', 'inner');
+    $ci->db->where('a.date', date('Y-m-d')); // Bugünün tarihine göre filtreleme
+    $ci->db->where('a.entry_time IS NOT NULL'); // Giriş yapmış olanlar
+    $ci->db->group_start();
+    $ci->db->where('a.exit_time IS NULL'); // Çıkış yapmamış olanlar
+    $ci->db->or_where('a.exit_time', '');  // Çıkış boş olanlar
+    $ci->db->group_end();
+    $ci->db->group_by(['a.project_id', 'user_type']); // Proje ve user_type bazlı grupla
+    $query = $ci->db->get();
+    $result = $query->result(); // Sonuçları dizi olarak al
+    return $result;
+
+
+}
 function category_list($cat_id = 0)
 
 {
@@ -568,11 +601,13 @@ function tehvil_kalan_miktar($id)
         $kalan_miktar = floatval($total_qty) - floatval($alinan_miktar);
     } else {
         $kontrol = $ci->db->query("SELECT * FROM `warehouse_teslimat` Where id=$id")->row();
-        $item_id = $kontrol->talep_form_product_id;
-        $form_id = $kontrol->form_id;
-        $product_id = $kontrol->product_id;
-        $teslim_edilecek_warehouse_id = $kontrol->teslim_edilecek_warehouse_id;
-        $product_stock_code = talep_form_product_options_teklif_values($item_id);
+        $item_id = $kontrol->talep_form_product_id; //26242
+        $form_id = $kontrol->form_id; //4371
+        $product_id = $kontrol->product_id; //17023
+        $teslim_edilecek_warehouse_id = $kontrol->teslim_edilecek_warehouse_id; //165
+        $product_stock_code = talep_form_product_options_teklif_values($item_id);//2637
+
+
         $stock_details = stock_qty_new_mt($product_id,$product_stock_code,$form_id,$teslim_edilecek_warehouse_id);
        
         $kalan_miktar = floatval( $total_qty) - floatval($stock_details['qty']);
@@ -3591,6 +3626,22 @@ function proje_to_employe($proje_id){
     }
 
 }
+function proje_to_warehouse($proje_id)
+{
+    $ci =& get_instance();
+    $ci->load->database();
+
+    // Active Record ile sorgu
+    $query = $ci->db->where('proje_id', $proje_id)
+        ->get('geopos_warehouse');
+
+    if ($query->num_rows() > 0) {
+        return $query->row(); // İlk satırı döndür
+    } else {
+        return false; // Kayıt yoksa false döndür
+    }
+}
+
 function bordro_onay_kimde($bordro_item_id){
     $ci =& get_instance();
     $ci->load->database();
@@ -4276,6 +4327,58 @@ function pay_images($id,$text=''){
 }
 
 
+function pay_images_personel($id,$text=''){
+    $ci =& get_instance();
+    $ci->load->database();
+    $kontrol = $ci->db->query("SELECT * FROM talep_form_customer_new_payment Where form_id=$id");
+    if($kontrol->num_rows()){
+        $ci->db->select('SUM(total) as total');
+        $ci->db->from('talep_form_personel_products');
+        $ci->db->where('cost_id!=',0);
+        $ci->db->where('form_id',$id);
+        $query = $ci->db->get();
+        $totals = $query->row()->total;
+
+        $ci->db->select('SUM(total) as totals');
+        $ci->db->from('talep_form_customer_new_payment');
+        $ci->db->where('form_id',$id);
+        $ci->db->where('tip',2);
+        $querys = $ci->db->get();
+
+
+        $odeme_total =  $querys->row()->totals;
+
+
+        if($text==''){
+            if(intval($totals)==intval($odeme_total)){
+                return "<img src='/assets/images/red_new_pay.png' style='width: 70%;'>";
+            }
+            elseif($odeme_total) {
+                return "<img src='/assets/images/green_new_pay.png' style='width: 70%;'>";
+            }
+            else {
+                return '';
+            }
+        }
+        else {
+            if(intval($totals)==intval($odeme_total)){
+                return "<img src='/assets/images/red_new_pay.png' style='width: 10%;'>";
+            }
+            elseif($odeme_total) {
+                return "<img src='/assets/images/green_new_pay.png' style='width: 10%;'>";
+            }
+            else {
+                return '';
+            }
+        }
+
+    }
+    else {
+        return false;
+    }
+}
+
+
 function pay_images_avans($id,$text=''){
     $ci =& get_instance();
     $ci->load->database();
@@ -4655,7 +4758,7 @@ WHERE talep_form_nakliye_products.status=$status and  talep_form_nakliye.loc=$lo
 
 }
 
-function izinli_personeller(){
+function izinli_personeller_(){
     $ci =& get_instance();
     $ci->load->database();
     $sayi=0;
@@ -4740,6 +4843,81 @@ function izinli_personeller(){
     }
 
 
+
+}
+
+function izinli_personeller()
+{
+    $ci =& get_instance();
+    $ci->load->database();
+    $table='';
+    $currentDateTime = date('Y-m-d H:i:s');
+    $ci->db->where('start_date <=', $currentDateTime);
+    $ci->db->where('end_date >=', $currentDateTime);
+    $ci->db->where('status', 1);
+    $izinliKullanicilar = $ci->db->get('user_permit')->result_array();
+
+    $sayi=0;
+    $table='<table class="table table-bordered">
+              <thead>
+                  <tr>
+                        <th class="text-danger">İzinli Personeller</th>
+                      <th>Personel</th>
+                      <th>Proje</th>
+                      <th>Pozisyon</th>
+                      <th>Başlangıç Tarihi</th>
+                      <th>Bitiş Tarihi</th>
+                      <th>Kalan Süre</th>
+                  </tr>
+              </thead><tbody>';
+
+
+
+    if (!empty($izinliKullanicilar)) {
+        foreach ($izinliKullanicilar as $izin) {
+            $baslangic = new DateTime($izin['start_date']);
+            $bitis = new DateTime($izin['end_date']);
+            $simdi = new DateTime();
+
+            // Kalan süreyi hesapla
+            $aktif_personel_kontrol =personel_detailsa($izin['user_id'])['banned'];
+            if($aktif_personel_kontrol==0){
+                $user_id = $izin['user_id'];
+
+
+                $proje_id = $ci->db->query("SELECT * FROM personel_salary WHERE  status=1  and personel_id=$user_id")->row()->proje_id;
+                $proje_name = proje_name($proje_id);
+                $role_id=personel_detailsa($user_id)['roleid'];
+                if ($bitis > $simdi) {
+                    $kalanSure = $simdi->diff($bitis)->format('%d gün %h saat %i dakika');
+
+                $sayi++;
+                $table.='  <tr style="background: red;color:white">
+                          <td>'.$sayi.'</td>
+                          <td>'.personel_details_full($user_id)['name'].'</td>
+                          <td>'.$proje_name.'</td>
+                          <td>'.roles($role_id).'</td>
+                          <td>'.$baslangic->format('Y-m-d H:i:s').'</td>
+                          <td>'.$bitis->format('Y-m-d H:i:s').'</td>
+                          <td>'.$kalanSure.'</td>
+                      </tr>';
+                    }
+            }
+
+
+        }
+
+        $table.='  </tbody>
+                                      </table>';
+
+        if($sayi){
+            return $table;
+        }
+
+    } else {
+
+        return false;
+    }
 
 }
 function personel_cart_gecikmis(){
@@ -5067,6 +5245,19 @@ function cari_yoklama_detalis($cari_id)
         'details_akt'=>$details_akt,
         'akt_status'=>$akt_status,
     );
+}
+
+function iptal_talep_kontrol($tip,$islem_id)
+{
+    $ci =& get_instance(); // CodeIgniter instance'ını alın
+
+    $sql = $ci->db->from('iptal_talep')
+        ->where('islem_id', $islem_id)
+        ->where('type', $tip)
+        ->where_in('yetkili_status', [0, 1])
+        ->count_all_results();
+
+    return $sql > 0; // Kayıt varsa true, yoksa false döner
 }
 
 
