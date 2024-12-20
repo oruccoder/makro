@@ -2021,13 +2021,11 @@
                                                                     </tbody>
                                                                 </table>
                                                             </div>
-                                                            <?php  if($details->status==8 || $details->status==7) { ?>
-                                                                <div class="col-md-12 pt-4 pb-2">
-                                                                    <button class="btn btn-success qaime_create"><i class="fa fa-check"></i> Qaime Oluştur</button>
-                                                                    <button class="btn btn-info confirm_asama_update"><i class="fa fa-file"></i> Talebi Tamamla</button>
+                                                            <div class="col-md-12 pt-4 pb-2">
+                                                                <button class="btn btn-success qaime_create"><i class="fa fa-check"></i> Qaime Oluştur</button>
+                                                                <button class="btn btn-info confirm_asama_update"><i class="fa fa-file"></i> Talebi Tamamla</button>
 
-                                                                </div>
-                                                            <?php } ?>
+                                                            </div>
                                                         </div>
                                                     </div>
 

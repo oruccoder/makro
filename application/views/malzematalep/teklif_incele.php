@@ -75,7 +75,10 @@
 
                                             </table>
                                             <?php if($details->talep_type!=3){ ?>
-                                                <span class="avatar-lg align-baseline"><img style="    width: 20% !important;" class="image_talep_product" src="<?php echo base_url().'/'.$image ?>"></span>
+                                                <span
+                                                        data-product-id="<?=$product_items->product_id?>"
+                                                        data-stock-code-id="<?=$product_items->product_stock_code_id?>"
+                                                        class="price_history avatar-lg align-baseline"><img style="    width: 20% !important;" class="image_talep_product" src="<?php echo base_url().'/'.$image ?>"></span>
                                             <?php }?>
                                         </div>
 
@@ -884,7 +887,98 @@
         let cur_price = currencyFormat(floatVal(total_price))
         $('#secilen_tutar').empty().text(cur_price);
     }
+    let confirmOpen = false; // Confirm durumunu takip eden değişken
+
+    $(document).on('click', '.price_history', function () {
+        if (confirmOpen) return; // Eğer confirm açık ise hiçbir işlem yapma
+        confirmOpen = true; // Confirm açık durumuna geçiş yap
+
+        const productId = $(this).data('product-id'); // Elementten ürün ID'sini alın
+        const stockCodeId = $(this).data('stock-code-id') || 0; // Stok kod ID varsa alın, yoksa 0
+
+        $.confirm({
+            theme: 'modern',
+            closeIcon: true,
+            title: 'Fiyat Geçmişi',
+            icon: 'fa fa-credit-card',
+            type: 'green',
+            animation: 'scale',
+            useBootstrap: true,
+            columnClass: "small",
+            containerFluid: !0,
+            smoothContent: true,
+            draggable: false,
+            content: "Fiyat geçmişini görmek istiyor musunuz?",
+            buttons: {
+                button: {
+                    text:'Evet',
+                    btnClass: "btn btn-info btn-sm",
+                    action:function (){
+                        $.ajax({
+                            url: '/malzemetalep/fiyat_listesi_getir', // PHP fonksiyonuna giden URL
+                            type: 'POST',
+                            data: {
+                                product_id: productId,
+                                product_Stock_code_id: stockCodeId
+                            },
+                            beforeSend: function () {
+                                // Loading animasyonu göster
+                                $('#priceHistoryModal .modal-body').html('<div class="text-center"><i class="fa fa-spinner fa-spin"></i> Yükleniyor...</div>');
+                                $('#priceHistoryModal').modal('show');
+                            },
+                            success: function (response) {
+                                // Gelen HTML yanıtını modal içinde göster
+                                $('#priceHistoryModal .modal-body').html(response);
+                            },
+                            error: function () {
+                                // Hata durumunda mesaj göster
+                                $('#priceHistoryModal .modal-body').html('<div class="text-danger text-center">Fiyat geçmişi alınırken bir hata oluştu.</div>');
+                            },
+                            complete: function () {
+                                // Loading animasyonunu gizlemek için gerekirse işlem yapabilirsiniz
+                                // Ancak burada gerek yok çünkü yanıt geldiğinde zaten içerik değiştiriliyor
+                            }
+                        });
+
+                    }
+
+                },
+                cancel: {
+                    text: 'Kapat',
+                    btnClass: "btn btn-danger btn-sm",
+                    action:function (){
+                        modal_close();
+                    }
+                }
+            }
+        });
+
+    });
+
+    function modal_close(){
+        confirmOpen = false;
+    }
+
 
 </script>
+<div class="modal fade" id="priceHistoryModal" tabindex="-1" role="dialog" aria-labelledby="priceHistoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="    width: 900px;">
+            <div class="modal-header">
+                <h5 class="modal-title" id="priceHistoryModalLabel">Fiyat Geçmişi</h5>
+                <button type="button" class="close"  onclick="modal_close()"  data-dismiss="modal" aria-label="Kapat">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- AJAX ile gelen veri burada görünecek -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="modal_close()" class="btn btn-secondary" data-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>app-assets/talep.css">
 

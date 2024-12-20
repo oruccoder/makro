@@ -2227,11 +2227,10 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                 var api = this.api(), data;
 
                 // Remove the formatting to get integer data for summation
-                var floatVal = function (i) {
+                  var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2434,11 +2433,10 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                 var api = this.api(), data;
 
                 // Remove the formatting to get integer data for summation
-                var floatVal = function (i) {
+                  var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2579,11 +2577,10 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                 var api = this.api(), data;
 
                 // Remove the formatting to get integer data for summation
-                var floatVal = function (i) {
+                  var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2724,11 +2721,10 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                 var api = this.api(), data;
 
                 // Remove the formatting to get integer data for summation
-                var floatVal = function (i) {
+                  var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2869,11 +2865,10 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
                 var api = this.api(), data;
 
                 // Remove the formatting to get integer data for summation
-                var floatVal = function (i) {
+                  var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -4011,11 +4006,10 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
         return  deger.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.')+' AZN';
     }
 
-    var floatVal = function ( i ) {
+    var floatVal = function (i) {
         return typeof i === 'string' ?
-            i.replace(/[\AZN,.]/g, '')/100 :
-            typeof i === 'number' ?
-                i : 0;
+            parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+            typeof i === 'number' ? i : 0;
     };
 
     function amount_max(obj){

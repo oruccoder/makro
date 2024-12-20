@@ -26,7 +26,6 @@ class Malzemetalepform Extends CI_Controller
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
-
     }
     public function index()
     {
@@ -100,18 +99,19 @@ class Malzemetalepform Extends CI_Controller
 
         // Sorgu uzunluğu kontrolü
         if (strlen($query) < 3) {
-            echo json_encode(['success' => false, 'message' => 'En az 5 harf giriniz.']);
+            echo json_encode(['success' => false, 'message' => 'En az 3 harf giriniz.']);
             return;
         }
 
         // Veritabanı sorgusu
         $keyword = $this->db->escape_like_str($query); // Güvenlik için input temizleme
+        //CONCAT(geopos_products.product_name, ' ', geopos_products.product_name_tr, ' ', geopos_products.product_name_en) AS product_name,
 
         $query = $this->db->query(
             "SELECT 
     geopos_products.pid AS product_id,
     geopos_products.image AS images,
-    CONCAT(geopos_products.product_name, ' ', geopos_products.product_name_tr, ' ', geopos_products.product_name_en) AS product_name,
+    geopos_products.product_name AS product_name,
     IF(product_stock_code.id, product_stock_code.code, 'varyasyon tanımlanmamış') AS varyasyon,
     IF(product_stock_code.id, product_stock_code.id, 0) AS product_stock_code_id,
     product_stock_code.code
@@ -133,6 +133,7 @@ GROUP BY product_stock_code.id
 ORDER BY geopos_products.pid DESC
 LIMIT 100;"
         );
+
         if ($query->num_rows() > 0) {
             echo json_encode(['success' => true, 'results' => $query->result()]);
         } else {

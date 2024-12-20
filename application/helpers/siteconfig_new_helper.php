@@ -2071,7 +2071,6 @@ function alt_file_id_geti($talep_item_id,$talep_id,$firma)
 }
 
 
-
 function amountFormat($number,$para_birimi = 0)
 {
 

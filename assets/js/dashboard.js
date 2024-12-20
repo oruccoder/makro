@@ -173,6 +173,32 @@ $(document).ready(function (){
         buttons: []
     });
 
+    $('#invoices_tables_banka_isle').DataTable({
+        autoWidth: false,
+        select: true,
+        processing: true,
+        serverSide: true,
+        'ajax': {
+            'url': baseurl+'/qaime/ajax_list',
+            'type': 'POST',
+            'data': {
+                start_date: '',
+                end_date: '',
+                alt_firma:'',
+                status:6,
+                crsf_token: crsf_hash,
+            }
+        },
+        'columnDefs': [
+            {
+                'targets': [0],
+                'orderable': false,
+            },
+        ],
+        dom: 'Blfrtip',
+        buttons: []
+    });
+
     $('#invoices_tables_bank').DataTable({
         autoWidth: false,
         select: true,

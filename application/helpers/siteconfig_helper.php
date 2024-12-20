@@ -2093,49 +2093,7 @@ function alt_file_id_geti($talep_item_id,$talep_id,$firma)
 
 
 
-function amountFormat($number,$para_birimi = 0)
-{
 
-    $ci =& get_instance();
-
-    if($para_birimi==0)
-    {
-        $query = $ci->db->query("SELECT currency FROM geopos_system WHERE id=1 LIMIT 1");
-        $row = $query->row_array();
-        $currency = $row['currency'];
-
-        //get data from database
-        $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
-        $row = $query2->row_array();
-        //Format money as per country
-
-        if ($row['method'] == 'l') {
-            return $currency . ' ' . @number_format($number, $row['url'], $row['key1'], $row['key2']);
-        } else {
-            return @number_format($number, $row['url'], $row['key1'], $row['key2']) . ' ' . $currency;
-        }
-    }
-    else
-    {
-        $query = $ci->db->query("SELECT * FROM geopos_currencies WHERE id=$para_birimi LIMIT 1");
-        $row = $query->row_array();
-        $currency = $row['symbol'];
-
-        //get data from database
-        $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
-        $row = $query2->row_array();
-        //Format money as per country
-
-        if ($row['method'] == 'l') {
-            return $currency . ' ' . @number_format($number, $row['url'], $row['key1'], $row['key2']);
-        } else {
-            return @number_format($number, $row['url'], $row['key1'], $row['key2']) . ' ' . $currency;
-        }
-    }
-
-
-
-}
 
 function hesap_types()
 {
@@ -2246,6 +2204,76 @@ function active($input1)
 
 }
 
+function amountFormat($number,$para_birimi = 0)
+{
+
+    $ci =& get_instance();
+
+    if($para_birimi==0)
+    {
+        $query = $ci->db->query("SELECT currency FROM geopos_system WHERE id=1 LIMIT 1");
+        $row = $query->row_array();
+        $currency = $row['currency'];
+
+        //get data from database
+        //get data from database
+        $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
+        $row = $query2->row_array();
+        //Format money as per country
+
+        $key1=$row['key1'];
+        $key2=$row['key2'];
+
+
+        // Sayıyı formatla
+        $formatted = @number_format($number, 4, $key1, $key2); // Başlangıçta 4 basamaklı
+
+        // Virgülden sonra fazlalık sıfırları kaldır
+        $formatted = rtrim($formatted, "0"); // Sağdaki sıfırları kaldır
+        $formatted = rtrim($formatted, $key1); // Eğer sadece ayırıcı kaldıysa onu da kaldır
+
+        // Eğer sayının ondalık kısmı yoksa ,00 ekle
+        if (strpos($formatted, $key1) === false) {
+            $formatted .= $key1 . '00';
+        }
+        // Formatlanmış sayıyı döndür
+        return $formatted. ' ' . $currency;;
+    }
+    else
+    {
+        $query = $ci->db->query("SELECT * FROM geopos_currencies WHERE id=$para_birimi LIMIT 1");
+        $row = $query->row_array();
+        $currency = $row['symbol'];
+
+
+        //get data from database
+        $query2 = $ci->db->query("SELECT * FROM univarsal_api WHERE id=4 LIMIT 1");
+        $row = $query2->row_array();
+        //Format money as per country
+
+        $key1=$row['key1'];
+        $key2=$row['key2'];
+
+
+        // Sayıyı formatla
+        $formatted = @number_format($number, 4, $key1, $key2); // Başlangıçta 4 basamaklı
+
+        // Virgülden sonra fazlalık sıfırları kaldır
+        $formatted = rtrim($formatted, "0"); // Sağdaki sıfırları kaldır
+        $formatted = rtrim($formatted, $key1); // Eğer sadece ayırıcı kaldıysa onu da kaldır
+
+        // Eğer sayının ondalık kısmı yoksa ,00 ekle
+        if (strpos($formatted, $key1) === false) {
+            $formatted .= $key1 . '00';
+        }
+        // Formatlanmış sayıyı döndür
+        return $formatted. ' ' . $currency;;
+    }
+
+
+
+}
+
 function amountFormat_s($number)
 {
     $ci =& get_instance();
@@ -2256,11 +2284,23 @@ function amountFormat_s($number)
     $row = $query2->row_array();
     //Format money as per country
 
-    if ($row['method'] == 'l') {
-        return @number_format($number, $row['url'], $row['key1'], $row['key2']);
-    } else {
-        return @number_format($number, $row['url'], $row['key1'], $row['key2']);
+    $key1=$row['key1'];
+    $key2=$row['key2'];
+
+
+    // Sayıyı formatla
+    $formatted = @number_format($number, 4, $key1, $key2); // Başlangıçta 4 basamaklı
+
+    // Virgülden sonra fazlalık sıfırları kaldır
+    $formatted = rtrim($formatted, "0"); // Sağdaki sıfırları kaldır
+    $formatted = rtrim($formatted, $key1); // Eğer sadece ayırıcı kaldıysa onu da kaldır
+
+    // Eğer sayının ondalık kısmı yoksa ,00 ekle
+    if (strpos($formatted, $key1) === false) {
+        $formatted .= $key1 . '00';
     }
+    // Formatlanmış sayıyı döndür
+    return $formatted;
 
 }
 
@@ -5526,7 +5566,23 @@ function customer_details($id)
         return  array('company'=>'');
     }
 
+}
+function customer_details_res($id)
+{
 
+    $ci =& get_instance();
+    $ci->load->database();
+
+    if(isset($id))
+    {
+        $query2 = $ci->db->query("SELECT * FROM geopos_customers WHERE id=$id");
+        $row = $query2->row();
+        return $row;
+    }
+    else
+    {
+        return  array('company'=>'');
+    }
 
 }
 
@@ -5718,6 +5774,26 @@ function all_projects()
     $loc =  $ci->session->userdata('set_firma_id');
 
     $query2 = $ci->db->query("SELECT * FROM `geopos_projects` Where loc = $loc and status not in  (3,4)");
+
+    if($query2->num_rows()>0)
+    {
+        $row = $query2->result();
+        return $row;
+    }
+    else
+    {
+        return 0;
+    }
+
+}
+function all_projects_edit()
+{
+    $ci =& get_instance();
+    $ci->load->database();
+
+    $loc =  $ci->session->userdata('set_firma_id');
+
+    $query2 = $ci->db->query("SELECT * FROM `geopos_projects` Where loc = $loc");
 
     if($query2->num_rows()>0)
     {
@@ -9385,6 +9461,33 @@ function talep_list($type)
 
 }
 
+function nakliye_talep_list($cari_id)
+{
+    $ci =& get_instance();
+    $ci->load->database();
+    if($cari_id){
+        $talep_details = [];
+        $nakliye_talepleri = $ci->db->query("SELECT * FROM talep_form_nakliye_products WHERE cari_id = $cari_id GROUP BY cari_id ORDER BY form_id DESC");
+        if($nakliye_talepleri->num_rows()>0){
+            foreach ($nakliye_talepleri->result() as $row){
+                $talep_details[]=[
+                  'id'=>$row->form_id,
+                  'code'=>$ci->db->query("SELECT * FROM talep_form_nakliye id = $row->form_id")->row()->code
+                ];
+            }
+
+            return ['status'=>true,'data'=>$talep_details];
+        }
+        else
+        {
+            return ['status'=>false];
+        }
+    }
+    else
+    {
+        return ['status'=>false];
+    }
+}
 
 function talep_list_onay($type)
 {
@@ -12501,6 +12604,118 @@ function personel_bakiye_report_num($id){
 
 
 }
+
+
+
+function new_talep_onay_new_invoices($type,$id){
+    $ci =& get_instance();
+    $ci->load->database();
+
+    $ci = &get_instance();
+    $onaylar = $ci->db->from('invoices_onay_new')
+        ->where('invoices_id', $id)
+        ->where('type', $type)
+        ->order_by('sort', 'ASC')
+        ->get()
+        ->result();
+    if (!$onaylar) {
+        return [
+            'status' => false,
+            'message' => 'Bu talep için onay listesi bulunamadı.'
+        ];
+    }
+
+    $user_ids = array_column($onaylar, 'user_id');
+    $users = $ci->db->select('id, name')
+        ->from('geopos_employees')
+        ->where_in('id', $user_ids)
+        ->get()
+        ->result();
+
+    $user_map = [];
+    $create_user_id = $ci->db->query("SELECT * FROM geopos_invoices Where id = $id")->row()->eid;
+    $onay_veren_id_array[]=[
+        'name'=>personel_details($create_user_id),
+        'user_id'=>$create_user_id
+    ];
+    foreach ($users as $user) {
+        $user_map[$user->id] = $user->name;
+    }
+
+    // Listeyi oluştur
+    $list = [];
+    $sira_kimde = null;
+    foreach ($onaylar as $onay) {
+        $active=false;
+        if ($onay->staff) {
+            $active=true;
+        }
+
+        $onay_tipi='Forma 2 Onayı';
+        if($type==1){
+            $onay_tipi='Qaime Onayı';
+        }
+
+
+
+        $update='';
+        $button = '<button disabled class="btn btn-warning"><i class="fa fa-question"></i>&nbsp;Sıra Gelmedi</button>';
+        $durum='Sıra Gelmedi';
+        $durum_reverse='';
+
+        if($active && !$onay->status){
+            $durum='Təsdiq Edin';
+            $durum_reverse='<button class="btn btn-warning reverse_qaime"  onay_id="'.$onay->id.'" type="button"><i class="fa fa-spin-reverse "></i> Qaime Geri Gönder</button>';
+            $button = '<button class="btn btn-info onayla" onay_id="'.$onay->id.'"><i class="fa fa-check"></i>&nbsp;Təsdiq Edin</button>';
+        }
+        elseif($onay->status){
+            $onay_veren_id_array[]=[
+                'name'=>personel_details($onay->user_id),
+                'user_id'=>$onay->user_id
+            ];
+            $update=(!empty($onay->updated_at))?' | '.$onay->updated_at:'';
+            $durum='Onaylandı';
+            $button = '<button disabled class="btn btn-success"><i class="fa fa-question"></i>&nbsp;Onaylandı</button>';
+        }
+        $list[] = [
+            'id' => $onay->id,
+            'kullanici_id' => $onay->user_id,
+            'kullanici_ad' => $user_map[$onay->user_id] ?? 'Bilinmiyor',
+            'onay_tipi' => $type,
+            'onay_tipi_str' => $onay_tipi,
+            'active' => $active,
+            'durum_reverse' => $durum_reverse,
+            'durum' => $durum,
+            'update' => $update,
+            'onay_sirasi' => $onay->sort,
+            'button' => $button,
+        ];
+
+    }
+
+    $html='';
+    if($list){
+        $html='<table class="table-bordered table"><tbody>';
+        foreach ($list as $items){
+            $html.="<tr>";
+            $html.="<td class='text-center'>".$items['onay_tipi_str']."</td>";
+            $html.="<td class='text-center'>".$items['kullanici_ad']."</td>";
+            $html.="<td class='text-center'>".$items['durum'].$items['update']."</td>";
+            $html.="<td class='text-center'>".$items['button'].' '.$items['durum_reverse']."</td>";
+            $html.="</tr>";
+        }
+        $html.="</tbody></table>";
+    }
+
+    return [
+        'status' => true,
+        'html' => $html,
+        'onay_veren_id_array' => array_key_uniq($onay_veren_id_array,'user_id'),
+    ];
+
+
+}
+
 function talep_onay_listesi($talep_id,$talep_status)
 {
     $ci =& get_instance();
@@ -13394,12 +13609,14 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
                 // Proje ID 35 için rehberlik kontrolü
                 $approval_flow = in_array($personel_id, $data_rehberlik)
                     ? [
+                        'hr' => 750,
                         'sorumlu' => $sorumlu_pers_id,
                         'ofis_menejeri' => 62,
                         'genel_mudur' => 61,
                         'muhasebe_muduru' => 39,
                     ]
                     : [
+                        'hr' => 750,
                         'sorumlu' => $sorumlu_pers_id,
                         'ofis_menejeri' => 62,
                         'muhasebe_muduru' => 39,
@@ -13408,6 +13625,7 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
                 // Diğer projeler için rehberlik kontrolü
                 $approval_flow = in_array($personel_id, $data_rehberlik)
                     ? [
+                        'hr' => 750,
                         'sorumlu' => $sorumlu_pers_id,
                         'ofis_menejeri' => 62,
                         'santiye_muduru' => $proje_muduru,
@@ -13415,6 +13633,7 @@ function onay_sort($type,$proje_id,$personel_id=0,$talep_id=0){
                         'muhasebe_muduru' => 39,
                     ]
                     : [
+                        'hr' => 750,
                         'santiye_muhasebe' => $santiye_muhasib,
                         'santiye_muduru' => $proje_sorumlusu_id,
                         'genel_proje_muduru' => 66,
