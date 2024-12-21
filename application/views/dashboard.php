@@ -742,6 +742,47 @@
                 </div>
                 <?php } ?>
 
+                <?php if ($this->aauth->premission(98)->read) { ?>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="container-fluid">
+                                <section>
+                                    <div class="row">
+                                        <div class="col-xl-12 col-sm-12 col-12 col-xs-12 mb-4">
+                                            <h5 class="text-info" style="text-align:center">Bankaya İşlenmesi Bekleyen Faturalar</h5>
+                                            <a href="#pop_model_invoice" data-toggle="modal" data-remote="false"
+                                               class="btn btn-warning btn-md" id="invoice_id_aktar_bankta" title="Change Status">Durum Güncelle</a>
+                                            <table id="invoices_tables_banka_isle"  class="table responsive" style="width:100%">
+                                                <thead>
+                                                <tr>
+
+                                                    <th><input type="checkbox" class="form-control one_invoice_ids"></th>
+                                                    <th><?php echo $this->lang->line('Date') ?></th>
+                                                    <th><?php echo $this->lang->line('invoice_type') ?></th>
+                                                    <th>Fatura No</th>
+                                                    <th>Proje Adı</th>
+                                                    <th><?php echo $this->lang->line('Customer') ?></th>
+                                                    <th>Açıklama</th>
+                                                    <th>Esas Meblağ</th>
+                                                    <th>KDV</th>
+                                                    <th><?php echo $this->lang->line('Amount') ?></th>
+                                                    <th><?php echo $this->lang->line('Status') ?></th>
+                                                    <th>Alt Firma</th>
+                                                    <th class="no-sort"><?php echo $this->lang->line('Settings') ?></th>
+
+
+                                                </tr>
+                                                </thead>
+
+                                            </table>
+                                        </div>
+                                    </div>
+                                </section>
+                            </div>
+                        </div>
+                    </div>
+                <?php } ?>
+
                 <?php if ($this->aauth->premission(81)->read) { ?>
                     <div class="card">
                         <div class="card-body">
@@ -1180,23 +1221,7 @@
                     }
                 }
                 ?>
-                <?php if ($this->aauth->premission(46)->read) { ?>
-                <div class="card mobile_hidden">
-                    <div class="card-body">
-                        <div class="container-fluid">
-                            <section>
-                                <div class="row">
-                                    <?php
-                                        $this->load->view('customer_meeting/index');
-                                    ?>
-                                </div>
-                            </section>
-                        </div>
-                    </div>
-                </div>
 
-
-                <?php } ?>
                 <?php if(vorker_list_run()['status']) { ?>
                     <div class="card mobile_hidden">
                         <div class="card-body">
@@ -1837,6 +1862,218 @@
                                                     <option value="10">Ödeme Yap</option>
                                                     <option value="9">Acil Ödeme</option>
                                                     <option value="1">Beklet</option>
+                                                </select>
+                                        </div>
+
+</form>
+
+
+                           `,
+            buttons: {
+                formSubmit: {
+                    text: 'Onayla',
+                    btnClass: 'btn-blue',
+                    action: function () {
+                        $('#loading-box').removeClass('d-none');
+                        let data_post = {
+                            array: array,
+                            status: $('#status').val(),
+                        }
+                        $.post(baseurl + 'invoices/update_status_toplu_dashboard',data_post,(response)=>{
+                            let data = jQuery.parseJSON(response);
+                            if(data.status==200){
+                                $('#loading-box').addClass('d-none');
+                                $.alert({
+                                    theme: 'modern',
+                                    icon: 'fa fa-check',
+                                    type: 'green',
+                                    animation: 'scale',
+                                    useBootstrap: true,
+                                    columnClass: "col-md-4 mx-auto",
+                                    title: 'Başarılı',
+                                    content: data.message,
+                                    buttons:{
+                                        prev: {
+                                            text: 'Tamam',
+                                            btnClass: "btn btn-link text-dark",
+                                            action: function () {
+                                                window.location.reload();
+                                            }
+                                        }
+                                    }
+                                });
+
+                            }
+                            else {
+                                $('#loading-box').addClass('d-none');
+                                $.alert({
+                                    theme: 'material',
+                                    icon: 'fa fa-exclamation',
+                                    type: 'red',
+                                    animation: 'scale',
+                                    useBootstrap: true,
+                                    columnClass: "col-md-4 mx-auto",
+                                    title: 'Dikkat!',
+                                    content: data.message,
+                                    buttons:{
+                                        prev: {
+                                            text: 'Tamam',
+                                            btnClass: "btn btn-link text-dark",
+                                        }
+                                    }
+                                });
+                            }
+                        })
+                    }
+                },
+                cancel: {
+                    text: 'İptal Et',
+                    btnClass: "btn btn-danger btn-sm",
+                    action:function (){
+                        $.alert({
+                            theme: 'modern',
+                            icon: 'fa fa-question',
+                            type: 'green',
+                            closeIcon: true,
+                            animation: 'scale',
+                            useBootstrap: true,
+                            columnClass: "col-md-4 mx-auto",
+                            title: 'Açıklama',
+                            content: "<input class='desc form-control' placeholder='iptal sebebi'>",
+                            buttons:{
+                                prev: {
+                                    text: 'Durum Bildir',
+                                    btnClass: "btn btn-success",
+                                    action: function () {
+
+                                        let desct=$('.desc').val();
+                                        if(!desct){
+                                            $.alert({
+                                                theme: 'material',
+                                                icon: 'fa fa-exclamation',
+                                                type: 'red',
+                                                animation: 'scale',
+                                                useBootstrap: true,
+                                                columnClass: "col-md-4 mx-auto",
+                                                title: 'Dikkat!',
+                                                content: 'Açıklama Zorunludur',
+                                                buttons:{
+                                                    prev: {
+                                                        text: 'Tamam',
+                                                        btnClass: "btn btn-link text-dark",
+                                                    }
+                                                }
+                                            });
+                                            return false;
+                                        }
+                                        else {
+                                            $('#loading-box').removeClass('d-none');
+                                        }
+
+                                        let data_post = {
+                                            confirm_id: id,
+                                            status: 2,
+                                            desc: $('.desc').val()
+                                        }
+                                        $.post(baseurl + 'personelaction/user_permit_update',data_post,(response)=>{
+                                            let data = jQuery.parseJSON(response);
+                                            if(data.status==200){
+                                                $('#loading-box').addClass('d-none');
+                                                $.alert({
+                                                    theme: 'modern',
+                                                    icon: 'fa fa-check',
+                                                    type: 'green',
+                                                    animation: 'scale',
+                                                    useBootstrap: true,
+                                                    columnClass: "col-md-4 mx-auto",
+                                                    title: 'Başarılı',
+                                                    content: data.message,
+                                                    buttons:{
+                                                        prev: {
+                                                            text: 'Tamam',
+                                                            btnClass: "btn btn-link text-dark",
+                                                            action: function () {
+                                                                window.location.reload();
+                                                            }
+                                                        }
+                                                    }
+                                                });
+
+                                            }
+                                            else {
+                                                $('#loading-box').addClass('d-none');
+                                                $.alert({
+                                                    theme: 'material',
+                                                    icon: 'fa fa-exclamation',
+                                                    type: 'red',
+                                                    animation: 'scale',
+                                                    useBootstrap: true,
+                                                    columnClass: "col-md-4 mx-auto",
+                                                    title: 'Dikkat!',
+                                                    content: data.message,
+                                                    buttons:{
+                                                        prev: {
+                                                            text: 'Tamam',
+                                                            btnClass: "btn btn-link text-dark",
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        })
+                                    }
+                                }
+                            }
+                        });
+
+                    }
+                }
+            },
+            onContentReady: function () {
+                $('.select-box').select2({
+                    dropdownParent: $(".jconfirm-box-container")
+                })
+                // bind to events
+                var jc = this;
+                this.$content.find('form').on('submit', function (e) {
+                    // if the user submits the form by pressing enter in the field.
+                    e.preventDefault();
+                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                });
+            }
+        });
+
+    })
+
+    $(document).on('click', "#invoice_id_aktar_bankta", function (e) {
+        var array = [];
+
+        var array = [];
+        $(".invoice_ids:checked").map(function(){
+            array.push($(this).val());
+        });
+
+        $.confirm({
+            theme: 'modern',
+            closeIcon: true,
+            title: false,
+            icon: false,
+            type: 'dark',
+            animation: 'scale',
+            useBootstrap: true,
+            columnClass: "medium",
+            containerFluid: !0,
+            smoothContent: true,
+            draggable: false,
+            content:`<form>
+
+									  <div class="form-group col-md-12">
+                                                  <label for="name">Durum Bildirme</label>
+                                                  <select name="status" class="form-control mb-1" id="status">
+                                                    <option value="13">Bankta</option>
+                                                    <option value="18">Ödeme Bekliyor</option>
+                                                    <option value="21">Tamamlandı</option>
+                                                    <option value="2">Ödendi</option>
+
                                                 </select>
                                         </div>
 
@@ -3450,6 +3687,15 @@
         }
     }
 
+    $(document).on('change','.one_invoice_ids',function (){
+        let status = $(this).prop('checked');
+        if(status){
+            $('#invoices_tables_banka_isle .invoice_ids').prop('checked',true)
+        }
+        else {
+            $('#invoices_tables_banka_isle .invoice_ids').prop('checked',false)
+        }
+    })
 </script>
 <script src="<?= base_url().'assets/js/dashboard.js?v='.rand(11111,99999)?>"></script>
 

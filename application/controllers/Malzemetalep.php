@@ -1896,7 +1896,7 @@ class Malzemetalep Extends CI_Controller
         elseif($type==5) //muhasebe kullanıcısı
         {
             $yetkili_kontrol  = $this->db->query("SELECT * FROM `geopos_projects` where id = $details->proje_id and  muhasebe_muduru_id=$user_id")->num_rows();
-            if($yetkili_kontrol || $this->aauth->get_user()->id==39 || $this->aauth->get_user()->id==1135 || $this->aauth->get_user()->id==174){
+            if($yetkili_kontrol || $this->aauth->get_user()->id==39 || $this->aauth->get_user()->id==21 || $this->aauth->get_user()->id==1135 || $this->aauth->get_user()->id==174){
             //if($roleid==1 || $roleid==2 || $roleid==4){
                 echo json_encode(array('status' => 'Success','message'=>'Yetki MEvcut'));
             }
@@ -4498,20 +4498,6 @@ Where talep_list_proje.aauth_id=$user_id  and proje_stoklari.bolum_id=$bolum_id
                         ];
                         $this->db->insert('invoices_item_to_option',$varyasyon);
 
-
-
-
-//                        foreach ($options as $option_details){
-//                            //varyasyon kayıt
-//                            $varyasyon=[
-//                                'invoices_item_id'=>$invoice_items_id,
-//                                'option_id'=>$option_details['option_id'],
-//                                'option_value_id'=>$option_details['option_value_id'],
-//                            ];
-//                            $this->db->insert('invoices_item_to_option',$varyasyon);
-//                            //varyasyon kayıt
-//                        }
-
                     }
 
 
@@ -5418,5 +5404,14 @@ Where talep_list_proje.aauth_id=$user_id  and proje_stoklari.bolum_id=$bolum_id
                 }
             }
         }
+    }
+
+    public function fiyat_listesi_getir()
+    {
+        $product_id = $this->input->post('product_id');
+        $product_Stock_code_id = $this->input->post('product_Stock_code_id');
+        echo fiyat_listesi_getir($product_id,$product_Stock_code_id);
+
+
     }
 }

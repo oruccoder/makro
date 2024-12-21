@@ -134,23 +134,14 @@ class Invoices extends CI_Controller
 
 
         $list = $this->invocies->get_datatables($this->limited);
-
         $data = array();
-
-
-
         $no = $this->input->post('start');
-
-        $this->session->set_userdata('test', 1);
-
         foreach ($list as $invoices) {
 
             $proje_name=proje_name($invoices->proje_id);
-
             $notes='Proje Adı : '.$proje_name.' &#013;Not : '.$invoices->notes;
             $tool="data-toggle='tooltip' data-placement='top' data-html='true' title='$notes'";
             $no++;
-
             $row = array();
 
             if($invoices->invoice_type_id==37)
@@ -684,11 +675,17 @@ class Invoices extends CI_Controller
         $status = $this->input->post('status');
         foreach ($inv_array as $lists)
         {
+
+            $old_status_id  = $this->db->query("SELECT * FROM geopos_invoices WHERE id = '$lists'")->row()->status;
+            $old_status = invoice_status($old_status_id);
+            $new_status = invoice_status($status);
+            $text = "Fatura Durumu Güncellendi.Eski Durum : ".$old_status.' Yeni Durum : '.$new_status;
+            $this->talep_history($lists,$this->aauth->get_user()->id,$text,1);
+
             $this->db->set('status', $status);
-
             $this->db->where('id', $lists);
-
             $this->db->update('geopos_invoices');
+
             $this->aauth->applog("Status : ".$status." Durum Değiştirildi : ID " . $lists, $this->aauth->get_user()->username);
             $index++;
 
@@ -717,6 +714,14 @@ class Invoices extends CI_Controller
         $status = $this->input->post('status');
         foreach ($inv_array as $lists)
         {
+
+            $old_status_id  = $this->db->query("SELECT * FROM geopos_invoices WHERE id = '$lists'")->row()->status;
+            $old_status = invoice_status($old_status_id);
+            $new_status = invoice_status($status);
+            $text = "Fatura Durumu Güncellendi.Eski Durum : ".$old_status.' Yeni Durum : '.$new_status;
+            $this->talep_history($lists,$this->aauth->get_user()->id,$text,1);
+
+
             $this->db->set('status', $status);
             $this->db->where('id', $lists);
             $this->db->update('geopos_invoices');
@@ -737,8 +742,6 @@ class Invoices extends CI_Controller
     }
 
     public function action()
-
-
     {
 
 
@@ -788,6 +791,7 @@ class Invoices extends CI_Controller
         $satinalma_talep_id = $this->input->post('satinalma_talep_id');
         $forma2_id = $this->input->post('forma2_id');
         $tehvil_id = $this->input->post('tehvil_id');
+        $search_input_nakliye = $this->input->post('search_input_nakliye');
 
         $paymethod = $this->input->post('paymethod');
         $project = $this->input->post('proje_id');
@@ -945,6 +949,12 @@ class Invoices extends CI_Controller
                     $this->db->insert('invoice_to_tehvil', $data_tehvil_);
                 }
             }
+            if($search_input_nakliye){
+                foreach ($search_input_nakliye as $aid){
+                    $data_nakliye =  array('nakliye_id'=>$aid,'invoice_id'=>$insert_id);
+                    $this->db->insert('nakliye_to_invoice', $data_nakliye);
+                }
+            }
 
 
 
@@ -1054,40 +1064,23 @@ class Invoices extends CI_Controller
                     $proje_item_id=$project;
 
                     $data = array(
-
                         'tid' => $invocieno,
-
                         'pid' => $product_id[$key],
-
                         'product' => $product_name1[$key],
-
                         'code' => $product_hsn[$key],
-
                         'qty' => $product_qty[$key],
-
                         'price' => $p_price,
-
                         'tax' => $p_tax,
-
                         'discount' => $p_discount,
-
                         'subtotal' => $p_subtotal,
-
                         'totaltax' => $p_total_tax,
-
                         'totaldiscount' => $p_total_discount,
-
                         'product_des' => $product_des[$key],
-
                         'unit' => $product_unit[$key],
-
                         'invoice_type_id' => $invoice_type,
-
                         'proje_id' => $proje_item_id,
-
                         'depo_id' => $depo_id_item[$key],
                         'item_desc' => $item_desc,
-
                         'invoice_type_desc' => invoice_type_id($invoice_type)
                     );
                     $productlist[$prodindex] = $data;
@@ -1538,6 +1531,7 @@ class Invoices extends CI_Controller
         $malzeme_talep_id = $this->input->post('malzeme_talep_id');
         $avans_talep_id = $this->input->post('avans_talep_formu');
         $satinalma_talep_id = $this->input->post('satinalma_talep_id');
+        $search_input_nakliye = $this->input->post('search_input_nakliye');
 
 
         $stok_guncellemes=isset($stok_durumu)?1:0;
@@ -1674,6 +1668,7 @@ class Invoices extends CI_Controller
             $this->db->delete('invoice_to_talep', array('invoice_id' => $iid));
             $this->db->delete('invoice_to_forma_2', array('invoice_id' => $iid));
             $this->db->delete('invoice_to_tehvil', array('invoice_id' => $iid));
+            $this->db->delete('nakliye_to_invoice', array('invoice_id' => $iid));
             if($avans_talep_id){
                 foreach ($avans_talep_id as $aid){
                     $data_avans =  array('tip'=>5,'talep_id'=>$aid,'invoice_id'=>$iid,'user_id'=>$this->aauth->get_user()->id);
@@ -1707,6 +1702,13 @@ class Invoices extends CI_Controller
                     $this->db->insert('invoice_to_tehvil', $data_tehvil);
                 }
             }
+            if($search_input_nakliye){
+                foreach ($search_input_nakliye as $aid){
+                    $data_nakliye =  array('nakliye_id'=>$aid,'invoice_id'=>$iid);
+                    $this->db->insert('nakliye_to_invoice', $data_nakliye);
+                }
+            }
+
             //Product Data
 
             $pid = $this->input->post('pid');
@@ -1730,13 +1732,8 @@ class Invoices extends CI_Controller
 
             foreach ($pid as $key => $value) {
                 $toplam_rulo=0;
-
-
-
                 $product_id = $this->input->post('pid');
-
                 $product_name1 = $this->input->post('product_name',true);
-
                 $product_qty = $this->input->post('product_qty');
                 $old=$this->input->post('old_product_qty');
                 if(isset($old))
@@ -1746,8 +1743,6 @@ class Invoices extends CI_Controller
                 {
                     $old_product_qty=0;
                 }
-
-
 
                 $old_depo_id_item = $this->input->post('old_depo_id_item'); //100
 
@@ -1769,6 +1764,7 @@ class Invoices extends CI_Controller
 
                 $product_hsn = $this->input->post('hsn');
                 $depo_id_item = $this->input->post('depo_id_item');
+                $product_stock_code_id = $this->input->post('product_stock_code_id');
 
                 $total_discount += $ptotal_disc[$key];
 
@@ -1786,7 +1782,7 @@ class Invoices extends CI_Controller
                     $p_total_tax=$ptotal_tax[$key];
                     $p_total_discount=$ptotal_disc[$key];
 
-                    $data = array(
+                    $data_products = array(
 
                         'tid' => $iid,
 
@@ -1821,20 +1817,12 @@ class Invoices extends CI_Controller
                         'invoice_type_desc' => invoice_type_id($invoice_type)
 
                     );
-                    $productlist[$prodindex] = $data;
+                    $productlist[$prodindex] = $data_products;
                     $i++;
 
                     $prodindex++;
 
                 }
-
-
-                //alış fiyatlarını görebilmemiz için tabloya ekleme yapıyoruz
-
-                //$this->stock_product_price($iid,$bill_date,$product_id[$key],$product_qty[$key],$depo_id_item[$key],$p_price,$p_tax,$p_discount,$p_subtotal,$p_total_tax,$p_total_discount,$kur_degeri,$para_birimi);
-
-                //alış fiyatlarını görebilmemiz için tabloya ekleme yapıyoruz
-
 
                 if(isset($old_product_qty[$key]))
                 {
@@ -1876,6 +1864,16 @@ class Invoices extends CI_Controller
 
                 $itc += $amt;
 
+                $this->db->insert('geopos_invoice_items', $data_products);
+                $item_id_last = $this->db->insert_id();
+                if($product_stock_code_id[$key]!=0){
+                    $varyasyon=[
+                        'invoices_item_id'=>$item_id_last,
+                        'product_stock_code_id'=>$product_stock_code_id[$key],
+                    ];
+                    $this->db->insert('invoices_item_to_option',$varyasyon);
+                }
+
 
             }
 
@@ -1884,7 +1882,6 @@ class Invoices extends CI_Controller
             if ($prodindex > 0) {
                 $load=array_chunk($productlist, 50, true);
 
-                $this->db->insert_batch('geopos_invoice_items', $productlist);
                 $this->db->insert_batch('geopos_project_items_gider', $productlist);
 
 
@@ -2072,14 +2069,16 @@ class Invoices extends CI_Controller
 
             }
             else {
-                echo json_encode(array('status' => 410, 'message' =>"Projenize Yetkili Kişiler Atanmamıştır veya Seçilen Depoya Yetkili Tanımlanmamıştır.Bu Sebeple İşlem Yapamazsınız."));
                 $this->db->trans_rollback();
+                echo json_encode(array('status' => 410, 'message' =>"Projenize Yetkili Kişiler Atanmamıştır veya Seçilen Depoya Yetkili Tanımlanmamıştır.Bu Sebeple İşlem Yapamazsınız."));
+
             }
         }
 
         else {
-            echo json_encode(array('status' => 410, 'message' =>"Onay Sisteminde Kayıt Bulunmaktadır!"));
             $this->db->trans_rollback();
+            echo json_encode(array('status' => 410, 'message' =>"Onay Sisteminde Kayıt Bulunmaktadır!"));
+
         }
 
     }
@@ -2247,6 +2246,76 @@ Inner JOIN geopos_employees on invoices_onay_new.user_id = geopos_employees.id W
         $this->db->insert('invoice_history', $data_step);
 
     }
+
+    public function search_cari_to_nakliye()
+    {
+        // GET ile gelen parametreleri al
+        $search = $this->input->get('search', TRUE);
+        $cari_id = $this->input->get('cari_id', TRUE);
+
+        // Parametre kontrolü: cari_id boşsa hata döner
+        if (empty($cari_id)) {
+            echo json_encode(array('status' => 400, 'message' => 'CSD ID gerekli.'));
+            return;
+        }
+
+        $talep_details = [];
+
+        // Ana sorgu: JOIN kullanarak iki tabloyu birleştiriyoruz
+        $this->db->select('t1.form_id, t2.code');
+        $this->db->from('talep_form_nakliye_products t1');
+        $this->db->join('talep_form_nakliye t2', 't1.form_id = t2.id', 'left');
+        $this->db->where('t1.cari_id', $cari_id);
+
+        // Arama işlemi: t2.code alanında LIKE kullanılır
+        if (!empty($search)) {
+            $this->db->like('t2.code', $search );
+        }
+
+        // Grup ve sıralama işlemleri
+        $this->db->group_by('t1.form_id'); // form_id'ye göre gruplama
+        $this->db->order_by('t1.form_id', 'DESC');
+
+        // Sorguyu çalıştır
+        $query = $this->db->get();
+
+
+        if ($query->num_rows() > 0) {
+            // Sonuçları döngüyle işleyerek array'e ekle
+            foreach ($query->result() as $row) {
+                $talep_details[] = [
+                    'id' => $row->form_id,
+                    'code' => $row->code
+                ];
+            }
+
+            // JSON yanıtı: başarılı
+            echo json_encode(array('status' => 200, 'data' => $talep_details));
+        } else {
+            // JSON yanıtı: sonuç bulunamadı
+            echo json_encode(array('status' => 404, 'message' => 'Nakliye Bulunamadı'));
+        }
+    }
+
+    public function get_selected_nakliye()
+    {
+        $invoice_id = $this->input->post('invoice_id');
+        $this->db->select('talep_form_nakliye.id, talep_form_nakliye.code');
+        $this->db->from('nakliye_to_invoice');
+        $this->db->join('talep_form_nakliye', 'nakliye_to_invoice.nakliye_id = talep_form_nakliye.id', 'left');
+        $this->db->where('nakliye_to_invoice.invoice_id', $invoice_id); // Kullanıcı bazlı filtre
+        $query = $this->db->get();
+
+
+        $results = [];
+        foreach ($query->result() as $row) {
+            $results[] = ['id' => $row->id, 'text' => $row->code];
+        }
+
+        // JSON formatında döndür
+        echo json_encode($results);
+    }
+
 
 
 

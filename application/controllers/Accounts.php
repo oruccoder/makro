@@ -18,6 +18,10 @@ class Accounts Extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $selected_db = $this->session->userdata('selected_db');
+        if (!empty($selected_db)) {
+            $this->db = $this->load->database($selected_db, TRUE);
+        }
         if (!$this->aauth->is_loggedin()) {
             redirect('/user/', 'refresh');
         }
@@ -420,12 +424,11 @@ $this->load->model('locations_model');
 
     public function editacc()
     {
-        if (!$this->aauth->premission(27)->update) {
-
-            echo json_encode(array('status' => 'Error', 'message' =>'Yetkiniz Bulunmamaktadır'));
+        if ($this->aauth->get_user()->id != 21) {
+            echo json_encode(array('status' => 410, 'message' => 'Yetkiniz Bulunmamaktadır'));
+            return;
         }
 
-        else {
             $acid = $this->input->post('acid');
             $accno = $this->input->post('accno');
             $holder = $this->input->post('holder');
@@ -438,7 +441,6 @@ $this->load->model('locations_model');
             if ($acid) {
                 $this->accounts->edit($acid, $accno, $holder, $acode,$lid,$kasa_tipi,$para_birimi,$account_eid);
             }
-        }
 
     }
 

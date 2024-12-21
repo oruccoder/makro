@@ -18,7 +18,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 function personel_yetkileri()
 {
-    return [10,40,48,6,19,1,2,7,9,30,57,56,946];
+    return [10,40,48,6,19,1,2,7,9,30,57,56,946,900];
 }
 function aktif_personel_listesi()
 {
@@ -431,6 +431,58 @@ function qaime_to_talep($id,$tip=1)
 
 }
 
+function qaime_to_forma2($id,$tip=1)
+{
+    $ci = &get_instance();
+    $ci->load->database();
+    $html = '';
+
+    if($id){
+        $query2 = $ci->db->query("SELECT * FROM `invoice_to_forma_2` Where invoice_id=$id");
+        if ($query2->num_rows()) {
+            foreach ($query2->result() as $items) {
+                $invoice_details =  $ci->db->query("SELECT * FROM geopos_invoices Where id=$items->forma_2_id and status!=10");
+                if($invoice_details->num_rows()){
+                    $html .= '<a target="_blank" href="/formainvoices/view?id=' . $items->forma_2_id . '"><span class="badge badge-info">' . $invoice_details->row()->invoice_no . '</span></a>&nbsp;';
+
+                }
+            }
+            return $html;
+        } else {
+            return false;
+        }
+    }
+    else {
+        return false;
+    }
+}
+function qaime_to_nakliye($id,$tip=1)
+{
+    $ci = &get_instance();
+    $ci->load->database();
+    $html = '';
+
+    if($id){
+        $query2 = $ci->db->query("SELECT * FROM `nakliye_to_invoice` Where invoice_id=$id");
+        if ($query2->num_rows()) {
+            foreach ($query2->result() as $items) {
+                $invoice_details =  $ci->db->query("SELECT * FROM talep_form_nakliye Where id=$items->nakliye_id and status!=10");
+                if($invoice_details->num_rows()){
+                    $html .= '<a target="_blank" href="/nakliye/view/' . $items->nakliye_id . '"><span class="badge badge-info">' . $invoice_details->row()->code . '</span></a>&nbsp;';
+
+                }
+             }
+            return $html;
+        } else {
+            return false;
+        }
+    }
+    else {
+        return false;
+    }
+
+}
+
 function talep_odemeler($id,$tip=1){
     $ci =& get_instance();
     $ci->load->database();
@@ -546,6 +598,7 @@ function hizmet_teslim_alinmis($talep_id,$product_id,$talep_form_product_id)
 
     $array=[];
 
+    $say=0;
 
     $html='Forma2 Oluşturulmamış';
     $items_kontrol = $ci->db->query("SELECT * FROM forma2_ht_items Where item_id = $talep_form_product_id");
@@ -565,7 +618,7 @@ function hizmet_teslim_alinmis($talep_id,$product_id,$talep_form_product_id)
                         if($forma_2_detils_->num_rows()){
                             $forma_2_detils=$forma_2_detils_->row();
                             $alinan_miktar+=$forma_2_item_kontrol->row()->qty;
-                            $forma_2_detils = $ci->db->query("SELECT * FROM geopos_invoices Where id = $form_2_id")->row();
+                            $forma_2_detils = $ci->db->query("SELECT * FROM geopos_invoices Where id = $form_2_id and status!=3")->row();
                             $bildirim='Bildirim Başlatılmamış';
                             $style='style="background: red;color: white;"';
                             if($forma_2_detils->bildirim_durumu){
@@ -576,13 +629,21 @@ function hizmet_teslim_alinmis($talep_id,$product_id,$talep_form_product_id)
                             $forma2_status =invoice_status($forma_2_detils->status);
                             $inv_=$forma_2_detils->invoice_no.' | '.$bildirim.' | '.$forma2_status;
                             $html.= '<a  target="_blank" '.$style.' href="/formainvoices/view?id='.$form_2_id.'" class="dropdown-item">'.$inv_.'</a>';
+                            $say++;
                         }
                     }
                 }
         $html.='</div></div>';
     }
 
-    return array('alinan_miktar'=>$alinan_miktar,'forma2_bilgisi'=>$html);
+    if(!$say){
+        return array('alinan_miktar'=>$alinan_miktar,'forma2_bilgisi'=>'Forma2 Oluşmamış veya İptal Edilmiş');
+
+    }
+    else {
+        return array('alinan_miktar'=>$alinan_miktar,'forma2_bilgisi'=>$html);
+
+    }
 }
 
 function tehvil_kalan_miktar($id)
@@ -2320,23 +2381,23 @@ where stc.product_id=$product_id and sto.option_id='$option_id' and
 
 function talep_form_product_options_teklif_values($id)
 {
-    $product_stock_code_id=0;
+    $product_stock_code_id = 0; // Varsayılan değer
     $ci = &get_instance();
     $ci->load->database();
-    if($id){
-    $details = $ci->db->query("SELECT * FROM talep_form_products Where id=$id");
 
-
-        if ($details->num_rows()) {
-
-            if($details->row()->product_stock_code_id){
-                $product_stock_code_id=$details->row()->product_stock_code_id;
+    if ($id) {
+        // SQL sorgusunda parametre bağlama kullanılıyor
+        $query = $ci->db->query("SELECT product_stock_code_id FROM talep_form_products WHERE id = ?", array($id));
+        if ($query->num_rows() > 0) {
+            $row = $query->row(); // Tek satır getirir
+            if (!empty($row->product_stock_code_id)) {
+                $product_stock_code_id = $row->product_stock_code_id;
             }
         }
     }
-
     return $product_stock_code_id;
 }
+
 
 function talep_form_product_options_teklif_values_new($id)
 {
@@ -3622,7 +3683,7 @@ function proje_to_employe($proje_id){
         return $all_personel->result();
     }
     else{
-        return 0;
+        return [];
     }
 
 }

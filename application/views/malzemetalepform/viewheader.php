@@ -39,11 +39,11 @@
 
         <button  type="button" class="hover_effect btn btn-secondary history_view"  data-popup="popover" data-trigger="hover" data-placement="top" data-original-title="Bilgilendirme"  data-content="Talep Hareketlerini Görüntüle"><i class="fa fa-list"></i></button>
 
-        <?php if(mt_nakliye($details->id)){ ?>
-            <button type="button" id="ljt_view"  mt_id="<?php echo $details->id ?>" class="btn btn-secondary flash-button">
-                <i class="fa fa-truck fa-2x"></i>&nbsp; Lojistik Hareketleri
-            </button>
-        <?php   }  ?>
+<!--        --><?php //if(mt_nakliye($details->id)){ ?>
+<!--            <button type="button" id="ljt_view"  mt_id="--><?php //echo $details->id ?><!--" class="btn btn-secondary flash-button">-->
+<!--                <i class="fa fa-truck fa-2x"></i>&nbsp; Lojistik Hareketleri-->
+<!--            </button>-->
+<!--        --><?php //  }  ?>
 
 
     </div>

@@ -18,8 +18,8 @@
         <option value="$PROJECT_DIR$/vendor_/hayageek/oauth2-yahoo/tests" />
         <option value="$PROJECT_DIR$/tests" />
         <option value="$PROJECT_DIR$/vendor_/stevenmaguire/oauth2-microsoft/tests" />
-        <option value="$PROJECT_DIR$/application/third_party/stripe-php/tests" />
         <option value="$PROJECT_DIR$/application/third_party/php-qrcode/tests" />
+        <option value="$PROJECT_DIR$/application/third_party/stripe-php/tests" />
         <option value="$PROJECT_DIR$/application/third_party/twilio-php-master2/Twilio/Tests" />
       </list>
     </option>

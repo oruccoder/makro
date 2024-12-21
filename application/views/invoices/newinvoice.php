@@ -30,50 +30,58 @@
                                                         </div>
 
                                                         <div class="form-group row">
-                                                            <div class="frmSearch col-sm-12"><label for="cst"
-                                                                                                    class="caption"><?php echo $this->lang->line('Search Client'); ?></label><span class='text-danger'>*</span>
-                                                                <input disabled title="Fatura Tipini Seçiniz" type="text" class="form-control " name="cst" id="customer-box"
-                                                                       placeholder="Müşteri Adı veya Telefon Numarası Giriniz"
-                                                                       autocomplete="off"/>
 
-                                                                <div id="customer-box-result"></div>
+                                                            <div class="frmSearch col-sm-12">
+                                                                <label for="cst" class="caption">Cari Seçiniz</label><span class='text-danger'>*</span>
+
+                                                                <select class="select-box form-control" name="customer_id" disabled id="customer_id">
+                                                                    <option value="0">Fatura Tipi Seçiniz</option>
+                                                                    <?php foreach (all_customer() as $customer_item){
+                                                                        echo '<option value="'.$customer_item->id.'">'.$customer_item->company.'</option>';
+                                                                    } ?>
+                                                                </select>
+<!--                                                                <input disabled title="Fatura Tipini Seçiniz" type="text" class="form-control " name="cst" id="customer-box"-->
+<!--                                                                       placeholder="Müşteri Adı veya Telefon Numarası Giriniz"-->
+<!--                                                                       autocomplete="off"/>-->
+<!---->
+<!--                                                                <div id="customer-box-result"></div>-->
                                                             </div>
 
                                                         </div>
                                                         <div id="customer">
-                                                            <div class="clientinfo">
-                                                                <?php echo $this->lang->line('Client Details'); ?>
-                                                                <hr>
-                                                                <input type="hidden" name="customer_id" class="zorunlu" id="customer_id" value="0">
-                                                                <div id="customer_company"></div>
-                                                            </div>
-                                                            <div class="clientinfo" style="display: none">
-
-                                                                <div id="customer_name"></div>
-                                                            </div>
-                                                            <div class="clientinfo">
-
-                                                                <div id="customer_address1"></div>
-                                                            </div>
-
-                                                            <div class="clientinfo">
-
-                                                                <div id="customer_phone"></div>
-                                                            </div>
-                                                            <div class="clientinfo">
-
-                                                                <div id="customer_credit"></div>
-                                                            </div>
-                                                            <div class="clientinfo">
-
-                                                                <div id="customer_kalan_credit"></div>
-                                                            </div>
-                                                            <div class="clientinfo">
-
-                                                                <div id="customer_hesaplaan_kalan_credit"></div>
-                                                            </div>
-                                                            <hr>
-                                                            <div id="customer_pass"></div>
+<!--                                                            <div class="clientinfo">-->
+<!--                                                                --><?php //echo $this->lang->line('Client Details'); ?>
+<!--                                                                <hr>-->
+<!--                                                                <input type="hidden" name="customer_id" class="zorunlu" id="customer_id" value="0">-->
+<!--                                                                <div id="customer_company"></div>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="clientinfo" style="display: none">-->
+<!---->
+<!--                                                                <div id="customer_name"></div>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="clientinfo">-->
+<!---->
+<!--                                                                <div id="customer_address1"></div>-->
+<!--                                                            </div>-->
+<!---->
+<!--                                                            <div class="clientinfo">-->
+<!---->
+<!--                                                                <div id="customer_phone"></div>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="clientinfo">-->
+<!---->
+<!--                                                                <div id="customer_credit"></div>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="clientinfo">-->
+<!---->
+<!--                                                                <div id="customer_kalan_credit"></div>-->
+<!--                                                            </div>-->
+<!--                                                            <div class="clientinfo">-->
+<!---->
+<!--                                                                <div id="customer_hesaplaan_kalan_credit"></div>-->
+<!--                                                            </div>-->
+<!--                                                            <hr>-->
+<!--                                                            <div id="customer_pass"></div>-->
 
 
 
@@ -256,9 +264,8 @@
                                                                             id="discount_format" name="discount_format">
 
                                                                         <?php echo " <option  value='%'>Yüzde (%)</option>
-                                                       <option selected value='flat'>Sabit</option>";
+                                                                                    <option selected value='flat'>Sabit</option>";
                                                                         ?>
-
                                                                     </select>
                                                                 </div>
                                                             </div>
@@ -379,14 +386,8 @@
                                                             </div>
                                                             <div class="col-sm-4">
                                                                 <label for="toAddInfo"
-                                                                       class="caption">Satın Alma Formu</label>
-                                                                <select class="form-control select-box" multiple name="satinalma_talep_id[]" id="satinalma_talep_id">
-                                                                    <option value="0">Satın Alma Talep Formu Seçiniz</option>
-                                                                    <?php foreach (talep_list(2) as $talep)
-                                                                    {
-                                                                        echo "<option value='$talep->id'>$talep->talep_no</option>";
-                                                                    } ?>
-                                                                </select>
+                                                                       class="caption">Nakliye Talep Formu</label>
+                                                                <select id="search_input_nakliye" class="select-box" multiple name="search_input_nakliye[]" style="width: 300px; height: 150px;"></select>
                                                             </div>
 
                                                             <div class="col-sm-6">
@@ -882,6 +883,7 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/i18n/tr.min.js"></script>
 
 <script>
 
@@ -1032,7 +1034,8 @@
 
 
     $('#invoice_type').on('change',function () {
-        $('#customer-box').prop('disabled',false);
+        //$('#customer-box').prop('disabled',false);
+            $('#customer_id').prop('disabled',false);
 
         if($("#invoice_type").val()==36 || $("#invoice_type").val()==35 )
         {
@@ -1043,7 +1046,6 @@
             $('.sozle_hid').css('display','none');
         }
 
-        let customer_id = $('#customer_id').val();
         forma_2list(customer_id);
         tehvil_list(customer_id);
 
@@ -1558,5 +1560,54 @@
             }
         });
     });
+
+    $(document).ready(function() {
+        // Select2 başlangıç ayarları
+        $('#search_input_nakliye').select2({
+            placeholder: "Nakliye aramak için yazın...",
+            allowClear: true,
+            language: {
+                inputTooShort: function () {
+                    return "3 karakter daha yazın...";
+                },
+                noResults: function () {
+                    return "Sonuç bulunamadı veya cari seçilmedi";
+                },
+                searching: function () {
+                    return "Arama yapılıyor...";
+                }
+            },
+            ajax: {
+                url: "<?php echo base_url('invoices/search_cari_to_nakliye'); ?>", // AJAX isteğinin gönderileceği URL
+                dataType: 'json',
+                delay: 250, // Gecikme süresi
+                data: function (params) {
+                    return {
+                        search: params.term, // Kullanıcının yazdığı değer
+                        cari_id: $('#customer_id').val() // CSD ID
+                    };
+                },
+                processResults: function (data) {
+                    if (data.status === 200) {
+                        return {
+                            results: $.map(data.data, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.code
+                                };
+                            })
+                        };
+                    } else {
+                        return {
+                            results: [{ id: '', text: data.message }]
+                        };
+                    }
+                },
+                cache: true
+            },
+            minimumInputLength: 3 // En az 3 karakter yazıldığında AJAX isteği gönderilir
+        });
+    });
+
 
 </script>

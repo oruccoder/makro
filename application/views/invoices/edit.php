@@ -111,7 +111,7 @@
                                 <input type="hidden" class="form-control round" placeholder="Invoice #" name="invocieno"
                                        value="<?php echo $invoice['tid']; ?>" readonly>
 
-                                <input type="hidden" name="iid"
+                                <input type="hidden" name="iid" id="hid_invoice"
                                        value="<?php echo $invoice['iid']; ?>">
 
                                 <div class="col-sm-3"><label for="invocieno"
@@ -152,7 +152,7 @@
                                     <div class="input-group">
                                         <div class="input-group-addon"><span class="icon-calendar-o"
                                                                              aria-hidden="true"></span></div>
-                                        <input type="text" class="form-control round required editdate" name="invocieduedate"
+                                        <input type="text" class="form-control round  editdate" name="invocieduedate"
                                                placeholder="Due Date" autocomplete="false"
                                                value="<?php echo dateformat($invoice['invoiceduedate']) ?>">
                                     </div>
@@ -337,7 +337,7 @@
                                            class="caption">Proje Seçiniz</label>
                                     <select class="form-control select-box" name="proje_id" id="proje_id">
                                         <option value="0">Seçiniz</option>
-                                        <?php foreach (all_projects() as $project){
+                                        <?php foreach (all_projects_edit() as $project){
 
 
                                                 $proje_id=$invoice['proje_id'];
@@ -539,31 +539,9 @@
                                     </select>
                                 </div>
                                 <div class="col-sm-4">
-
                                     <label for="toAddInfo"
-                                           class="caption">Satın Alma Formu</label>
-                                    <select class="form-control select-box" name="satinalma_talep_id[]" multiple>
-                                        <option value="0">Satın Alma Talep Formu Seçiniz</option>
-                                        <?php
-                                        if(talep_list(2)){
-                                            foreach (talep_list(2) as $talep)
-                                            {
-                                            if(invoice_to_talep_sorgu($_GET['id'],2)){
-                                                if(in_array($talep->id,invoice_to_talep_sorgu($_GET['id'],2)))
-                                                {
-                                                    echo "<option selected value='$talep->id'>$talep->talep_no</option>";
-                                                }
-                                                else
-                                                {
-                                                    echo "<option value='$talep->id'>$talep->talep_no</option>";
-                                                }
-                                            }
-
-                                            }
-                                        }
-
-                                        ?>
-                                    </select>
+                                           class="caption">Nakliye Talep Formu</label>
+                                    <select id="search_input_nakliye" class="select-box" multiple name="search_input_nakliye[]" style="width: 300px; height: 150px;"></select>
                                 </div>
                                 <div class="col-sm-4">
                                     <label for="toAddInfo"
@@ -634,9 +612,14 @@
                         </tr></thead> <tbody>
                         <?php $i = 0;
                         foreach ($products as $row) {
+
+                            $product_stock_code_id = invoice_item_to_stock_code_id($row['id']);
+
                             echo '<tr >
                         <td>
                         <input type="hidden" id="tax_type-' . $i . '" value="' . $row['tax_type'] . '">
+                        <input type="hidden" name="product_stock_code_id[]"  id="product_stock_code_id-' . $i . '" value="' . $product_stock_code_id . '">
+                        
                         <input type="text" class="form-control text-center" disabled id="productname-' . $i . '"   value="' . $row['product'] . '">
                         <input type="hidden" class="form-control text-center" id="productname-' . $i . '" name="product_name[]"  value="' . $row['product'] . '">
                         </td>
@@ -1358,4 +1341,86 @@
             }
         });
     })
+
+
+    $(document).ready(function() {
+        // Select2'yi başlat
+        $('#search_input_nakliye').select2({
+            placeholder: "Nakliye taleplerini seçin...",
+            allowClear: true
+        });
+
+        // Sayfa yüklendiğinde verileri çek ve Select2'ye ekle
+        $.ajax({
+            url: "<?php echo base_url('invoices/get_selected_nakliye'); ?>",
+            data: 'invoice_id='+$('#hid_invoice').val(),
+            type: "POST",
+            dataType: "json",
+            success: function(data) {
+                // Gelen verileri Select2 kutusuna ekle
+                $.each(data, function(index, item) {
+                    let option = new Option(item.text, item.id, true, true);
+                    $('#search_input_nakliye').append(option).trigger('change');
+                });
+
+                // Select2'nin yerleşmesini sağla
+                $('#search_input_nakliye').trigger('change');
+            },
+            error: function() {
+                alert("Seçili talepler yüklenirken bir hata oluştu.");
+            }
+        });
+    });
+
+
+    $(document).ready(function() {
+        // Select2 başlangıç ayarları
+        $('#search_input_nakliye').select2({
+            placeholder: "Nakliye aramak için yazın...",
+            allowClear: true,
+            language: {
+                inputTooShort: function () {
+                    return "3 karakter daha yazın...";
+                },
+                noResults: function () {
+                    return "Sonuç bulunamadı veya cari seçilmedi";
+                },
+                searching: function () {
+                    return "Arama yapılıyor...";
+                }
+            },
+            ajax: {
+                url: "<?php echo base_url('invoices/search_cari_to_nakliye'); ?>", // AJAX isteğinin gönderileceği URL
+                dataType: 'json',
+                delay: 250, // Gecikme süresi
+                data: function (params) {
+                    return {
+                        search: params.term, // Kullanıcının yazdığı değer
+                        cari_id: $('#customer_id').val() // CSD ID
+                    };
+                },
+                processResults: function (data) {
+                    if (data.status === 200) {
+                        return {
+                            results: $.map(data.data, function(item) {
+                                return {
+                                    id: item.id,
+                                    text: item.code
+                                };
+                            })
+                        };
+                    } else {
+                        return {
+                            results: [{ id: '', text: data.message }]
+                        };
+                    }
+                },
+                cache: true
+            },
+            minimumInputLength: 3 // En az 3 karakter yazıldığında AJAX isteği gönderilir
+        });
+    });
+
+
+
 </script>

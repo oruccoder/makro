@@ -1756,3 +1756,81 @@ function hizmet_kontrol($forma_2_id)
         );
     }
 }
+function invoice_item_to_stock_code_id($item_id)
+{
+    $ci = &get_instance();
+    $ci->load->database();
+    $kontrol = $ci->db->query("SELECT * FROM invoices_item_to_option Where invoices_item_id=$item_id");
+    if($kontrol->num_rows()){
+        return $kontrol->row()->product_stock_code_id;
+    }
+    else {
+        return 0;
+    }
+}
+
+function fiyat_listesi_getir($product_id, $product_Stock_code_id = 0)
+{
+    $ci = &get_instance();
+    $ci->load->database();
+
+    // `product_stock_code_id` kontrolü ve dinamik SQL parçası
+    $product_stock_code_w = '';
+    if ($product_Stock_code_id) {
+        $product_stock_code_w = " AND product_price_options.product_stock_code_id = " . $ci->db->escape($product_Stock_code_id);
+    }
+
+    // SQL sorgusu
+    $sql = $ci->db->query("
+        SELECT
+            geopos_customers.company,
+            product_price_details.price,
+            geopos_units.name AS unit_name,
+            talep_form.code AS talep_code,
+            product_price_details.talep_id,
+            product_price_details.create_at
+        FROM product_price_details
+        LEFT JOIN product_price_options ON product_price_options.product_price_id = product_price_details.id
+        LEFT JOIN siparis_list_form ON siparis_list_form.talep_form_product_id = product_price_details.item_id
+        LEFT JOIN geopos_customers ON siparis_list_form.cari_id = geopos_customers.id
+        LEFT JOIN geopos_units ON siparis_list_form.unit_id = geopos_units.id
+        LEFT JOIN talep_form ON product_price_details.talep_id = talep_form.id
+        WHERE product_price_details.product_id = " . $ci->db->escape($product_id) . "
+        $product_stock_code_w
+          AND siparis_list_form.deleted_at IS NULL
+        ORDER BY product_price_details.create_at DESC
+    ");
+
+    // Sonuçları kontrol edin ve HTML oluşturun
+    if ($sql->num_rows()) {
+        $result = $sql->result_array();
+
+        // HTML tablosu oluşturma
+        $html = '<table border="1" cellspacing="0" cellpadding="5">
+                    <thead>
+                        <tr>
+                            <th>Şirket</th>
+                            <th>Fiyat</th>
+                            <th>Birim</th>
+                            <th>Talep Kodu</th>
+                            <th>Oluşturulma Tarihi</th>
+                        </tr>
+                    </thead>
+                    <tbody>';
+        foreach ($result as $row) {
+            $html .= '<tr>
+                        <td>' . htmlspecialchars($row['company']) . '</td>
+                        <td>' . amountFormat($row['price']) . '</td>
+                        <td>' . htmlspecialchars($row['unit_name']) . '</td>
+                        <td><a href="/malzemetalep/view/'.$row['talep_id'].'" target="_blank" class="btn btn-warning btn-sm"> ' . htmlspecialchars($row['talep_code']) . '</a></td>
+                        <td>' . htmlspecialchars($row['create_at']) . '</td>
+                      </tr>';
+        }
+        $html .= '</tbody></table>';
+
+        return $html;
+    } else {
+        return '<p>Hiçbir kayıt bulunamadı.</p>';
+    }
+}
+

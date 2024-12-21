@@ -471,8 +471,8 @@
                     Fatura Yönetimi
                 </a>
                 <div class="dropdown-menu">
-                    <a href="<?= base_url(); ?>invoices/create" class="dropdown-item"><i class="fas fa-list"></i>Yeni Fatura</a>
-                    <a href="<?= base_url(); ?>invoices" class="dropdown-item"><i class="fas fa-list"></i>Fatura Listesi</a>
+                    <a href="<?= base_url(); ?>qaime/createall" class="dropdown-item"><i class="fas fa-list"></i>Yeni Fatura</a>
+                    <a href="<?= base_url(); ?>qaime" class="dropdown-item"><i class="fas fa-list"></i>Fatura Listesi</a>
                     <a href="<?= base_url(); ?>formainvoices" class="dropdown-item"><i class="fas fa-list"></i>Forma2</a>
                     <a href="<?= base_url(); ?>siparis" class="dropdown-item"><i class="fas fa-list"></i>Sipariş Formu</a>
                 </div>

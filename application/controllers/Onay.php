@@ -468,7 +468,7 @@ WHERE  talep_form_products.gider_durumu=0 and  talep_form.gider_durumu=1 group b
         $data = array();
         $no = $this->input->post('start');
         foreach ($list as $prd) {
-            $view = "<a class='btn btn-success view' href='/invoices/view?id=$prd->id' type='button'><i class='fa fa-eye'></i></a>&nbsp;";
+            $view = "<a class='btn btn-success view' href='/qaime/view/$prd->id' type='button'><i class='fa fa-eye'></i></a>&nbsp;";
             $no++;
             $row = array();
             $row[] = $no;

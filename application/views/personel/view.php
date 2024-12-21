@@ -1619,10 +1619,17 @@
                 // Remove the formatting to get integer data for summation
                 var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
+
+
+                total2 = api
+                    .column(3)
+                    .data()
+                    .reduce(function (a, b) {
+                        return floatVal(a) + floatVal(b);
+                    }, 0);
 
                 // Total over all pages
                 total = api
@@ -1632,12 +1639,7 @@
                         return floatVal(a) + floatVal(b);
                     }, 0);
 
-                total2 = api
-                    .column(3)
-                    .data()
-                    .reduce(function (a, b) {
-                        return floatVal(a) + floatVal(b);
-                    }, 0);
+
 
 
                 // Update footer
@@ -1662,6 +1664,15 @@
         });
     }
 
+
+  function return_formul(){
+      let i='1.791,71 AZN';
+      let sonuc =  typeof i === 'string' ?
+          i.replace(/[\AZN,.]/g, '') / 100 :
+          typeof i === 'number' ?
+              i : 0;
+      console.log(sonuc);
+  }
     function extre_is_draw_data() {
         $('#extre_is').DataTable({
 
@@ -1733,9 +1744,8 @@
                 // Remove the formatting to get integer data for summation
                 var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -1983,9 +1993,8 @@
                 // Remove the formatting to get integer data for summation
                 var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2095,9 +2104,8 @@
                 // Remove the formatting to get integer data for summation
                 var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2210,9 +2218,8 @@
                 // Remove the formatting to get integer data for summation
                 var floatVal = function (i) {
                     return typeof i === 'string' ?
-                        i.replace(/[\AZN,.]/g, '') / 100 :
-                        typeof i === 'number' ?
-                            i : 0;
+                        parseFloat(i.replace(/[^0-9,-]+/g, '').replace(',', '.')) || 0 :
+                        typeof i === 'number' ? i : 0;
                 };
 
                 // Total over all pages
@@ -2585,6 +2592,7 @@
         });
     })
     $(document).ready(function(){
+        return_formul();
         $(".rating-upper").css({
             width: <?php echo   $point_value['result'] = null ? 0 : $point_value['result'] ; ?> + "%"
 

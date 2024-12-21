@@ -98,6 +98,10 @@
                             <li>
                                 <?php echo qaime_to_talep($invoice['id']); ?>
                             </li>
+
+                            <li>
+                                <?php echo qaime_to_nakliye($invoice['id']); ?>
+                            </li>
                         </ul>
                     </div>
                 </div>
