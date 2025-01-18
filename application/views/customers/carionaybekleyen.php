@@ -2,134 +2,124 @@
 $due = false;
 if ($this->input->get('due')) {
     $due = true;
-} ?>
+}
+?>
 
 <div class="page-header">
     <div class="page-header-content header-elements-lg-inline">
         <div class="page-title d-flex">
-            <h4><span class="font-weight-semibold">Cari İşlemleri</span></h4>
+            <h4><span class="font-weight-semibold">Cari Onay Bekleyen</span></h4>
             <a href="#" class="header-elements-toggle text-body d-lg-none"><i class="icon-more"></i></a>
         </div>
-
     </div>
 </div>
 
 <div class="content">
-        <div class="content-wrapper">
-            <div class="content">
-                <div class="card">
-                    <div class="card-body">
-                        <form action="#">
-
-                            <div class="form-group row">
-                                <div class="col-lg-2">
-                                    <select class="select-box form-control" id="customer_group_id"
-                                            name="customer_group_id">
-                                        <option value="">Cari Grupları</option>
-                                        <?php foreach (customer_group_list() as $row) {
-                                            echo "<option value='$row->id'>$row->name</option>";
-                                        } ?>
-                                    </select>
-                                </div>
-                                <div class="col-lg-2">
-                                    <input type="button" name="search" id="search" value="Filtrele"
-                                           class="btn btn-info btn-md"/>
-                                </div>
+    <div class="content-wrapper">
+        <div class="content">
+            <!-- Filter Section -->
+            <div class="card">
+                <div class="card-body">
+                    <form action="#">
+                        <div class="form-group row">
+                            <div class="col-lg-2">
+                                <select class="select-box form-control" id="customer_group_id" name="customer_group_id">
+                                    <option value="">Cari Grupları</option>
+                                    <?php foreach (customer_group_list() as $row) { 
+                                        echo "<option value='$row->id'>$row->name</option>"; 
+                                    } ?>
+                                </select>
                             </div>
-
-                        </form>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <div id="notify" class="alert alert-success" style="display:none;">
-                            <a href="#" class="close" data-dismiss="alert">&times;</a>
-
-                            <div class="message"></div>
+                            <div class="col-lg-2">
+                                <input type="button" name="search" id="search" value="Filtrele" class="btn btn-info btn-md" />
+                            </div>
                         </div>
-                        <div class="container-fluid">
-                            <section>
-                                <div class="row">
-                                    <div class="col-12 mb-4">
-                                        <table id="clientstable" class="table datatable-show-all" cellspacing="0"
-                                               width="100%">
-                                            <thead class="table_head">
+                    </form>
+                </div>
+            </div>
+
+            <!-- Customers Table -->
+            <div class="card">
+                <div class="card-body">
+                    <div id="notify" class="alert alert-success" style="display:none;">
+                        <a href="#" class="close" data-dismiss="alert">&times;</a>
+                        <div class="message"></div>
+                    </div>
+                    <div class="container-fluid">
+                        <section>
+                            <div class="row">
+                                <div class="col-12 mb-4">
+                                    <table id="clientstable" class="table datatable-show-all" cellspacing="0" width="100%">
+                                        <thead class="table_head">
                                             <tr>
                                                 <th>#</th>
                                                 <th>Durum</th>
                                                 <th>Logo</th>
                                                 <th><?php echo $this->lang->line('Name') ?></th>
                                                 <?php if ($due) {
-                                                    echo '  <th>' . $this->lang->line('Due') . '</th>';
+                                                    echo '<th>' . $this->lang->line('Due') . '</th>';
                                                 } ?>
                                                 <th><?php echo $this->lang->line('Address') ?></th>
                                                 <th><?php echo $this->lang->line('Email') ?></th>
                                                 <th><?php echo $this->lang->line('Phone') ?></th>
                                                 <th>Sorumlu Personel</th>
-                                                <th><?php echo $this->lang->line('Settings') ?></th>
-
-
+                                                <th><?php echo $this->lang->line('Approval') ?></th>
                                             </tr>
-                                            </thead>
-                                            <tbody>
-                                            </tbody>
-
-                                            <tfoot>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Data will be dynamically inserted here -->
+                                        </tbody>
+                                        <tfoot>
                                             <tr>
                                                 <th>#</th>
                                                 <th>Durum</th>
                                                 <th>Logo</th>
                                                 <th><?php echo $this->lang->line('Name') ?></th>
                                                 <?php if ($due) {
-                                                    echo '  <th>' . $this->lang->line('Due') . '</th>';
+                                                    echo '<th>' . $this->lang->line('Due') . '</th>';
                                                 } ?>
                                                 <th><?php echo $this->lang->line('Address') ?></th>
                                                 <th>Email</th>
                                                 <th><?php echo $this->lang->line('Mobile') ?></th>
                                                 <th>Sorumlu Personel</th>
-                                                <th><?php echo $this->lang->line('Settings') ?></th>
-
-
+                                                <th><?php echo $this->lang->line('Approval') ?></th>
                                             </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
+                                        </tfoot>
+                                    </table>
                                 </div>
-                            </section>
-                        </div>
+                            </div>
+                        </section>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Hidden Input for Active Status -->
+<input type="hidden" value="<?php echo $active_status ?? 0; ?>" id="active_status">
 
 
-<input type="hidden" value="<?php echo $active_status ?>" id="active_status">
+<!-- Delete Customer Modal -->
 <div id="delete_model" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-
                 <h4 class="modal-title">Delete Customer</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                            aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
             <div class="modal-body">
                 <p><?php echo $this->lang->line('are_you_sure_delete_customer') ?></p>
             </div>
             <div class="modal-footer">
-                <input type="hidden" class="form-control"
-                       id="object-id" name="deleteid" value="0">
+                <input type="hidden" class="form-control" id="object-id" name="deleteid" value="0">
                 <input type="hidden" id="action-url" value="customers/delete_i">
-                <button type="button" data-dismiss="modal" class="btn btn-primary"
-                        id="delete-confirm"><?php echo $this->lang->line('Delete') ?></button>
-                <button type="button" data-dismiss="modal"
-                        class="btn"><?php echo $this->lang->line('Cancel') ?></button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary" id="delete-confirm"><?php echo $this->lang->line('Delete') ?></button>
+                <button type="button" data-dismiss="modal" class="btn"><?php echo $this->lang->line('Cancel') ?></button>
             </div>
         </div>
     </div>
 </div>
-
 <style>
     .table_head{
         background-color: #385F71;
@@ -251,74 +241,153 @@ if ($this->input->get('due')) {
             'serverSide': true,
             'stateSave': true,
             responsive: true,
-            <?php datatable_lang();?>
+            <?php datatable_lang(); ?>
             'order': [],
             'ajax': {
-                'url': "<?php echo site_url('customers/load_list')?>",
+                'url': "<?php echo site_url('customers/load_list_carionaybekleyen') ?>",
                 'type': 'POST',
                 'data': {
-                    '<?=$this->security->get_csrf_token_name()?>': crsf_hash <?php if ($due) echo ",'due':true" ?>,
-                    'musteri_grup_id': status,
-                    'active_status': $('#active_status').val(),
+                    '<?= $this->security->get_csrf_token_name() ?>': crsf_hash <?php if ($due)
+                        echo ",'due':true" ?>,
+                        'musteri_grup_id': status,
+                        'active_status': 1,
+                    }
+                },
+                'columnDefs': [
+                    {
+                        'targets': [0],
+                        'orderable': false,
+                    },
+                ],
+                'createdRow': function (row, data, dataIndex) {
+                    if (data[1] === 'Onaylandı') {
+                        $(row).css('background-color', '#4CAF50');
+                    }
+                },
+                dom: 'Blfrtip',
+                buttons: [
+                    {
+                        text: '<i class="fa fa-plus"></i> Yeni Cari',
+                        action: function (e, dt, node, config) {
+                            location.href = '/customers/create'
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5]
+                        }
+                    },
+                    {
+                        extend: 'pdf',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5]
+                        }
+                    },
+                    {
+                        extend: 'csv',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5]
+                        }
+                    },
+
+                    {
+                        extend: 'copy',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5]
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        footer: true,
+                        exportOptions: {
+                            columns: [0, 1, 2, 3, 4, 5]
+                        }
+                    },
+                ],
+            });
+        }
+
+        $(document).on('click', '.approve-btn', function() {
+    var customerId = $(this).data('customer-id');
+    var statusElement = $('#' + customerId + '-status');
+    $.ajax({
+        url: 'onayla.php',
+        type: 'POST',
+        data: { id: customerId },
+        success: function(response) {
+            if (response === 'success') {
+                statusElement.text('Onaylandı');
+            } else {
+                alert('Xəta baş verdi!');
+            }
+        }
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+        const onaylaButtons = document.querySelectorAll('.btn-success'); 
+
+        onaylaButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const customerRow = this.closest('tr');
+                const statusCell = customerRow.querySelector('td:nth-child(2)');
+
+                if (statusCell) {
+                    statusCell.textContent = 'Onaylandı'; 
+                    this.disabled = true;
+                    this.textContent = 'Onaylandı';
                 }
-            },
-            'columnDefs': [
-                {
-                    'targets': [0],
-                    'orderable': false,
-                },
-            ],
-            'createdRow': function (row, data, dataIndex) {
-                $(row).attr('style',data[7]);
-
-            },
-            dom: 'Blfrtip',
-            buttons: [
-                {
-                    text: '<i class="fa fa-plus"></i> Yeni Cari',
-                    action: function (e, dt, node, config) {
-                        location.href = '/customers/create'
-                    }
-                },
-                {
-                    extend: 'excelHtml5',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5]
-                    }
-                },
-                {
-                    extend: 'pdf',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5]
-                    }
-                },
-                {
-                    extend: 'csv',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5]
-                    }
-                },
-
-                {
-                    extend: 'copy',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5]
-                    }
-                },
-                {
-                    extend: 'print',
-                    footer: true,
-                    exportOptions: {
-                        columns: [0, 1, 2, 3, 4, 5]
-                    }
-                },
-            ],
+            });
         });
+    });
+
+    $(document).on('click', '.onayla-btn', function () {
+    const cariId = $(this).attr('cari_id'); // Elementin cari_id atributunu alır
+    const button = $(this); // Button elementi
+    const statusCell = $(`#status-${cariId}`); // Statusun olduğu element
+
+    console.log(`Cari ID: ${cariId}`);
+    console.log(`Status Cell: `, statusCell);
+
+    if (statusCell.length === 0) {
+        console.error(`Status element tapılmadı: #status-${cariId}`);
+        return;
     }
+
+    $.ajax({
+        url: 'customers/update_status',
+        type: 'POST',
+        data: { id: cariId, status: 'approved' },
+        success: function (response) {
+            console.log('Server cavabı:', response); 
+            let data;
+            try {
+                data = typeof response === 'string' ? JSON.parse(response) : response;
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                alert('Serverdən düzgün cavab alınmadı!');
+                return;
+            }
+
+            if (data.success) {
+                console.log('Status uğurla dəyişdi');
+                statusCell.text('Onaylandı');
+                button.prop('disabled', true).text('Onaylandı');
+            } else {
+                alert(data.message || 'Status güncəllənmədi!');
+            }
+        },
+        error: function () {
+            alert('Xəta baş verdi!');
+        }
+    });
+});
+
 
 
 

@@ -52,6 +52,22 @@ class Customers extends CI_Controller
         $this->load->view('fixed/footer');
     }
 
+    public function carionaybekleyen()
+    {
+        if (!$this->aauth->premission(3)->read) {
+
+            exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
+
+        }
+
+
+        $head['usernm'] = $this->aauth->get_user()->username;
+        $head['title'] = 'Cari Projeleri';
+        $this->load->view('fixed/header', $head);
+        $this->load->view('customers/carionaybekleyen');
+        $this->load->view('fixed/footer');
+    }
+
     public function cari_proje_ajax_list(){
         $list = $this->customers->ajax_list_proje();
         $data = [];
@@ -284,6 +300,200 @@ class Customers extends CI_Controller
         //output to json format
         echo json_encode($output);
     }
+
+    public function load_list_carionaybekleyen()
+{
+    $no = $this->input->post('start');
+
+    $list = $this->customers->get_datatables();
+
+    $data = array();
+    if ($this->input->post('due')) {
+        foreach ($list as $customers) {
+            $cari_yoklama_details = cari_yoklama_detalis($customers->id);
+            $style = '';
+            if ($cari_yoklama_details['inceleme_status']) {
+                $style = 'background: #dd4646;color: white;';
+            }
+
+            $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
+            $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
+            $buttons_ = '<div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" style="width: 180px;" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Onayla
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    ' . $views . '
+                    ' . $edit . '
+                </div>
+            </div>';
+
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
+            $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $customers->company . '</a>';
+            $row[] = amountExchange($customers->total - $customers->pamnt, 0, $this->aauth->get_user()->loc);
+            $row[] = $customers->address . ',' . $customers->city . ',' . $customers->country;
+            $row[] = $customers->email;
+            $row[] = $customers->phone;
+            $row[] = $customers->emp_name;
+            $row[] = $buttons_;
+            $row[] = $style;
+            $data[] = $row;
+        }
+    } else {
+        foreach ($list as $customers) {
+            $cari_yoklama_details = cari_yoklama_detalis($customers->id);
+            $style = '';
+            $durums = 'Onaylanmadı';
+            if ($cari_yoklama_details['inceleme_status']) {
+                $style = 'background: #4b865d;color: white;';
+                $durums = "<div style='display: flex;'><img class='cari_tables' onmouseover='cari_tables($customers->id)' src='/userfiles/cari-yoklandi.jpg' style='width: 70px;'></div>";
+            }
+
+            if ($cari_yoklama_details['akt_status']) {
+                if (!$cari_yoklama_details['inceleme_status']) {
+                    $durums = "<div style='display: flex;'><img class='cari_tables' onmouseover='cari_tables($customers->id)' src='/userfiles/akt.jpg' style='width: 70px;'></div>";
+                } else {
+                    $durums .= "<img src='/userfiles/akt.jpg' onmouseover='cari_tables($customers->id)' style='width: 70px;'></div>";
+                }
+            }
+
+            $passive = '<button class="passive dropdown-item" status="1" cari_id="' . $customers->id . '">AKTİF YAP</button>';
+
+            if ($customers->active) {
+                $passive = '<button class="passive dropdown-item" status="0" cari_id="' . $customers->id . '">PASİF YAP</button>';
+            }
+
+            $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
+            $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
+            
+            // URL segmentinin doğru istifadə olunduğuna əmin ol
+            if ($this->uri->segment(1) == 'carionaybekleyen') {
+                // carionaybekleyen səhifəsindəki ONAYLA düyməsi
+                $onayla = '<button class="onayla dropdown-item" cari_id="' . $customers->id . '">ONAYLA</button>';
+                $buttons_ = '<div class="dropdown">
+                    <button class="btn btn-success" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        İşlemler
+                    </button>
+                </div>';
+            } else {
+                // Digər səhifələr üçün standart İşlemler düyməsi
+                $akt = '<button class="akt_yoklama dropdown-item" cari_id="' . $customers->id . '">AKT / YOKLAMA BİLDİR</button>';
+                $buttons_ = '<div class="dropdown">
+                    <button class="btn btn-success" type="button" style="width: 180px; padding: 11px;" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Onayla
+                    </button>
+                </div>';
+            }
+            $name = $customers->company;
+
+            $no++;
+            $row = array();
+            $row[] = $no;
+            $row[] = $durums;
+            $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
+            $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $name . '</a>';
+            $row[] = $customers->country;
+            $row[] = $customers->email;
+            $row[] = $customers->phone;
+            $row[] = $customers->emp_name;
+            $row[] = $buttons_;
+            $row[] = $style;
+            $data[] = $row;
+        }
+    }
+
+    
+        $output = array(
+            "draw" => $this->input->post('draw'),
+            "recordsTotal" => $this->customers->count_all(),
+            "recordsFiltered" => $this->customers->count_filtered(),
+            "data" => $data,
+        );
+        //output to json format
+        echo json_encode($output);
+    }
+
+    public function onayla_action()
+{
+    $cari_id = $this->input->post('cari_id');
+    if ($cari_id) {
+        // Cari ID ilə statusu yenilə
+        $this->db->where('id', $cari_id);
+        $update = $this->db->update('cariler', ['status' => 'onaylandı']);
+        
+        if ($update) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Yeniləmə uğursuz oldu']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'ID göndərilmədi']);
+    }
+}
+
+public function update_customer_status($id, $status)
+{
+    $this->db->where('id', $id);
+    return $this->db->update('geopos_customers', ['status' => $status]);
+}
+    
+    
+
+public function update_status()
+{
+    $id = $this->input->post('id');
+    $status = $this->input->post('status');
+
+    if ($id && $status) {
+        $this->db->where('id', $id);
+        $this->db->update('geopos_customers', ['status' => $status]);
+
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false]);
+    }
+}
+
+public function approve_customer()
+{
+    $id = $this->input->post('id');
+    if ($id) {
+        // ID ilə statusu "Onaylandı" olaraq yeniləyin
+        $this->db->where('id', $id)->update('customers', ['status' => 'Onaylandı']);
+        echo json_encode(['success' => true]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'ID mövcud deyil']);
+    }
+}
+
+
+    public function onayla(){
+        if ($this->input->is_ajax_request() && $this->security->get_csrf_token_name() == $this->input->post('<?=$this->security->get_csrf_token_name()?>')) {
+        
+            $client_id = $this->input->post('client_id');
+    
+            $currentStatus = $this->customers_model->get_onay_status($client_id);
+    
+            if ($currentStatus < 3) {
+                $this->customers_model->increment_onay_status($client_id);
+    
+                if ($currentStatus + 1 == 3) {
+                    $this->customers_model->set_onay_status($client_id, 1);
+                }
+    
+                echo json_encode(['status' => 'success']);
+            } else {
+                echo json_encode(['status' => 'error']);
+            }
+        } else {
+            show_error('Zəhmət olmasa düzgün sorğu göndərin.');
+        }
+    }
+
+    
     public function create()
     {
         if (!$this->aauth->premission(3)->write) {
@@ -1436,6 +1646,26 @@ class Customers extends CI_Controller
         $head['title'] = 'Teklifler';
         $this->load->view('fixed/header', $head);
         $this->load->view('customers/avanstalep', $data);
+        $this->load->view('fixed/footer');
+    }
+    public function malzemetalep($custid)
+    {
+
+        $data['details'] = $this->customers->details($custid);
+        $data['money'] = $this->customers->money_details($custid);
+        $head['usernm'] = $this->aauth->get_user()->username;
+        $data['talepler'] = $this->db->query("
+    SELECT talep_form.code, talep_form.id, talep_form.created_at 
+    FROM siparis_list_form
+    INNER JOIN talep_form ON siparis_list_form.talep_id = talep_form.id
+    WHERE siparis_list_form.cari_id = ? 
+      AND siparis_list_form.deleted_at IS NULL
+    GROUP BY siparis_list_form.talep_id
+", [$custid])->result();
+
+        $head['title'] = 'Teklifler';
+        $this->load->view('fixed/header', $head);
+        $this->load->view('customers/malzemetalep', $data);
         $this->load->view('fixed/footer');
     }
     public function qto_list()

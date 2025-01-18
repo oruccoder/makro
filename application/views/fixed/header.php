@@ -488,6 +488,7 @@
                     <a href="<?= base_url(); ?>clientgroup" class="dropdown-item"><i class="fas fa-list"></i>Cari Grupları</a>
                     <a href="<?= base_url(); ?>razilastirma/razilastirma_list_all" class="dropdown-item"><i class="fas fa-list"></i>Cari Razılaştırma Listesi</a>
                     <a href="<?= base_url(); ?>customers/cari_projeleri" class="dropdown-item"><i class="fas fa-list"></i>Cari Projeler</a>
+                    <a href="<?= base_url(); ?>customers/carionaybekleyen" class="dropdown-item"><i class="fas fa-list"></i>Cari Onay Bekleyen</a>
                     <a href="<?= base_url(); ?>podradci" class="dropdown-item"><i class="fas fa-list"></i>Alt Podradçılar</a>
                     <a href="<?= base_url(); ?>personelp" class="dropdown-item"><i class="fas fa-list"></i>Podradçı Personeller</a>
                     <a href="<?= base_url(); ?>worker" class="dropdown-item"><i class="fas fa-list"></i>Fehle Kartları</a>

@@ -389,7 +389,7 @@ class Customers_model extends CI_Model
         $this->db->where('email', $email);
         $query = $this->db->get();
         $valid = $query->row_array();
-        if (!$valid['email']) {
+        if (!empty($valid['email'])) {
 
             $data = array(
 
@@ -452,20 +452,14 @@ class Customers_model extends CI_Model
                 $cid = $this->db->insert_id();
 
                 $this->db->delete('customer_to_parent', array('customer_id' => $cid));
-                if($parent_id != 0){
+                if(!empty($parent_id)){
                     $parent_list = [];
-                    $data_par = [];
-                    $i=0;
-                    foreach ($parent_id as $value){
-                        $data_par = array('customer_id' => $cid,'parent_id'=>$value);
-                        $parent_list[$i] = $data_par;
-                        $i++;
-                    }
-                    $this->db->insert_batch('customer_to_parent', $parent_list);
+                    $data_par = array('customer_id' => $cid,'parent_id'=>$parent_id);
+                    $this->db->insert('customer_to_parent', $data_par);
 
                 }
 
-                kont_kayit(41,$cid);
+              //  kont_kayit(41,$cid);
 
                 // Banka Bilgileri //
                 $data_bank=array();
@@ -673,7 +667,7 @@ class Customers_model extends CI_Model
                 $query = $this->db->get();
                 $othe = $query->row_array();
 
-                if ($othe['other']) {
+                if (!empty($othe['other'])) {
                     $auto_mail = $this->send_mail_auto($email, $name, $temp_password);
                     $this->load->model('communication_model');
                     $attachmenttrue = false;
