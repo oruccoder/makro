@@ -130,30 +130,6 @@ if ($this->input->get('due')) {
     </div>
 </div>
 
-<style>
-    .table_head{
-        background-color: #385F71;
-        color: #fff;
-        padding: 10px;
-    }
-
-    .dataTables_filter input {
-    outline: 0;
-    width: 16rem;
-    padding: .5rem 1rem;
-}
-
-
-.dataTables_filter>label:after {
-    font-size: .8125rem;
-    display: inline-block;
-    position: absolute;
-    top: 70%;
-    right: 1rem;
-}
-</style>
-
-
 <script type="text/javascript">
     $(document).ready(function () {
         $('.summernote').summernote({

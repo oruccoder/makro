@@ -144,8 +144,11 @@ class Customers_model extends CI_Model
 
 
     }
-
-
+public function approve_customer($customer_id)
+    {
+        $this->db->where('id', $customer_id);
+        return $this->db->update('customers', ['status' => 'approved']);
+    }
 
     function get_datatables()
 
@@ -177,6 +180,17 @@ class Customers_model extends CI_Model
 
         return $query->num_rows($id = '');
 
+    }
+
+    public function get_customer_by_id($id)
+    {
+        return $this->db->get_where('customers', ['id' => $id])->row_array();
+    }
+
+    public function update_customer_status($customer_id, $status)
+    {
+        $this->db->where('id', $customer_id);
+        return $this->db->update('customers', ['status' => $status]);
     }
 
 
