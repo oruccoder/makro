@@ -130,6 +130,19 @@ if ($this->input->get('due')) {
     </div>
 </div>
 
+<style>
+    .dataTables_filter input {
+    width: 16rem;
+    padding: .5rem 1rem;
+}
+
+.dataTables_filter>label:after {
+    font-size: .9125rem;
+    top: 70%;
+    line-height: 1;
+}
+</style>
+
 <script type="text/javascript">
     $(document).ready(function () {
         $('.summernote').summernote({

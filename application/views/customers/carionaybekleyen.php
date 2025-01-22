@@ -69,9 +69,8 @@ if ($this->input->get('due')) {
                                             </tr>
                                         </thead>
                                         <table id="clientstable" class="table">
-                                        <button class="onayla-button" data-id="681">Onayla</button>
-<button class="onayla-button" data-id="740">Onayla</button>
-
+                                            <!-- data table coming -->
+                                             
                                         </table>
                                         <tfoot>
                                             <tr>
@@ -130,6 +129,20 @@ if ($this->input->get('due')) {
     .onaylandi {
         background-color: #4CAF50;
     }
+
+    .dataTables_filter input {
+    width: 16rem;
+    padding: .5rem 1rem;
+}
+
+.dataTables_filter>label:after {
+    font-size: .9125rem;
+    top: 70%;
+    right: 1rem;
+    margin-top: -.40625rem;
+    line-height: 1;
+}
+
 </style>
 
 <script type="text/javascript">
@@ -304,48 +317,152 @@ if ($this->input->get('due')) {
         });
     }
 
-    $(document).on('click', '.onayla-button', function () {
-    var customerId = $(this).data('id');
-    var button = $(this); // Hal-hazırda basılan düyməni saxlayırıq
+    $(document).ready(function () {
+    
+    $('.onayla-button').each(function () {
+        var button = $(this);
+        var customerId = button.data('id');
 
-    console.log("Düymə ID-si:", customerId);
+        $.ajax({
+            url: '/customers/get_status',
+            method: 'POST',
+            data: { id: customerId },
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
+                    if (response.status === 'onaylandı') {
+                        button.text('Onaylandı');
+                        button.prop('disabled', true);
+                    }
+                } catch (e) {
+                    console.error("JSON parse xətası:", e);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Xəta baş verdi:", error, xhr.responseText);
+            }
+        });
+    });
+});
 
-    if (!customerId) {
-        alert("Customer ID tapılmadı!");
-        return;
+document.addEventListener('DOMContentLoaded', function () {
+    const customerTable = document.getElementById('customer-table');
+
+    // Table-i dinamik doldurmaq üçün AJAX ilə məlumat yükləyirik
+    function loadTableData() {
+        fetch('/path/to/load_list_carionaybekleyen', {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = customerTable.querySelector('tbody');
+                tbody.innerHTML = ''; // Mövcud məlumatları təmizlə
+
+                data.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.innerHTML = cell;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+
+                // Buttonlara event listener əlavə et
+                attachOnaylaEvent();
+            })
+            .catch(error => console.error('Məlumat yüklənərkən xəta baş verdi:', error));
     }
 
+    // Onayla buttonuna klik olunanda işləyəcək funksiya
+    function attachOnaylaEvent() {
+        const buttons = document.querySelectorAll('.onayla-button');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                const customerId = this.getAttribute('data-id');
+
+                fetch('/path/to/update_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: customerId }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.classList.remove('btn-primary');
+                            this.classList.add('btn-success');
+                            this.textContent = 'Onaylandı';
+                            this.disabled = true;
+                        } else {
+                            alert('Status yenilənmədi!');
+                        }
+                    })
+                    .catch(error => console.error('Xəta baş verdi:', error));
+            });
+        });
+    }
+
+    loadTableData();
+});
+
+
+$(document).on('click', '.onayla-button', function () {
+    var customerId = $(this).data('id');
+
     $.ajax({
-        url: '/customers/approve', // Backenddəki URL
+        url: '/customers/approve_customer',
         method: 'POST',
         data: { id: customerId },
+        dataType: 'json',
         success: function (response) {
-            try {
-                response = JSON.parse(response);
-                console.log("Serverdən gələn cavab:", response);
+            if (response.status === 'success') {
+                alert(response.message);
 
-                if (response.status === 'success') {
-                    button.text('Onaylandı');
-                    button.prop('disabled', true);
-
-                    alert(response.message);
-                } else {
-                    alert("Xəta: " + response.message);
-                }
-            } catch (e) {
-                console.error("JSON parse xətası:", e);
-                alert("Serverdən düzgün cavab alınmadı!");
+                var button = $('button[data-id="' + customerId + '"]');
+                button.removeClass('btn-primary onayla-button')
+                      .addClass('btn-success')
+                      .text('Onaylandı')
+                      .prop('disabled', true);
+            } else {
+                alert("Xəta: " + response.message);
             }
         },
         error: function (xhr, status, error) {
-            console.log("Xəta baş verdi:", error, xhr.responseText);
-            alert("Serverdə xəta baş verdi: " + xhr.responseText || error);
+            alert("Xəta: Status yenilənə bilmədi. " + error);
         }
     });
 });
 
 
+$(document).ready(function () {
+    $('.onayla-button').each(function () {
+        var button = $(this);
+        var customerId = button.data('id');
 
+        $.ajax({
+            url: '/customers/get_status',
+            method: 'POST',
+            data: { id: customerId },
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
+                    if (response.status === 'onaylandı') {
+                        button.text('Onaylandı');
+                        button.prop('disabled', true); 
+                    }
+                } catch (e) {
+                    console.error("JSON parse xətası:", e);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Xəta baş verdi:", error, xhr.responseText);
+            }
+        });
+    });
+});
 
     $(document).on('click', '.onayla', function () {
         var cari_id = $(this).attr('cari_id');
@@ -359,7 +476,7 @@ if ($this->input->get('due')) {
                 '<?= $this->security->get_csrf_token_name() ?>': crsf_hash,
             },
             success: function (response) {
-                console.log(response); // Server cavabını konsola yazdırırıq
+                console.log(response);
                 if (response.success) {
                     var row = button.closest('tr');
                     row.find('td:nth-child(2)').text('Onaylandı');
@@ -375,7 +492,6 @@ if ($this->input->get('due')) {
             }
         });
     });
-
 
 
 
@@ -410,8 +526,6 @@ if ($this->input->get('due')) {
             }
         });
     }
-
-
 
 
 

@@ -301,127 +301,135 @@ class Customers extends CI_Controller
     }
 
     public function load_list_carionaybekleyen()
-    {
-        $no = $this->input->post('start');
+{
+    $no = $this->input->post('start');
+    $list = $this->customers->get_datatables();
 
-        $list = $this->customers->get_datatables();
+    $data = array();
 
-        $data = array();
-        if ($this->input->post('due')) {
-            foreach ($list as $customers) {
-                $cari_yoklama_details = cari_yoklama_detalis($customers->id);
-                $style = '';
-                if ($cari_yoklama_details['inceleme_status']) {
-                    $style = 'background: #dd4646;color: white;';
-                }
+    $user_role = $this->session->userdata('role');
 
-                $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
-                $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
-                $buttons_ = '<div class="dropdown">
-    <button class="btn btn-success onayla-button" type="button" style="width: 180px; padding: 11px;" data-id="' . $customers->id . '">
-        Onayla
-    </button>
-</div>';
+    foreach ($list as $customer) {
+        $status_button = '';
+        $style = '';
+        $cari_yoklama_details = cari_yoklama_detalis($customer->id);
+        $name = $customer->company;
 
-                $no++;
-                $row = array();
-                $row[] = $no;
-                $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
-                $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $customers->company . '</a>';
-                $row[] = amountExchange($customers->total - $customers->pamnt, 0, $this->aauth->get_user()->loc);
-                $row[] = $customers->address . ',' . $customers->city . ',' . $customers->country;
-                $row[] = $customers->email;
-                $row[] = $customers->phone;
-                $row[] = $customers->emp_name;
-                $row[] = $buttons_;
-                $row[] = $style;
-                $data[] = $row;
-            }
+        if ($user_role == 'admin' || $user_role == 'onayla') {
+            $status_button = ($customer->status === 'onaylandı')
+                ? '<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>'
+                : '<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayla</button>';
         } else {
-            foreach ($list as $customers) {
-                $cari_yoklama_details = cari_yoklama_detalis($customers->id);
-                $style = '';
-                $durums = 'Onaylanmadı';
-                if ($cari_yoklama_details['inceleme_status']) {
-                    $style = 'background: #4b865d;color: white;';
-                    $durums = "<div style='display: flex;'><img class='cari_tables' onmouseover='cari_tables($customers->id)' src='/userfiles/cari-yoklandi.jpg' style='width: 70px;'></div>";
-                }
-
-                if ($cari_yoklama_details['akt_status']) {
-                    if (!$cari_yoklama_details['inceleme_status']) {
-                        $durums = "<div style='display: flex;'><img class='cari_tables' onmouseover='cari_tables($customers->id)' src='/userfiles/akt.jpg' style='width: 70px;'></div>";
-                    } else {
-                        $durums .= "<img src='/userfiles/akt.jpg' onmouseover='cari_tables($customers->id)' style='width: 70px;'></div>";
-                    }
-                }
-
-                $passive = '<button class="passive dropdown-item" status="1" cari_id="' . $customers->id . '">AKTİF YAP</button>';
-
-                if ($customers->active) {
-                    $passive = '<button class="passive dropdown-item" status="0" cari_id="' . $customers->id . '">PASİF YAP</button>';
-                }
-
-                $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
-                $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
-
-                $akt = '<button class="akt_yoklama dropdown-item" cari_id="' . $customers->id . '">AKT / YOKLAMA BİLDİR</button>';
-                $buttons_ = '<div class="dropdown">
-    <button class="btn btn-success onayla-button" type="button" style="width: 180px; padding: 11px;" data-id="' . $customers->id . '">
-        Onayla
-    </button>
-</div>';
-                $name = $customers->company;
-
-                $no++;
-                $row = array();
-                $row[] = $no;
-                $row[] = $durums;
-                $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
-                $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $name . '</a>';
-                $row[] = $customers->country;
-                $row[] = $customers->email;
-                $row[] = $customers->phone;
-                $row[] = $customers->emp_name;
-                $row[] = $buttons_;
-                $row[] = $style;
-                $data[] = $row;
-            }
+            $status_button = '<button class="btn btn-secondary" style="width: 180px; padding: 11px;" disabled>Onaylama Yetkiniz Yok</button>';
         }
 
+        $no++;
+        $row = array();
 
-        $output = array(
-            "draw" => $this->input->post('draw'),
-            "recordsTotal" => $this->customers->count_all(),
-            "recordsFiltered" => $this->customers->count_filtered(),
-            "data" => $data,
-        );
-        echo json_encode($output);
+        $row[] = $no;
+        $row[] = $customer->status;
+        $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customer->picture . '" ></span>';
+        $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customer->id . '">' . $name . '</a>';
+        $row[] = $customer->country;
+        $row[] = $customer->email;
+        $row[] = $customer->phone;
+        $row[] = $customer->emp_name;
+        $row[] = $status_button;
+        $row[] = $style;
+        $data[] = $row;
     }
+
+    $output = array(
+        "draw" => $this->input->post('draw'),
+        "recordsTotal" => $this->customers->count_all(),
+        "recordsFiltered" => $this->customers->count_filtered(),
+        "data" => $data,
+    );
+
+    echo json_encode($output);
+}
+
+
+public function update_status()
+{
+    $customer_id = $this->input->post('id');
+    $status = 'onaylandı';
+
+    $this->db->where('id', $customer_id);
+    $this->db->update('customers', ['status' => $status]);
+
+    echo json_encode(['success' => true, 'status' => $status]);
+}
 
 
     public function approve()
     {
         $customer_id = $this->input->post('id');
-
+        
         if (!$customer_id) {
             echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
             return;
         }
 
         $this->load->model('Customers_model');
-        $updated = $this->Customers_model->update_customer_status($customer_id, 'onaylandı');
+        $update_status = $this->Customers_model->update_customer_status($customer_id, 'onaylandı');
 
-        if ($updated) {
+        if ($update_status) {
             echo json_encode(['status' => 'success', 'message' => 'Müştəri təsdiqləndi!']);
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Status dəyişdirilə bilmədi.']);
+            echo json_encode(['status' => 'error', 'message' => 'Status yenilənə bilmədi.']);
         }
     }
 
-    
+public function approve_customer()
+{
+    $customer_id = $this->input->post('id');
 
-    
-    
+    if (!$customer_id) {
+        echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
+        return;
+    }
+
+    $this->load->model('Customers_model');
+    $customer = $this->Customers_model->get_customer_by_id($customer_id);
+
+    if (!$customer) {
+        echo json_encode(['status' => 'error', 'message' => 'Müştəri tapılmadı.']);
+        return;
+    }
+
+    if ($customer['status'] === 'onaylandı') {
+        echo json_encode(['status' => 'success', 'message' => 'Bu müştəri artıq onaylanıb.']);
+        return;
+    }
+
+    $update_status = $this->Customers_model->update_customer_status($customer_id, 'onaylandı');
+
+    if ($update_status) {
+        echo json_encode(['status' => 'success', 'message' => 'Müştəri uğurla onaylandı.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Status yenilənə bilmədi.']);
+    }
+}
+
+    public function get_status()
+    {
+        $customer_id = $this->input->post('id');
+        
+        if (!$customer_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
+            return;
+        }
+
+        $this->load->model('Customers_model');
+        $status = $this->Customers_model->get_customer_status($customer_id);
+
+        if ($status) {
+            echo json_encode(['status' => $status]);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Status tapılmadı.']);
+        }
+    }
     
 
     public function onayla_action()
@@ -444,39 +452,6 @@ class Customers extends CI_Controller
     }
 }
 
-
-
-
-public function approve_customer($cari_id)
-{
-    $this->db->where('id', $cari_id);
-    return $this->db->update('customers', ['status' => 'approved']);
-}
-
-
-    public function update_status()
-    {
-        $cari_id = $this->input->post('cari_id');
-        if (!$cari_id) {
-            echo json_encode(['success' => false, 'message' => 'ID tapılmadı!']);
-            return;
-        }
-
-        $current_status = $this->db->get_where('customers', ['id' => $cari_id])->row()->onay_status;
-
-        if ($current_status < 3) {
-            $this->db->set('onay_status', 'onay_status + 1', FALSE);
-            $this->db->where('id', $cari_id);
-            $this->db->update('customers');
-
-            $new_status = $current_status + 1;
-            $message = ($new_status === 3) ? 'Onaylandı (3 nəfər tərəfindən)!' : 'Onaylanma prosesi davam edir.';
-
-            echo json_encode(['success' => true, 'message' => $message]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Artıq tamamilə onaylanıb!']);
-        }
-    }
 
     
 
