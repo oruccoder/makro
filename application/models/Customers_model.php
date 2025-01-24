@@ -21,8 +21,6 @@ class Customers_model extends CI_Model
 
 {
 
-
-
     var $table = 'geopos_customers';
 
     var $column_order_p = array(null, 'geopos_customers.company', 'customers_project.proje_name',null);

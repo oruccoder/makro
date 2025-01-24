@@ -177,128 +177,57 @@ class Customers extends CI_Controller
 
     }
     public function load_list()
-    {
-        $no = $this->input->post('start');
+{
+    $no = $this->input->post('start');
+    $list = $this->customers->get_datatables();
 
-        $list = $this->customers->get_datatables();
-
-
-
-
-
-        $data = array();
-        if ($this->input->post('due')) {
-            foreach ($list as $customers) {
-                $cari_yoklama_details = cari_yoklama_detalis($customers->id);
-                $style = '';
-                if ($cari_yoklama_details['inceleme_status']) {
-                    $style = 'background: #dd4646;color: white;';
-                }
-
-                $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
-                $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
-                $buttons_ = '<div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                İşlemler
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                ' . $views . '
-                ' . $edit . '
-              </div>
-            </div>';
-
-
-                $no++;
-                $row = array();
-                //$row[] = $no . ' <input type="checkbox" name="cust[]" class="checkbox" value="' . $customers->id . '"> ';
-                $row[] = $no;
-                $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
-                $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $customers->company . '</a>';
-                $row[] = amountExchange($customers->total - $customers->pamnt, 0, $this->aauth->get_user()->loc);
-                $row[] = $customers->address . ',' . $customers->city . ',' . $customers->country;
-                $row[] = $customers->email;
-                $row[] = $customers->phone;
-                $row[] = $customers->emp_name;
-                $row[] = $buttons_;
-                $row[] = $style;
-                $data[] = $row;
-            }
-        } else {
-            foreach ($list as $customers) {
-                $cari_yoklama_details = cari_yoklama_detalis($customers->id);
-                $style = '';
-                $durums = 'Onaylanmadı';
-                if ($cari_yoklama_details['inceleme_status']) {
-                    $style = 'background: #4b865d;color: white;';
-                    $durums = "<div style='display: flex;'><img class='cari_tables' onmouseover='cari_tables($customers->id)' src='/userfiles/cari-yoklandi.jpg' style='    width: 70px;'>";
-                } else {
-                    $style = '';
-                }
-
-                if ($cari_yoklama_details['akt_status']) {
-                    if (!$cari_yoklama_details['inceleme_status']) {
-                        $durums = "<div style='display: flex;'><img  class='cari_tables' onmouseover='cari_tables($customers->id)' src='/userfiles/akt.jpg' style='    width: 70px;'></div>";
-                    } else {
-                        $durums .= "<img  src='/userfiles/akt.jpg' onmouseover='cari_tables($customers->id)' style='width: 70px;'></div>";
-                    }
-
-                }
-
-                $passive = '<button class="passive dropdown-item" status="1" cari_id="' . $customers->id . '">AKTİF YAP</button>';
-
-                if ($customers->active) {
-                    $passive = '<button class="passive dropdown-item" status="0" cari_id="' . $customers->id . '">PASİF YAP</button>';
-                }
-
-                $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
-                $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
-                $akt = '<button class="akt_yoklama dropdown-item" cari_id="' . $customers->id . '">AKT / YOKLAMA BİLDİR</button>';
-                $buttons_ = '<div class="dropdown">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                İşlemler
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                ' . $views . '
-                ' . $edit . '
-                ' . $akt . '
-                ' . $passive . '
-              </div>
-            </div>';
-
-                $notes = $customers->address . ',' . $customers->city . ',' . $customers->country;
-                //                $tool='data-original-title="Bilgilendirme"   data-popup="popover" data-trigger="hover" data-placement="top" data-content="'.$notes.'"';
-
-
-                $name = $customers->company;
-
-                $no++;
-                $row = array();
-                //$row[] = $no . ' <input type="checkbox" name="cust[]" class="checkbox" value="' . $customers->id . '"> ';
-
-                $row[] = $no;
-                $row[] = $durums;
-                $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
-                $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $name . '</a>';
-                $row[] = $customers->country;
-                $row[] = $customers->email;
-                $row[] = $customers->phone;
-                $row[] = $customers->emp_name;
-                $row[] = $buttons_;
-                $row[] = $style;
-                $data[] = $row;
-            }
+    $data = array();
+    foreach ($list as $customers) {
+        $cari_yoklama_details = cari_yoklama_detalis($customers->id);
+        $style = '';
+        $durums = 'Onaylanmadı';
+        
+        if ($customers->onay_status == 1) {
+            $style = 'background: #4b865d; color: white;';
+            $durums = 'Onaylandı';
         }
 
+        $views = '<a href="/customers/view?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('View') . '</a>';
+        $edit = '<a href="/customers/edit?id=' . $customers->id . '" class="dropdown-item">' . $this->lang->line('Edit') . '</a>';
+        $buttons_ = '<div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            İşlemler
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            ' . $views . '
+            ' . $edit . '
+          </div>
+        </div>';
 
-        $output = array(
-            "draw" => $this->input->post('draw'),
-            "recordsTotal" => $this->customers->count_all(),
-            "recordsFiltered" => $this->customers->count_filtered(),
-            "data" => $data,
-        );
-        //output to json format
-        echo json_encode($output);
+        $no++;
+        $row = array();
+        $row[] = $no;
+        $row[] = $durums;
+        $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customers->picture . '" ></span>';
+        $row[] = '<a class="btn btn-outline-secondary btn-sm" href="/customers/view?id=' . $customers->id . '">' . $customers->company . '</a>';
+        $row[] = $customers->country;
+        $row[] = $customers->email;
+        $row[] = $customers->phone;
+        $row[] = $customers->emp_name;
+        $row[] = $buttons_;
+        $row[] = $style;
+        $data[] = $row;
     }
+
+    $output = array(
+        "draw" => $this->input->post('draw'),
+        "recordsTotal" => $this->customers->count_all(),
+        "recordsFiltered" => $this->customers->count_filtered(),
+        "data" => $data,
+    );
+    echo json_encode($output);
+}
+
 
     public function load_list_carionaybekleyen()
 {
@@ -307,25 +236,24 @@ class Customers extends CI_Controller
 
     $data = array();
 
-    $user_role = $this->session->userdata('role');
-
     foreach ($list as $customer) {
-        $status_button = '';
+        $durums = 'Onaylanmadı';
         $style = '';
         $cari_yoklama_details = cari_yoklama_detalis($customer->id);
         $name = $customer->company;
+
+        $user_role = $this->session->userdata('role');
 
         if ($user_role == 'admin' || $user_role == 'onayla') {
             $status_button = ($customer->status === 'onaylandı')
                 ? '<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>'
                 : '<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayla</button>';
         } else {
-            $status_button = '<button class="btn btn-secondary" style="width: 180px; padding: 11px;" disabled>Onaylama Yetkiniz Yok</button>';
+            $status_button = '<button class="btn btn-danger" style="width: 180px; padding: 11px;" disabled>Onaylama yetkiniz yok</button>';
         }
 
         $no++;
         $row = array();
-
         $row[] = $no;
         $row[] = $customer->status;
         $row[] = '<span class="avatar-sm align-baseline"><img class="" src="' . base_url() . 'userfiles/customers/thumbnail/' . $customer->picture . '" ></span>';
@@ -349,18 +277,32 @@ class Customers extends CI_Controller
     echo json_encode($output);
 }
 
-
 public function update_status()
 {
     $customer_id = $this->input->post('id');
-    $status = 'onaylandı';
+    
+    $user_role = $this->session->userdata('role');
+    
+    if ($user_role == 'onayla') {
+        $this->db->set('onay_status', 'onay_status + 1', FALSE);
+        $this->db->where('id', $customer_id);
+        $this->db->update('customers');
 
-    $this->db->where('id', $customer_id);
-    $this->db->update('customers', ['status' => $status]);
+        $onay_status_count = $this->db->select('COUNT(*) as onay_count')
+                                      ->where('customer_id', $customer_id)
+                                      ->get('customers')
+                                      ->row()->onay_count;
 
-    echo json_encode(['success' => true, 'status' => $status]);
+        if ($onay_status_count >= 3) {
+            $this->db->where('id', $customer_id);
+            $this->db->update('customers', ['status' => 'onaylandı']);
+        }
+
+        echo json_encode(['success' => true, 'status' => 'onaylandı']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Yetkiniz yok']);
+    }
 }
-
 
     public function approve()
     {

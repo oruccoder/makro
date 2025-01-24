@@ -222,9 +222,6 @@ class User extends CI_Controller
             else{
                 redirect('/dashboard/', 'refresh');
             }
-
-
-
         }
         else {
             redirect('/user/?e=eyxde', 'refresh');
@@ -232,38 +229,32 @@ class User extends CI_Controller
     }
 
     public function checklogin_yetki()
-    {
+{
+    $database = $this->input->post('database');
+    $this->session->set_userdata('selected_db', $database);
 
-        $database = $this->input->post('database');
+    $user = $this->input->post('username');
+    $password = $this->input->post('password');
+    $remember_me = $this->input->post('remember_me');
 
+    $rem = false;
 
-        $this->session->set_userdata('selected_db', $database);
-
-
-
-
-
-        $user = $this->input->post('username');
-        $password = $this->input->post('password');
-        $remember_me = $this->input->post('remember_me');
-
-        $rem = false;
-
-        if ($remember_me == 'on') {
-
-            $rem = true;
-
-        }
-
-        if ($this->aauth->login(0,$user, $password, $rem, $this->captcha)) {
-
-            redirect('/dashboard/', 'refresh');
-        }
-        else {
-            redirect('/user/yetki', 'refresh');
-
-        }
+    if ($remember_me == 'on') {
+        $rem = true;
     }
+
+    if ($this->aauth->login(0, $user, $password, $rem, $this->captcha)) {
+        $user_data = $this->db->get_where('users', ['username' => $user])->row();
+
+        $this->session->set_userdata('role', $user_data->role);
+
+        redirect('/dashboard/', 'refresh');
+    } else {
+        redirect('/user/yetki', 'refresh');
+    }
+}
+
+
     public function send_mail($user_id,$subject,$message){
         $this->load->model('communication_model');
         if(!$user_id){
@@ -281,8 +272,6 @@ class User extends CI_Controller
         }
 
     }
-
-
 
     public function profile()
 
