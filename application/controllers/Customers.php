@@ -229,7 +229,7 @@ class Customers extends CI_Controller
 }
 
 
-    public function load_list_carionaybekleyen()
+public function load_list_carionaybekleyen()
 {
     $no = $this->input->post('start');
     $list = $this->customers->get_datatables();
@@ -237,17 +237,15 @@ class Customers extends CI_Controller
     $data = array();
 
     foreach ($list as $customer) {
-        $durums = 'Onaylanmadı';
-        $style = '';
-        $cari_yoklama_details = cari_yoklama_detalis($customer->id);
         $name = $customer->company;
 
+        $user_id = $this->session->userdata('id');
         $user_role = $this->session->userdata('role');
 
-        if ($user_role == 'admin' || $user_role == 'onayla') {
-            $status_button = ($customer->status === 'onaylandı')
-                ? '<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>'
-                : '<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayla</button>';
+        if ($customer->status === 'onaylandı') {
+            $status_button = '<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>';
+        } elseif ($user_role == 'onayla' || $user_id == 21) { 
+            $status_button = '<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayla</button>';
         } else {
             $status_button = '<button class="btn btn-danger" style="width: 180px; padding: 11px;" disabled>Onaylama yetkiniz yok</button>';
         }
@@ -263,7 +261,6 @@ class Customers extends CI_Controller
         $row[] = $customer->phone;
         $row[] = $customer->emp_name;
         $row[] = $status_button;
-        $row[] = $style;
         $data[] = $row;
     }
 
@@ -277,26 +274,18 @@ class Customers extends CI_Controller
     echo json_encode($output);
 }
 
+
 public function update_status()
 {
     $customer_id = $this->input->post('id');
-    
+
+    $user_id = $this->session->userdata('id');
     $user_role = $this->session->userdata('role');
-    
-    if ($user_role == 'onayla') {
-        $this->db->set('onay_status', 'onay_status + 1', FALSE);
+
+    if ($user_role == 'onayla' || $user_id == 21) {
+        $this->db->set('status', 'onaylandı');
         $this->db->where('id', $customer_id);
         $this->db->update('customers');
-
-        $onay_status_count = $this->db->select('COUNT(*) as onay_count')
-                                      ->where('customer_id', $customer_id)
-                                      ->get('customers')
-                                      ->row()->onay_count;
-
-        if ($onay_status_count >= 3) {
-            $this->db->where('id', $customer_id);
-            $this->db->update('customers', ['status' => 'onaylandı']);
-        }
 
         echo json_encode(['success' => true, 'status' => 'onaylandı']);
     } else {
@@ -323,56 +312,131 @@ public function update_status()
         }
     }
 
-public function approve_customer()
+    public function showCustomer($customer_id) {
+        $user_id = $this->session->userdata('user_id');
+        $user = $this->db->get_where('geopos_users', ['id' => $user_id])->row();
+    
+        $customer = $this->db->get_where('customers', ['id' => $customer_id])->row();
+    
+        $has_permission = ($user && $user->id == 21);
+    
+        $data['has_permission'] = $has_permission;
+        $data['customer'] = $customer;
+        $data['user'] = $user;
+    
+        $this->load->view('customer_view', $data);
+    }
+
+    public function getCustomerData($customer_id) {
+        $user_id = $this->session->userdata('user_id'); 
+        $user = $this->db->get_where('geopos_users', ['id' => $user_id])->row();
+    
+        $customer = $this->db->get_where('customers', ['id' => $customer_id])->row();
+    
+        $has_permission = ($user && $user->id == 21);
+    
+        if ($has_permission) {
+            if ($customer && $customer->status == 'onaylandı') {
+                $status_button = '<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>';
+            } else {
+                $status_button = '<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayla</button>';
+            }
+        } else {
+            $status_button = '<button class="btn btn-danger" style="width: 180px; padding: 11px;" disabled>Onaylama yetkiniz yok</button>';
+        }
+    
+        echo json_encode([
+            'user' => $user,
+            'customer' => $customer,
+            'status_button' => $status_button,
+        ]);
+    }
+    
+
+    public function approve_customer()
+    {
+        $customer_id = $this->input->post('id');
+    
+        if (!$customer_id) {
+            echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
+            return;
+        }
+    
+        $this->load->model('Customers_model');
+        $customer = $this->Customers_model->get_customer_by_id($customer_id);
+    
+        if (!$customer) {
+            echo json_encode(['status' => 'error', 'message' => 'Müştəri tapılmadı.']);
+            return;
+        }
+    
+        if ($customer['status'] === 'onaylandı') {
+            echo json_encode(['status' => 'success', 'message' => 'Bu müştəri artıq onaylanıb.']);
+            return;
+        }
+    
+        $update_status = $this->Customers_model->update_customer_status($customer_id, 'onaylandı');
+    
+        if ($update_status) {
+            echo json_encode(['status' => 'success', 'message' => 'Müştəri uğurla onaylandı.']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Status yenilənə bilmədi.']);
+        }
+    }
+    
+
+    public function get_status()
 {
     $customer_id = $this->input->post('id');
-
+    
     if (!$customer_id) {
         echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
         return;
     }
 
     $this->load->model('Customers_model');
-    $customer = $this->Customers_model->get_customer_by_id($customer_id);
+    $status = $this->Customers_model->get_customer_status($customer_id);
 
-    if (!$customer) {
-        echo json_encode(['status' => 'error', 'message' => 'Müştəri tapılmadı.']);
-        return;
-    }
-
-    if ($customer['status'] === 'onaylandı') {
-        echo json_encode(['status' => 'success', 'message' => 'Bu müştəri artıq onaylanıb.']);
-        return;
-    }
-
-    $update_status = $this->Customers_model->update_customer_status($customer_id, 'onaylandı');
-
-    if ($update_status) {
-        echo json_encode(['status' => 'success', 'message' => 'Müştəri uğurla onaylandı.']);
+    if ($status) {
+        echo json_encode(['status' => $status]);
     } else {
-        echo json_encode(['status' => 'error', 'message' => 'Status yenilənə bilmədi.']);
+        echo json_encode(['status' => 'error', 'message' => 'Status tapılmadı.']);
     }
 }
 
-    public function get_status()
-    {
-        $customer_id = $this->input->post('id');
-        
-        if (!$customer_id) {
-            echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
-            return;
-        }
 
-        $this->load->model('Customers_model');
-        $status = $this->Customers_model->get_customer_status($customer_id);
 
-        if ($status) {
-            echo json_encode(['status' => $status]);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Status tapılmadı.']);
-        }
+
+public function has_permission($user_id)
+{
+    $this->load->model('Users_model');
+    return $this->Users_model->check_permission($user_id);
+}
+
+
+
+public function update_user_permission($user_id, $is_approved)
+{
+    $this->db->where('id', $user_id);
+    return $this->db->update('geopos_users', ['is_approved' => $is_approved]);
+}
+
+public function update_permission()
+{
+    $id = $this->input->post('id');
+    $is_approved = $this->input->post('is_approved');
+
+    $this->db->where('id', $id);
+    $success = $this->db->update('geopos_users', ['is_approved' => $is_approved]);
+
+    if ($success) {
+        echo json_encode(['status' => 'success', 'message' => 'İstifadəçi hüququ uğurla yeniləndi.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Xəta baş verdi.']);
     }
-    
+}
+
+
 
     public function onayla_action()
 {
@@ -394,8 +458,27 @@ public function approve_customer()
     }
 }
 
-
     
+public function login()
+{
+    $username = $this->input->post('username');
+    $password = $this->input->post('password');
+
+    $user = $this->db->get_where('users', [
+        'username' => $username,
+        'password' => $password
+    ])->row();
+
+    if ($user) {
+        $this->session->set_userdata([
+            'id' => $user->id,
+            'role' => $user->role,
+        ]);
+        redirect('dashboard');
+    } else {
+        echo "Yanlış istifadəçi adı və ya şifrə!";
+    }
+}
 
 
     public function onayla()
@@ -460,7 +543,14 @@ public function approve_customer()
         $data['customer_pers'] = $this->customers->customer_personel_details($pid);
 
 
-        $data['teminat'] = $this->common->teminat_type($teminat_type_id['teminat_type']);
+        $teminat_type_id = $this->customers->teminat_type_id($pid);
+        if (empty($teminat_type_id)) {
+            $teminat_type_id = array();
+        }
+        
+        $data['teminat'] = isset($teminat_type_id['teminat_type']) 
+            ? $this->common->teminat_type($teminat_type_id['teminat_type']) 
+            : null;
         $data['customergroup'] = $this->customers->group_info($data['customer']['gid']);
         $data['customergrouplist'] = $this->customers->group_list();
         $head['usernm'] = $this->aauth->get_user()->username;
@@ -473,44 +563,45 @@ public function approve_customer()
 
 
 
-    public function view()
-    {
-        if (!$this->aauth->premission(3)->read) {
+        public function view()
+        {
+            if (!$this->aauth->premission(3)->read) {
 
-            exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
+                exit('<h3>Üzgünüm!Giriş Yetkiniz Bulunmamaktadır</h3>');
 
+            }
+            $custid = $this->input->get('id');
+            $data['id'] = $this->input->get('id');
+            $data['customer_id'] = $this->input->get('id');
+            $data['para_birimi'] = 'tumu';
+            $this->load->model('transactions_model');
+            $data['details'] = $this->customers->details($data['id']);
+            $head['title'] = "Müşteri Detayları";
+
+
+            $head['usernm'] = $this->aauth->get_user()->username;
+
+
+            $data['customer'] = $this->customers->details($data['id']);
+
+            $data['customer_b'] = $this->customers->bank_details($data['id']);
+            $data['customer_inv'] = $this->customers->invoice_adres_details($data['id']);
+            $data['customer_tes'] = $this->customers->invoice_teslimat_details($data['id']);
+            $data['customer_pers'] = $this->customers->customer_personel_details($data['id']);
+
+            $id = $this->input->get('id');
+            $customer_group_id = $this->db->query("SELECT * FROM carionaybekleyen WHERE id=$id")->row()->musteri_tipi;
+
+            $this->load->view('fixed/header', $head);
+            if ($customer_group_id == 10) {
+                $this->load->view('customers/statement_musteri', $data);
+            } else {
+                $this->load->view('customers/statement', $data);
+            }
+
+
+            $this->load->view('fixed/footer');
         }
-        $custid = $this->input->get('id');
-        $data['id'] = $this->input->get('id');
-        $data['customer_id'] = $this->input->get('id');
-        $data['para_birimi'] = 'tumu';
-        $this->load->model('transactions_model');
-        $data['details'] = $this->customers->details($data['id']);
-        $head['title'] = "Müşteri Detayları";
-
-
-        $head['usernm'] = $this->aauth->get_user()->username;
-
-
-        $data['customer'] = $this->customers->details($data['id']);
-
-        $data['customer_b'] = $this->customers->bank_details($data['id']);
-        $data['customer_inv'] = $this->customers->invoice_adres_details($data['id']);
-        $data['customer_tes'] = $this->customers->invoice_teslimat_details($data['id']);
-        $data['customer_pers'] = $this->customers->customer_personel_details($data['id']);
-
-        $id = $this->input->get('id');
-        $customer_group_id = $this->db->query("SELECT * FROM geopos_customers WHERE id=$id")->row()->musteri_tipi;
-        $this->load->view('fixed/header', $head);
-        if ($customer_group_id == 10) {
-            $this->load->view('customers/statement_musteri', $data);
-        } else {
-            $this->load->view('customers/statement', $data);
-        }
-
-
-        $this->load->view('fixed/footer');
-    }
 
 
     public function controller_notes()
@@ -629,91 +720,86 @@ public function approve_customer()
     }
 
     public function addcustomer()
-    {
-        $cari_tipi = $this->input->post('cari_tipi', true); // Özel Devlet  1 özel 2 devlet
-        $company = $this->input->post('company', true); //firma adı
-        $country = $this->input->post('country', true); // Firma Ülke
-        $region = $this->input->post('region', true); //Şehir
-        $city = $this->input->post('city', true); // Rayon
-        $postbox = $this->input->post('postbox', true); // posta kodu
-        $address = $this->input->post('address', true); // adresi
-        $phone = $this->input->post('phone', true); // Firma Telefon
-        $email = $this->input->post('email', true); // Firma E-Mail
-        $name = $this->input->post('name', true); // Yetkili Adı
-        $yetkili_tel = $this->input->post('yetkili_tel', true); // Yetkili Tel
-        $yetkili_mail = $this->input->post('yetkili_mail', true); // Yetkili Mail
-        $yetkili_gorev = $this->input->post('yetkili_gorev', true); // Yetkili Görev
-        $sorumlu_personel = $this->input->post('sorumlu_personel', true); // Sorumlu Personel
-        $sorumlu_muhasebe_personeli = $this->input->post('sorumlu_muhasebe_personeli', true); // Sorumlu Muhasebe Personeli
-        $company_about = $this->input->post('company_about', true);  // Firma Hakkında Bilgi
-        $taxid = $this->input->post('taxid', true); // VÖEN
-        $kdv_orani = $this->input->post('kdv_orani', true); // KDV Oranı
-        $sirket_tipi = $this->input->post('sirket_tipi', true); // Şirket Tipi Grup / Tekil  1 Tekil 2 Grup
-        $parent_id = $this->input->post('parent_id', true); // Bağlı Olduğu Firma
-        $musteri_tipi = $this->input->post('musteri_tipi', true); // cari Grubu
-        $sektor = $this->input->post('sektor', true); // cari Grubu
-        $customergroup = 1;
-
-        //$name_s = $this->input->post('name_s',true);
-        //$phone_s = $this->input->post('phone_s',true);
-        //$email_s = $this->input->post('email_s',true);
-        //$address_s = $this->input->post('address_s',true);
-        //$city_s = $this->input->post('city_s',true);
-        //$region_s = $this->input->post('region_s',true);
-        //$country_s = $this->input->post('country_s',true);
-        //$postbox_s = $this->input->post('postbox_s',true);
-
-        //$sektor = '';
-        //$docid ='';
-        //$custom ='';
+{
+    $cari_tipi = $this->input->post('cari_tipi', true);
+    $company = $this->input->post('company', true);
+    $country = $this->input->post('country', true);
+    $region = $this->input->post('region', true);
+    $city = $this->input->post('city', true);
+    $postbox = $this->input->post('postbox', true);
+    $address = $this->input->post('address', true);
+    $phone = $this->input->post('phone', true);
+    $email = $this->input->post('email', true);
+    $name = $this->input->post('name', true);
+    $yetkili_tel = $this->input->post('yetkili_tel', true);
+    $yetkili_mail = $this->input->post('yetkili_mail', true);
+    $yetkili_gorev = $this->input->post('yetkili_gorev', true);
+    $sorumlu_personel = $this->input->post('sorumlu_personel', true);
+    $sorumlu_muhasebe_personeli = $this->input->post('sorumlu_muhasebe_personeli', true);
+    $company_about = $this->input->post('company_about', true);
+    $taxid = $this->input->post('taxid', true);
+    $kdv_orani = $this->input->post('kdv_orani', true);
+    $sirket_tipi = $this->input->post('sirket_tipi', true);
+    $parent_id = $this->input->post('parent_id', true);
+    $musteri_tipi = $this->input->post('musteri_tipi', true);
+    $sektor = $this->input->post('sektor', true);
+    $discount = $this->input->post('discount', true);
+    $teminat_type = $this->input->post('teminat_type', true);
+    $customer_teminat_desc = $this->input->post('customer_teminat_desc', true);
+    $customer_credit = $this->input->post('customer_credit', true);
+    $customer_credit_you = $this->input->post('customer_credit_you', true);
+    $create_login = $this->input->post('c_login', true);
+    $password = $this->input->post('password_c', true);
+    $language = $this->input->post('language', true);
+    $customergroup =1;
 
 
-        $discount = $this->input->post('discount', true);
-        $teminat_type = $this->input->post('teminat_type', true);
-        $customer_teminat_desc = $this->input->post('customer_teminat_desc', true);
-        $customer_credit = $this->input->post('customer_credit', true);
-        $customer_credit_you = $this->input->post('customer_credit_you', true);
-        $create_login = $this->input->post('c_login', true);
-        $password = $this->input->post('password_c', true);
-        $language = $this->input->post('language', true);
+    $this->customers->add($name, $company, $phone, $email, $address, $city, $region, $country,
+    $postbox, $customergroup, $taxid, $language, $create_login,
+    $password,$discount,
+    $customer_teminat_desc,
+    $teminat_type,
+    $customer_credit,
+    $company_about,
+    $musteri_tipi,
+    $kdv_orani,$parent_id,
+    $sirket_tipi,
+    $yetkili_tel,
+    $yetkili_mail,
+    $yetkili_gorev,
+    $sorumlu_personel,
+    $sorumlu_muhasebe_personeli,
+    $cari_tipi,
+    $customer_credit_you,
+    $sektor
 
+);
+}
 
+public function musteriEkle($id)
+{
+    $this->db->set('onay_sayisi', 'onay_sayisi+1', FALSE);
+    $this->db->where('id', $id);
+    $this->db->update('carionaybekleyen');
 
-        $this->customers->add(
-            $name,
-            $company,
-            $phone,
-            $email,
-            $address,
-            $city,
-            $region,
-            $country,
-            $postbox,
-            $customergroup,
-            $taxid,
-            $language,
-            $create_login,
-            $password,
-            $discount,
-            $customer_teminat_desc,
-            $teminat_type,
-            $customer_credit,
-            $company_about,
-            $musteri_tipi,
-            $kdv_orani,
-            $parent_id,
-            $sirket_tipi,
-            $yetkili_tel,
-            $yetkili_mail,
-            $yetkili_gorev,
-            $sorumlu_personel,
-            $sorumlu_muhasebe_personeli,
-            $cari_tipi,
-            $customer_credit_you,
-            $sektor
+    $this->db->select('onay_sayisi');
+    $this->db->from('carionaybekleyen');
+    $this->db->where('id', $id);
+    $query = $this->db->get();
+    $result = $query->row();
 
-        );
+    if ($result && $result->onay_sayisi >= 3) {
+        $this->db->query("
+            INSERT INTO cariler (name, company, phone, email, address, city, region, country, postbox, taxid, language, discount, customer_teminat_desc, teminat_type, customer_credit, company_about, musteri_tipi, kdv_orani, parent_id, sirket_tipi, yetkili_tel, yetkili_mail, yetkili_gorev, sorumlu_personel, sorumlu_muhasebe_personeli, cari_tipi, customer_credit_you, sektor)
+            SELECT name, company, phone, email, address, city, region, country, postbox, taxid, language, discount, customer_teminat_desc, teminat_type, customer_credit, company_about, musteri_tipi, kdv_orani, parent_id, sirket_tipi, yetkili_tel, yetkili_mail, yetkili_gorev, sorumlu_personel, sorumlu_muhasebe_personeli, cari_tipi, customer_credit_you, sektor
+            FROM carionaybekleyen WHERE id = ?
+        ", array($id));
+
+        $this->db->where('id', $id);
+        $this->db->delete('carionaybekleyen');
     }
+}
+
 
     public function cari_parent_kontrol()
     {
@@ -895,15 +981,15 @@ public function approve_customer()
         $id = $this->input->post('id');
         $tip = $this->input->post('tip');
         $data = array();
-        if ($tip == 1) // banka
+        if ($tip == 1)
         {
             $data['details'] = $this->db->query("SELECT * FROM geopos_customer_bank WHERE id=$id")->row_array();
             $this->load->view('customers/view_bilgi_bank_', $data);
-        } else if ($tip == 2) // Fatura Adresi
+        } else if ($tip == 2)
         {
             $data['details'] = $this->db->query("SELECT * FROM geopos_customer_iadress WHERE id=$id")->row_array();
             $this->load->view('customers/view_bilgi_invoice_adresi_', $data);
-        } else if ($tip == 3) // Teslimat Adresi
+        } else if ($tip == 3)
         {
             $data['details'] = $this->db->query("SELECT * FROM geopos_customer_tadress WHERE id=$id")->row_array();
             $this->load->view('customers/view_bilgi_teslimat_adresi_', $data);
@@ -4536,6 +4622,4 @@ WHERE ana_cari_id=' . $cid . '  ORDER BY dates ASC')->result();
         }
 
     }
-
-
 }

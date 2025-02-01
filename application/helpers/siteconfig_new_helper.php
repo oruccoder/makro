@@ -4746,8 +4746,6 @@ function recete_name($id)
     $row = $query2->row_array();
     $invoice_name = $row['invoice_name'];
     return $invoice_name;
-
-
 }
 
 function customer_id_recete($id)
@@ -4760,8 +4758,6 @@ function customer_id_recete($id)
     $row = $query2->row_array();
     $csd = $row['csd'];
     return $csd;
-
-
 }
 function all_customer()
 {
@@ -4772,21 +4768,18 @@ function all_customer()
     $query2 = $ci->db->query("SELECT * FROM geopos_customers Where loc=$loc");
     $row = $query2->result();
     return $row;
-
-
 }
+
 function all_cost()
 {
-
     $ci =& get_instance();
     $ci->load->database();
     $loc = $ci->session->userdata('set_firma_id');
     $query2 = $ci->db->query("SELECT * FROM geopos_cost Where loc=$loc");
     $row = $query2->result();
     return $row;
-
-
 }
+
 function all_personel()
 {
 

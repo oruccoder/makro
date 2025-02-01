@@ -188,7 +188,6 @@ if ($this->input->get('due')) {
             });
 
 
-            //uni sender
             $('#sendMail').on('click', '#sendNowSelected', function (e) {
                 e.preventDefault();
                 $("#sendMail").modal('hide');
@@ -345,18 +344,63 @@ if ($this->input->get('due')) {
     });
 });
 
+document.querySelectorAll('.onayla-button').forEach(button => {
+    button.addEventListener('click', function () {
+        let cari_id = this.getAttribute('data-cari-id');
+        let user_id = this.getAttribute('data-user-id');
+
+        fetch('onayla.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `cari_id=${cari_id}&user_id=${user_id}`
+        })
+        .then(response => response.text())
+        .then(data => {
+            alert(data);
+            location.reload();
+        });
+    });
+});
+
+
+$(document).on('click', '.update-permission', function () {
+    const userId = $(this).data('id');
+    const isApproved = $(this).data('approved');
+
+    $.ajax({
+        url: '/users/update_permission',
+        method: 'POST',
+        data: {
+            user_id: userId,
+            is_approved: isApproved
+        },
+        success: function (response) {
+            const res = JSON.parse(response);
+            if (res.success) {
+                alert(res.message);
+                location.reload();
+            } else {
+                alert('Xəta: ' + res.message);
+            }
+        },
+        error: function () {
+            alert('Bir xəta baş verdi!');
+        }
+    });
+});
+
+
 document.addEventListener('DOMContentLoaded', function () {
     const customerTable = document.getElementById('customer-table');
 
-    // Table-i dinamik doldurmaq üçün AJAX ilə məlumat yükləyirik
     function loadTableData() {
-        fetch('/path/to/load_list_carionaybekleyen', {
+        fetch('/customers/load_list_carionaybekleyen', {
             method: 'POST',
         })
             .then(response => response.json())
             .then(data => {
                 const tbody = customerTable.querySelector('tbody');
-                tbody.innerHTML = ''; // Mövcud məlumatları təmizlə
+                tbody.innerHTML = ''; 
 
                 data.data.forEach(row => {
                     const tr = document.createElement('tr');
@@ -368,13 +412,99 @@ document.addEventListener('DOMContentLoaded', function () {
                     tbody.appendChild(tr);
                 });
 
-                // Buttonlara event listener əlavə et
                 attachOnaylaEvent();
             })
             .catch(error => console.error('Məlumat yüklənərkən xəta baş verdi:', error));
     }
 
-    // Onayla buttonuna klik olunanda işləyəcək funksiya
+    function attachOnaylaEvent() {
+        const buttons = document.querySelectorAll('.onayla-button');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                const customerId = this.getAttribute('data-id');
+
+                fetch('/path/to/update_status', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: customerId }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.classList.remove('btn-primary');
+                            this.classList.add('btn-success');
+                            this.textContent = 'Onaylandı';
+                            this.disabled = true;
+                        } else {
+                            alert('Status yenilənmədi!');
+                        }
+                    })
+                    .catch(error => console.error('Xəta baş verdi:', error));
+            });
+        });
+    }
+
+    loadTableData();
+});
+
+$(document).ready(function () {
+    
+    $('.onayla-button').each(function () {
+        var button = $(this);
+        var customerId = button.data('id');
+
+        $.ajax({
+            url: '/customers/get_status',
+            method: 'POST',
+            data: { id: customerId },
+            success: function (response) {
+                try {
+                    response = JSON.parse(response);
+                    if (response.status === 'onaylandı') {
+                        button.text('Onaylandı');
+                        button.prop('disabled', true);
+                    }
+                } catch (e) {
+                    console.error("JSON parse xətası:", e);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Xəta baş verdi:", error, xhr.responseText);
+            }
+        });
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const customerTable = document.getElementById('customer-table');
+
+    function loadTableData() {
+        fetch('/path/to/load_list_carionaybekleyen', {
+            method: 'POST',
+        })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = customerTable.querySelector('tbody');
+                tbody.innerHTML = '';
+
+                data.data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    row.forEach(cell => {
+                        const td = document.createElement('td');
+                        td.innerHTML = cell;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+
+                attachOnaylaEvent();
+            })
+            .catch(error => console.error('Məlumat yüklənərkən xəta baş verdi:', error));
+    }
+
     function attachOnaylaEvent() {
         const buttons = document.querySelectorAll('.onayla-button');
 
@@ -436,7 +566,6 @@ $(document).on('click', '.onayla-button', function () {
     });
 });
 
-
 $(document).ready(function () {
     $('.onayla-button').each(function () {
         var button = $(this);
@@ -493,8 +622,6 @@ $(document).ready(function () {
         });
     });
 
-
-
     $(document).on('click', '.approve-button', function () {
         const customerId = $(this).data('id');
         console.log("Təsdiqləmə düyməsinə basıldı. ID:", customerId);
@@ -526,7 +653,6 @@ $(document).ready(function () {
             }
         });
     }
-
 
 
     $(document).on('click', '.passive', function () {
@@ -627,12 +753,10 @@ $(document).ready(function () {
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
                 })
-                // bind to events
                 var jc = this;
                 this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
                     e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    jc.$$formSubmit.trigger('click');
                 });
             }
         });
@@ -723,7 +847,6 @@ $(document).ready(function () {
                             }
 
                         });
-
                     }
                 },
                 cancel: {
@@ -735,16 +858,13 @@ $(document).ready(function () {
                 $('.select-box').select2({
                     dropdownParent: $(".jconfirm-box-container")
                 })
-                // bind to events
                 var jc = this;
                 this.$content.find('form').on('submit', function (e) {
-                    // if the user submits the form by pressing enter in the field.
                     e.preventDefault();
-                    jc.$$formSubmit.trigger('click'); // reference the button and click it
+                    jc.$$formSubmit.trigger('click');
                 });
             }
         });
-
     })
     function cari_tables(cari_id) {
         $.confirm({
@@ -782,8 +902,9 @@ $(document).ready(function () {
                     btnClass: "btn btn-danger btn-sm",
                 }
             },
-            onContentReady: function () {
 
+            
+            onContentReady: function () {
                 $(document).on('click', '.delete_yoklama', function () {
                     let id = $(this).attr('yk_id');
                     $.confirm({
@@ -857,7 +978,6 @@ $(document).ready(function () {
                                                 }
                                             });
                                         }
-
                                     });
 
                                 }
@@ -871,16 +991,13 @@ $(document).ready(function () {
                             $('.select-box').select2({
                                 dropdownParent: $(".jconfirm-box-container")
                             })
-                            // bind to events
                             var jc = this;
                             this.$content.find('form').on('submit', function (e) {
-                                // if the user submits the form by pressing enter in the field.
                                 e.preventDefault();
-                                jc.$$formSubmit.trigger('click'); // reference the button and click it
+                                jc.$$formSubmit.trigger('click');
                             });
                         }
                     });
-
                 })
             }
         });

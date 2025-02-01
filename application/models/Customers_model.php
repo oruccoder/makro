@@ -203,22 +203,15 @@ public function approve_customer($customer_id)
     }
 
     public function details($custid)
+{
+    $this->db->select('carionaybekleyen.*,users.lang');
+    $this->db->from('carionaybekleyen');
+    $this->db->join('users', 'users.cid = carionaybekleyen.id', 'left');
+    $this->db->where('carionaybekleyen.id', $custid);
 
-    {
-
-        $this->db->select('geopos_customers.*,users.lang');
-
-        $this->db->from($this->table);
-
-        $this->db->join('users','users.cid=geopos_customers.id','left');
-
-        $this->db->where('geopos_customers.id', $custid);
-
-        $query = $this->db->get();
-
-        return $query->row_array();
-
-    }
+    $query = $this->db->get();
+    return $query->row_array();
+}
 
 
     public function bank_details_id($id)
@@ -325,7 +318,7 @@ public function approve_customer($customer_id)
 
     }
 
-
+    // Cari Onay Bekleyen Crud Start
 
     public function due_details($custid)
 
@@ -345,11 +338,6 @@ public function approve_customer($customer_id)
         return $query->row_array();
 
     }
-
-
-
-
-
 
 
     public function add(
@@ -387,15 +375,14 @@ public function approve_customer($customer_id)
     )
 
 
-
     {
 
         $this->db->select('email');
-        $this->db->from('geopos_customers');
+        $this->db->from('carionaybekleyen');
         $this->db->where('email', $email);
         $query = $this->db->get();
         $valid = $query->row_array();
-        if (!empty($valid['email'])) {
+        if (empty($valid['email'])) {
 
             $data = array(
 
@@ -453,7 +440,7 @@ public function approve_customer($customer_id)
 
 
 
-            if ($this->db->insert('geopos_customers', $data)) {
+            if ($this->db->insert('carionaybekleyen', $data)) {
 
                 $cid = $this->db->insert_id();
 
@@ -464,7 +451,6 @@ public function approve_customer($customer_id)
                     $this->db->insert('customer_to_parent', $data_par);
 
                 }
-
               //  kont_kayit(41,$cid);
 
                 // Banka Bilgileri //
@@ -655,7 +641,6 @@ public function approve_customer($customer_id)
                 }
 
 
-
                 $this->session->unset_userdata('cari_invoice_data');
                 $this->session->unset_userdata('cari_teslimat_data');
                 $this->session->unset_userdata('cari_bank_data');
@@ -664,7 +649,6 @@ public function approve_customer($customer_id)
                 echo json_encode(array('status' => 'Success', 'message' => $this->lang->line('ADDED') . $p_string . '&nbsp;<a href="' . base_url('customers/view?id=' . $cid) . '" class="btn btn-info btn-sm"><span class="icon-eye"></span>' . $this->lang->line('View') . '</a>', 'cid' => $cid, 'pass' => $temp_password, 'discount' => amountFormat_general($discount)));
 
                 $this->custom->save_fields_data($cid, 1);
-
 
 
                 $this->db->select('other');
@@ -821,7 +805,7 @@ public function approve_customer($customer_id)
 
 
 
-        if ($this->db->update('geopos_customers')) {
+        if ($this->db->update('carionaybekleyen')) {
 
             kont_kayit(42,$id);
 

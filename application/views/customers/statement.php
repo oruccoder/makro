@@ -2022,8 +2022,8 @@ echo base_url('userfiles/company/' . $loc['logo']) ?>">
 <div id="mask_soz"></div>
 <div id="mask_forma2"></div>
 <div id="mask_avans"></div>
-<input type="hidden" id="cari_unvan" value="<?php echo customer_details($_GET['id'])['company'] ?>">
-<input type="hidden" id="cari_yetkili" value="<?php echo customer_details($_GET['id'])['name'] ?>">
+<input type="hidden" id="cari_unvan" value="<?php echo isset(customer_details($_GET['id'])['company']) ? customer_details($_GET['id'])['company'] : ''; ?>">
+<input type="hidden" id="cari_yetkili" value="<?php echo isset(customer_details($_GET['id'])['name']) ? customer_details($_GET['id'])['name'] : ''; ?>">
 <input type="hidden" id="bas_d" value="">
 <input type="hidden" id="bit_d" value="">
 <script src="<?php echo base_url('assets/myjs/jquery.ui.widget.js'); ?>"></script>
