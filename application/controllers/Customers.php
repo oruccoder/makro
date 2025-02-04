@@ -19,6 +19,7 @@ class Customers extends CI_Controller
     {
         parent::__construct();
         $this->load->library("Aauth");
+        $this->load->model('Notifications_model', 'notifications');
         $selected_db = $this->session->userdata('selected_db');
         if (!empty($selected_db)) {
             $this->db = $this->load->database($selected_db, TRUE);
@@ -293,24 +294,23 @@ public function update_status()
     }
 }
 
-    public function approve()
-    {
-        $customer_id = $this->input->post('id');
-        
-        if (!$customer_id) {
-            echo json_encode(['status' => 'error', 'message' => 'Müştəri ID-si göndərilməyib.']);
-            return;
-        }
+public function approve($customer_id) {
+    $this->db->set('onay_sayisi', 'onay_sayisi+1', FALSE);
+    $this->db->where('id', $customer_id);
+    $this->db->update('carionaybekleyen');
 
-        $this->load->model('Customers_model');
-        $update_status = $this->Customers_model->update_customer_status($customer_id, 'onaylandı');
+    $user_id = 21;
+    $message = "Yeni onay gözləyir: Cari ID " . $customer_id;
+    $this->Notifications_model->add_notification($user_id, $message);
 
-        if ($update_status) {
-            echo json_encode(['status' => 'success', 'message' => 'Müştəri təsdiqləndi!']);
-        } else {
-            echo json_encode(['status' => 'error', 'message' => 'Status yenilənə bilmədi.']);
-        }
-    }
+    redirect('/customer');
+}
+
+public function mark_as_read($id) {
+    $this->Notifications_model->mark_as_read($id);
+    redirect('/customer');
+}
+
 
     public function showCustomer($customer_id) {
         $user_id = $this->session->userdata('user_id');

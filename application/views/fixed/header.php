@@ -62,6 +62,7 @@
     <!--End of Tawk.to Script-->
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-confirm/3.3.2/jquery-confirm.min.js"></script>
 
 
@@ -259,6 +260,18 @@
                                         <div class="font-size-sm font-weight-semibold text-uppercase mt-2">Tümü</div>
                                     </a>
                                 </div>
+
+
+                                <div class="col-4">
+                                    <a href="/reports/customer_onay" class="d-block text-body text-center ripple-dark rounded p-3">
+                                    <i style="font-size: 26px" class="fa-solid fa-manat-sign"></i>
+                                        <div class="font-size-sm font-weight-semibold text-uppercase mt-2">Cari Onayı</div>
+                                        <span class="badge badge-pill badge-default badge-danger badge-default badge-up" id="maas_onayi">2</span>
+                                    </a>
+
+                                </div>
+
+
                             </div>
                         </div>
                     </div>

@@ -182,12 +182,12 @@ public function approve_customer($customer_id)
 
     public function update_customer_status($customer_id, $status)
 {
-    return $this->db->where('id', $customer_id)->update('geopos_customers', ['status' => $status]);
+    return $this->db->where('id', $customer_id)->update('carionaybekleyen', ['status' => $status]);
 }
 
     public function get_customer_by_id($customer_id)
 {
-    return $this->db->where('id', $customer_id)->get('geopos_customers')->row_array();
+    return $this->db->where('id', $customer_id)->get('carionaybekleyen')->row_array();
 }
 
     public function count_all($id = '')

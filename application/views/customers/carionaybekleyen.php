@@ -482,7 +482,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const customerTable = document.getElementById('customer-table');
 
     function loadTableData() {
-        fetch('/path/to/load_list_carionaybekleyen', {
+        fetch('/customers/load_list_carionaybekleyen', {
             method: 'POST',
         })
             .then(response => response.json())

@@ -7,10 +7,6 @@ $query_builder = TRUE;
 $hostname ='localhost';
 
 
-
-
-
-
 $db['default'] = array(
     'dsn'	=> '',
     'hostname' => "localhost",
