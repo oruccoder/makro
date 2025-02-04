@@ -478,6 +478,69 @@ $(document).ready(function () {
     });
 });
 
+
+
+
+
+
+
+
+$(document).ready(function() {
+    // "Onayla" düyməsinə basıldığında
+    $(document).on('click', '.onayla-button', function() {
+        var customerId = $(this).data('id');
+        
+        $.ajax({
+            url: '/customer/update_status',
+            type: 'POST',
+            data: { id: customerId },
+            success: function(response) {
+                if (response.success) {
+                    // Statusu "onaylandı" olaraq yeniləyirik
+                    $(this).replaceWith('<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>');
+                    // "Onayı Geri Al" düyməsini əlavə edirik
+                    $(this).closest('tr').find('td:last').append('<button class="btn btn-warning geri-al-button" style="width: 180px; padding: 11px;" data-id="' + customerId + '">Onayı Geri Al</button>');
+                }
+            },
+            error: function() {
+                alert('Bir xəta baş verdi.');
+            }
+        });
+    });
+
+    $(document).on('click', '.geri-al-button', function() {
+        var customerId = $(this).data('id');
+        
+        $.ajax({
+            url: '/customer/undo_status',
+            type: 'POST',
+            data: { id: customerId },
+            success: function(response) {
+                if (response.success) {
+                    $(this).replaceWith('<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' + customerId + '">Onayla</button>');
+                    $(this).closest('tr').find('td:last').find('.btn-success').remove();
+                }
+            },
+            error: function() {
+                alert('Bir xəta baş verdi.');
+            }
+        });
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 document.addEventListener('DOMContentLoaded', function () {
     const customerTable = document.getElementById('customer-table');
 

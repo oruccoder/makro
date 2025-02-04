@@ -244,8 +244,10 @@ public function load_list_carionaybekleyen()
         $user_role = $this->session->userdata('role');
 
         if ($customer->status === 'onaylandı') {
-            $status_button = '<button class="btn btn-success" style="width: 180px; padding: 11px;" disabled>Onaylandı</button>';
-        } elseif ($user_role == 'onayla' || $user_id == 21) { 
+            // "Onayla" buttonu artıq deaktivdir, "Onayı Geri Al" buttonunu göstəririk
+            $status_button = '<button class="btn btn-warning geri-al-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayı Geri Al</button>';
+        } elseif ($user_role == 'onayla' || $user_id == 21) {
+            // "Onayla" buttonu göstəririk
             $status_button = '<button class="btn btn-success onayla-button" style="width: 180px; padding: 11px;" data-id="' . $customer->id . '">Onayla</button>';
         } else {
             $status_button = '<button class="btn btn-danger" style="width: 180px; padding: 11px;" disabled>Onaylama yetkiniz yok</button>';
@@ -274,6 +276,18 @@ public function load_list_carionaybekleyen()
 
     echo json_encode($output);
 }
+
+public function undo_status()
+{
+    $customer_id = $this->input->post('id');
+    
+    $this->db->set('status', 'onayla');
+    $this->db->where('id', $customer_id);
+    $this->db->update('customers');
+    
+    echo json_encode(['success' => true, 'message' => 'Onay geri alındı']);
+}
+
 
 
 public function update_status()
