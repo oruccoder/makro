@@ -21,8 +21,6 @@ class Customers_model extends CI_Model
 
 {
 
-
-
     var $table = 'geopos_customers';
 
     var $column_order_p = array(null, 'geopos_customers.company', 'customers_project.proje_name',null);
@@ -144,8 +142,11 @@ class Customers_model extends CI_Model
 
 
     }
-
-
+public function approve_customer($customer_id)
+    {
+        $this->db->where('id', $customer_id);
+        return $this->db->update('customers', ['status' => 'approved']);
+    }
 
     function get_datatables()
 
@@ -179,7 +180,15 @@ class Customers_model extends CI_Model
 
     }
 
+    public function update_customer_status($customer_id, $status)
+{
+    return $this->db->where('id', $customer_id)->update('carionaybekleyen', ['status' => $status]);
+}
 
+    public function get_customer_by_id($customer_id)
+{
+    return $this->db->where('id', $customer_id)->get('carionaybekleyen')->row_array();
+}
 
     public function count_all($id = '')
 
@@ -191,28 +200,18 @@ class Customers_model extends CI_Model
         $query = $this->db->get();
 
         return $query->num_rows($id = '');
-
     }
-
-
 
     public function details($custid)
+{
+    $this->db->select('carionaybekleyen.*,users.lang');
+    $this->db->from('carionaybekleyen');
+    $this->db->join('users', 'users.cid = carionaybekleyen.id', 'left');
+    $this->db->where('carionaybekleyen.id', $custid);
 
-    {
-
-        $this->db->select('geopos_customers.*,users.lang');
-
-        $this->db->from($this->table);
-
-        $this->db->join('users','users.cid=geopos_customers.id','left');
-
-        $this->db->where('geopos_customers.id', $custid);
-
-        $query = $this->db->get();
-
-        return $query->row_array();
-
-    }
+    $query = $this->db->get();
+    return $query->row_array();
+}
 
 
     public function bank_details_id($id)
@@ -319,7 +318,7 @@ class Customers_model extends CI_Model
 
     }
 
-
+    // Cari Onay Bekleyen Crud Start
 
     public function due_details($custid)
 
@@ -339,11 +338,6 @@ class Customers_model extends CI_Model
         return $query->row_array();
 
     }
-
-
-
-
-
 
 
     public function add(
@@ -381,15 +375,14 @@ class Customers_model extends CI_Model
     )
 
 
-
     {
 
         $this->db->select('email');
-        $this->db->from('geopos_customers');
+        $this->db->from('carionaybekleyen');
         $this->db->where('email', $email);
         $query = $this->db->get();
         $valid = $query->row_array();
-        if (!$valid['email']) {
+        if (empty($valid['email'])) {
 
             $data = array(
 
@@ -447,25 +440,18 @@ class Customers_model extends CI_Model
 
 
 
-            if ($this->db->insert('geopos_customers', $data)) {
+            if ($this->db->insert('carionaybekleyen', $data)) {
 
                 $cid = $this->db->insert_id();
 
                 $this->db->delete('customer_to_parent', array('customer_id' => $cid));
-                if($parent_id != 0){
+                if(!empty($parent_id)){
                     $parent_list = [];
-                    $data_par = [];
-                    $i=0;
-                    foreach ($parent_id as $value){
-                        $data_par = array('customer_id' => $cid,'parent_id'=>$value);
-                        $parent_list[$i] = $data_par;
-                        $i++;
-                    }
-                    $this->db->insert_batch('customer_to_parent', $parent_list);
+                    $data_par = array('customer_id' => $cid,'parent_id'=>$parent_id);
+                    $this->db->insert('customer_to_parent', $data_par);
 
                 }
-
-                kont_kayit(41,$cid);
+              //  kont_kayit(41,$cid);
 
                 // Banka Bilgileri //
                 $data_bank=array();
@@ -655,7 +641,6 @@ class Customers_model extends CI_Model
                 }
 
 
-
                 $this->session->unset_userdata('cari_invoice_data');
                 $this->session->unset_userdata('cari_teslimat_data');
                 $this->session->unset_userdata('cari_bank_data');
@@ -666,14 +651,13 @@ class Customers_model extends CI_Model
                 $this->custom->save_fields_data($cid, 1);
 
 
-
                 $this->db->select('other');
                 $this->db->from('univarsal_api');
                 $this->db->where('id', 64);
                 $query = $this->db->get();
                 $othe = $query->row_array();
 
-                if ($othe['other']) {
+                if (!empty($othe['other'])) {
                     $auto_mail = $this->send_mail_auto($email, $name, $temp_password);
                     $this->load->model('communication_model');
                     $attachmenttrue = false;
@@ -821,7 +805,7 @@ class Customers_model extends CI_Model
 
 
 
-        if ($this->db->update('geopos_customers')) {
+        if ($this->db->update('carionaybekleyen')) {
 
             kont_kayit(42,$id);
 

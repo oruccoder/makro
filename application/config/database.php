@@ -7,16 +7,12 @@ $query_builder = TRUE;
 $hostname ='localhost';
 
 
-
-
-
-
 $db['default'] = array(
     'dsn'	=> '',
-    'hostname' => "mysql_makroerp",
-    'username' => 'new_test',
-    'password' => 'new_test',
-    'database' => 'new_test',
+    'hostname' => "localhost",
+    'username' => 'root',
+    'password' => '',
+    'database' => 'makro',
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
     'pconnect' => FALSE,
@@ -35,10 +31,10 @@ $db['default'] = array(
 
 $db['mobile_db'] = array(
     'dsn'       => '',
-    'hostname' => 'mysql_makroerp',
-    'username' => 'new_test_2',
-    'password' => 'new_test_2',
-    'database' => 'new_test_2',
+    'hostname' => 'localhost',
+    'username' => 'root',
+    'password' => '',
+    'database' => 'makro',
     'dbdriver' => 'mysqli',
     'dbprefix' => '',
     'pconnect' => FALSE,

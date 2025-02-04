@@ -67,25 +67,17 @@ class User extends CI_Controller
         }
 
 
-
-
         $this->load->view('user/header');
 
         $this->load->view('user/index', $data);
 
         $this->load->view('user/footer');
 
-
-
-
-
     }
 
     public function yetki()
 
     {
-
-
 
         $this->load->model('settings_model','settings');
 
@@ -126,18 +118,11 @@ class User extends CI_Controller
         $this->load->view('user/yetki', $data);
 
         $this->load->view('user/footer');
-
-
-
-
-
     }
 
     public function user_admin()
 
     {
-
-
 
         $this->load->model('settings_model','settings');
 
@@ -171,16 +156,7 @@ class User extends CI_Controller
 
         $this->load->view('user/footer');
 
-
-
-
-
     }
-
-
-
-
-
 
 
 	public function hash_password_($id){
@@ -222,9 +198,6 @@ class User extends CI_Controller
             else{
                 redirect('/dashboard/', 'refresh');
             }
-
-
-
         }
         else {
             redirect('/user/?e=eyxde', 'refresh');
@@ -232,38 +205,31 @@ class User extends CI_Controller
     }
 
     public function checklogin_yetki()
-    {
+{
+    $database = $this->input->post('database');
+    $this->session->set_userdata('selected_db', $database);
 
-        $database = $this->input->post('database');
+    $user = $this->input->post('username');
+    $password = $this->input->post('password');
+    $remember_me = $this->input->post('remember_me');
 
+    $rem = false;
 
-        $this->session->set_userdata('selected_db', $database);
-
-
-
-
-
-        $user = $this->input->post('username');
-        $password = $this->input->post('password');
-        $remember_me = $this->input->post('remember_me');
-
-        $rem = false;
-
-        if ($remember_me == 'on') {
-
-            $rem = true;
-
-        }
-
-        if ($this->aauth->login(0,$user, $password, $rem, $this->captcha)) {
-
-            redirect('/dashboard/', 'refresh');
-        }
-        else {
-            redirect('/user/yetki', 'refresh');
-
-        }
+    if ($remember_me == 'on') {
+        $rem = true;
     }
+
+    if ($this->aauth->login(0, $user, $password, $rem, $this->captcha)) {
+        $user_data = $this->db->get_where('users', ['username' => $user])->row();
+
+        $this->session->set_userdata('role', $user_data->role);
+
+        redirect('/dashboard/', 'refresh');
+    } else {
+        redirect('/user/yetki', 'refresh');
+    }
+}
+
     public function send_mail($user_id,$subject,$message){
         $this->load->model('communication_model');
         if(!$user_id){
@@ -281,8 +247,6 @@ class User extends CI_Controller
         }
 
     }
-
-
 
     public function profile()
 
@@ -312,13 +276,7 @@ class User extends CI_Controller
 
         $this->load->view('fixed/footer');
 
-
-
-
-
     }
-
-
 
     public function attendance()
 
@@ -330,17 +288,9 @@ class User extends CI_Controller
 
         }
 
-
-
-
-
         $head['usernm'] = $this->aauth->get_user()->username;
 
         $head['title'] = $head['usernm'] . ' attendance ';
-
-
-
-
 
         $this->load->view('fixed/header', $head);
 
@@ -348,13 +298,7 @@ class User extends CI_Controller
 
         $this->load->view('fixed/footer');
 
-
-
-
-
     }
-
-
 
         public function holidays()
 
@@ -370,19 +314,13 @@ class User extends CI_Controller
 
         $head['title'] = $head['usernm'] . ' attendance ';
 
-
-
         $this->load->view('fixed/header', $head);
 
         $this->load->view('user/holidays');
 
         $this->load->view('fixed/footer');
 
-
-
     }
-
-
 
        public function getAttendance()
 
@@ -399,7 +337,6 @@ class User extends CI_Controller
          $id = $this->aauth->get_user()->id;
 
 
-
         $start = $this->input->get('start');
 
         $end = $this->input->get('end');
@@ -409,8 +346,6 @@ class User extends CI_Controller
         echo json_encode($result);
 
     }
-
-
 
            public function getHolidays()
 
@@ -438,8 +373,6 @@ class User extends CI_Controller
 
     }
 
-
-
     public function update()
 
     {
@@ -449,9 +382,6 @@ class User extends CI_Controller
             redirect('/user/', 'refresh');
 
         }
-
-
-
 
 
         $id = $this->aauth->get_user()->id;
@@ -486,10 +416,6 @@ class User extends CI_Controller
 
             $head['title'] = $head['usernm'] . ' Profile';
 
-
-
-
-
             $data['user'] = $this->employee->employee_details($id);
 
             $data['eid'] = intval($id);
@@ -502,12 +428,7 @@ class User extends CI_Controller
 
         }
 
-
-
-
-
     }
-
 
 
     public function displaypic()
@@ -521,7 +442,6 @@ class User extends CI_Controller
             redirect('/user/', 'refresh');
 
         }
-
 
 
         $this->load->model('employee_model', 'employee');
@@ -542,12 +462,7 @@ class User extends CI_Controller
 
         }
 
-
-
-
-
     }
-
 
 
     public function user_sign()
@@ -559,9 +474,6 @@ class User extends CI_Controller
             redirect('/user/', 'refresh');
 
         }
-
-
-
 
 
         $this->load->model('employee_model', 'employee');
@@ -583,14 +495,77 @@ class User extends CI_Controller
         }
 
 
-
-
-
     }
 
+    public function login()
+{
+    $username = $this->input->post('username');
+    $password = $this->input->post('password');
+
+    $user = $this->db->get_where('users', [
+        'username' => $username,
+        'password' => $password
+    ])->row();
+
+    if ($user) {
+        $this->session->set_userdata([
+            'id' => $user->id,
+            'role' => $user->role,
+        ]);
+        redirect('dashboard'); 
+    } else {
+        echo "Yanlış istifadəçi adı və ya şifrə!";
+    }
+}
+
+public function update_user_permission($user_id, $is_approved)
+{
+    $this->db->where('id', $user_id);
+    return $this->db->update('geopos_users', ['is_approved' => $is_approved]);
+}
+
+public function check_permission($user_id)
+{
+    $query = $this->db->get_where('geopos_users', ['id' => $user_id, 'is_approved' => 1]);
+    return $query->num_rows() > 0;
+}
 
 
 
+public function approve()
+{
+    $this->check_authority();
+
+    $id = $this->input->post('id');
+    $this->db->where('id', $id);
+    $result = $this->db->update('customers', ['onay_status' => 1]);
+
+    if ($result) {
+        echo json_encode(['status' => 'success', 'message' => 'Onaylama uğurla tamamlandı.']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Onaylama zamanı xəta baş verdi.']);
+    }
+}
+
+
+
+    public function get_datatables() {
+        $this->db->select('id, name, email, yetki');
+        $this->db->from('users');
+        $query = $this->db->get();
+        return $query->result();
+    }
+    
+    public function count_all() {
+        $this->db->from('users');
+        return $this->db->count_all_results();
+    }
+    
+    public function count_filtered() {
+        $this->db->from('users');
+        return $this->db->count_all_results();
+    }
+    
 
     public function updatepassword()
 
@@ -605,12 +580,9 @@ class User extends CI_Controller
 
         }
 
-
-
         $id = $this->aauth->get_user()->id;
 
         $this->load->model('employee_model', 'employee');
-
 
 
         if ($this->input->post()) {

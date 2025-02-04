@@ -28,7 +28,7 @@ date_default_timezone_set('Asia/Baku');
 
 
 
-$config['base_url'] = 'http://localhost:8089/';
+$config['base_url'] = 'http://makro.local/';
 
 /*
 |--------------------------------------------------------------------------

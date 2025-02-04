@@ -153,7 +153,41 @@ class Reports_model extends CI_Model
     }
 
 
-
+    public function approve_request($request_id, $user_id) {
+        $this->db->where('id', $request_id);
+        $query = $this->db->get('requests');
+        $request = $query->row();
+    
+        if ($request) {
+            if ($request->approval_status == 0) {
+                $this->db->where('id', $request_id);
+                $this->db->update('requests', ['approval_status' => 1, 'approved_by' => $user_id]);
+    
+                $this->db->insert('notifications', [
+                    'user_id' => $this->get_second_approver(), 
+                    'message' => "Sizin təsdiqiniz gözlənilir! Sorğu ID: " . $request_id,
+                    'status' => 0
+                ]);
+    
+                return "Birinci təsdiq edildi, ikinci istifadəçiyə bildiriş göndərildi.";
+            } elseif ($request->approval_status == 1) {
+                $this->db->where('id', $request_id);
+                $this->db->update('requests', ['approval_status' => 2, 'approved_by' => $user_id]);
+    
+                return "İkinci təsdiq edildi, sorğu tam təsdiq olundu.";
+            }
+        }
+        return "Xəta baş verdi.";
+    }
+    
+    public function get_second_approver() {
+        // Burada ikinci təsdiqləyici user-i seç (məsələn, rolu 'manager' olan user)
+        $this->db->where('role', 'manager');
+        $query = $this->db->get('users');
+        $user = $query->row();
+        return $user ? $user->id : null;
+    }
+    
 
 
 

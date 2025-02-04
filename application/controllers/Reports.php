@@ -94,7 +94,20 @@ class Reports extends CI_Controller
     }
 
 
-
+    public function approve($request_id) {
+        $user_id = $this->aauth->get_user()->id;
+        $result = $this->reports->approve_request($request_id, $user_id);
+        echo json_encode(['message' => $result]);
+    }
+    
+    
+    public function get_second_approver() {
+        $this->db->where('role', 'manager');
+        $query = $this->db->get('users');
+        $user = $query->row();
+        return $user ? $user->id : null;
+    }
+    
     public function bekleyen_forma_2()
 
     {
@@ -230,6 +243,20 @@ class Reports extends CI_Controller
 
         $this->load->view('fixed/footer');
     }
+
+
+    public function customer_onay(){
+        $head['title'] = "Bekleyen Maaşlar";
+        $head['usernm'] = $this->aauth->get_user()->username;
+
+        $this->load->view('fixed/header', $head);
+
+        $this->load->view('reports/customer_onay');
+
+        $this->load->view('fixed/footer');
+    }
+
+
 //    public function maas_onayi(){
 //        $head['title'] = "Bekleyen Maaşlar";
 //        $head['usernm'] = $this->aauth->get_user()->username;

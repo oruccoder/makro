@@ -2,7 +2,6 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../../Proje/Makro2000" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/application/libraries/ZKTeco" vcs="Git" />
   </component>
 </project>
